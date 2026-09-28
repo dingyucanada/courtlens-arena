@@ -1,0 +1,725 @@
+{
+  "description": "Small synthetic camera fixture. Shift and zoom are known arithmetic; no NBA measurement or optical tracking.",
+  "play": {
+    "id": "dynamic-fixture",
+    "start": 0,
+    "end": 3,
+    "player": "A",
+    "team": "HOU",
+    "tracking": {
+      "coordinateSystem": "court",
+      "units": "ft",
+      "kind": "synthetic",
+      "court": {
+        "width": 50,
+        "length": 47
+      },
+      "maxGap": 0.5
+    },
+    "tracks": [
+      {
+        "t": 0,
+        "segmentId": "pan-zoom",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 0.25,
+        "segmentId": "pan-zoom",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 0.5,
+        "segmentId": "pan-zoom",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 0.75,
+        "segmentId": "pan-zoom",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 1,
+        "segmentId": "pan-zoom",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 1.25,
+        "segmentId": "pan-zoom",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 1.5,
+        "segmentId": "pan-zoom",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 1.75,
+        "segmentId": "pan-zoom",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 1.999,
+        "segmentId": "pan-zoom",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 2,
+        "segmentId": "cut-away",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 2.25,
+        "segmentId": "cut-away",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 2.5,
+        "segmentId": "cut-away",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 2.75,
+        "segmentId": "cut-away",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      },
+      {
+        "t": 3,
+        "segmentId": "cut-away",
+        "players": [
+          {
+            "id": "A",
+            "team": "HOU",
+            "x": 20,
+            "y": 20
+          },
+          {
+            "id": "D",
+            "team": "DAL",
+            "x": 25,
+            "y": 25
+          }
+        ]
+      }
+    ],
+    "screenTracks": [],
+    "annotations": [],
+    "calibration": {
+      "mode": "dynamic",
+      "court": {
+        "units": "ft"
+      },
+      "segments": [
+        {
+          "id": "pan-zoom",
+          "start": 0,
+          "end": 2,
+          "reviewed": true,
+          "source": "deterministic fixture: manually declared camera",
+          "interpolation": "anchors-linear",
+          "maxGap": 0.5,
+          "maxError": 0.01,
+          "courtPoints": [
+            [
+              0,
+              0
+            ],
+            [
+              50,
+              0
+            ],
+            [
+              50,
+              47
+            ],
+            [
+              0,
+              47
+            ]
+          ],
+          "keyframes": [
+            {
+              "id": "pan-zoom-k0",
+              "t": 0,
+              "segmentId": "pan-zoom",
+              "reviewed": true,
+              "source": "known fixture transform anchors",
+              "imagePoints": [
+                [
+                  0.1,
+                  0.2
+                ],
+                [
+                  0.5,
+                  0.2
+                ],
+                [
+                  0.5,
+                  0.67
+                ],
+                [
+                  0.1,
+                  0.67
+                ]
+              ]
+            },
+            {
+              "id": "pan-zoom-k1",
+              "t": 0.5,
+              "segmentId": "pan-zoom",
+              "reviewed": true,
+              "source": "known fixture transform anchors",
+              "imagePoints": [
+                [
+                  0.125,
+                  0.1875
+                ],
+                [
+                  0.5750000000000001,
+                  0.1875
+                ],
+                [
+                  0.5750000000000001,
+                  0.681
+                ],
+                [
+                  0.125,
+                  0.681
+                ]
+              ]
+            },
+            {
+              "id": "pan-zoom-k2",
+              "t": 1,
+              "segmentId": "pan-zoom",
+              "reviewed": true,
+              "source": "known fixture transform anchors",
+              "imagePoints": [
+                [
+                  0.15000000000000002,
+                  0.17500000000000002
+                ],
+                [
+                  0.65,
+                  0.17500000000000002
+                ],
+                [
+                  0.65,
+                  0.6920000000000001
+                ],
+                [
+                  0.15000000000000002,
+                  0.6920000000000001
+                ]
+              ]
+            },
+            {
+              "id": "pan-zoom-k3",
+              "t": 1.5,
+              "segmentId": "pan-zoom",
+              "reviewed": true,
+              "source": "known fixture transform anchors",
+              "imagePoints": [
+                [
+                  0.17500000000000002,
+                  0.1625
+                ],
+                [
+                  0.725,
+                  0.1625
+                ],
+                [
+                  0.725,
+                  0.703
+                ],
+                [
+                  0.17500000000000002,
+                  0.703
+                ]
+              ]
+            },
+            {
+              "id": "pan-zoom-k4",
+              "t": 2,
+              "segmentId": "pan-zoom",
+              "reviewed": true,
+              "source": "known fixture transform anchors",
+              "imagePoints": [
+                [
+                  0.2,
+                  0.15000000000000002
+                ],
+                [
+                  0.8,
+                  0.15000000000000002
+                ],
+                [
+                  0.8,
+                  0.7140000000000001
+                ],
+                [
+                  0.2,
+                  0.7140000000000001
+                ]
+              ]
+            }
+          ],
+          "checkpoints": [
+            {
+              "id": "pan-zoom-c0-0",
+              "t": 0.25,
+              "court": [
+                10,
+                10
+              ],
+              "image": [
+                0.1975,
+                0.29625
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            },
+            {
+              "id": "pan-zoom-c0-1",
+              "t": 0.25,
+              "court": [
+                30,
+                30
+              ],
+              "image": [
+                0.3675,
+                0.50125
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            },
+            {
+              "id": "pan-zoom-c1-0",
+              "t": 0.75,
+              "court": [
+                10,
+                10
+              ],
+              "image": [
+                0.2325,
+                0.28875000000000006
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            },
+            {
+              "id": "pan-zoom-c1-1",
+              "t": 0.75,
+              "court": [
+                30,
+                30
+              ],
+              "image": [
+                0.4225,
+                0.50375
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            },
+            {
+              "id": "pan-zoom-c2-0",
+              "t": 1.25,
+              "court": [
+                10,
+                10
+              ],
+              "image": [
+                0.2675,
+                0.28125
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            },
+            {
+              "id": "pan-zoom-c2-1",
+              "t": 1.25,
+              "court": [
+                30,
+                30
+              ],
+              "image": [
+                0.47750000000000004,
+                0.50625
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            },
+            {
+              "id": "pan-zoom-c3-0",
+              "t": 1.75,
+              "court": [
+                10,
+                10
+              ],
+              "image": [
+                0.3025,
+                0.27375
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            },
+            {
+              "id": "pan-zoom-c3-1",
+              "t": 1.75,
+              "court": [
+                30,
+                30
+              ],
+              "image": [
+                0.5325,
+                0.50875
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            }
+          ],
+          "invalidIntervals": []
+        },
+        {
+          "id": "cut-away",
+          "start": 2,
+          "end": 3,
+          "reviewed": true,
+          "source": "deterministic fixture: manually declared camera",
+          "interpolation": "anchors-linear",
+          "maxGap": 0.5,
+          "maxError": 0.01,
+          "courtPoints": [
+            [
+              0,
+              0
+            ],
+            [
+              50,
+              0
+            ],
+            [
+              50,
+              47
+            ],
+            [
+              0,
+              47
+            ]
+          ],
+          "keyframes": [
+            {
+              "id": "cut-away-k0",
+              "t": 2,
+              "segmentId": "cut-away",
+              "reviewed": true,
+              "source": "known fixture transform anchors",
+              "imagePoints": [
+                [
+                  0.1,
+                  0.3
+                ],
+                [
+                  0.7,
+                  0.3
+                ],
+                [
+                  0.7,
+                  0.723
+                ],
+                [
+                  0.1,
+                  0.723
+                ]
+              ]
+            },
+            {
+              "id": "cut-away-k1",
+              "t": 2.5,
+              "segmentId": "cut-away",
+              "reviewed": true,
+              "source": "known fixture transform anchors",
+              "imagePoints": [
+                [
+                  0.07500000000000001,
+                  0.27499999999999997
+                ],
+                [
+                  0.7750000000000001,
+                  0.27499999999999997
+                ],
+                [
+                  0.7750000000000001,
+                  0.7449999999999999
+                ],
+                [
+                  0.07500000000000001,
+                  0.7449999999999999
+                ]
+              ]
+            },
+            {
+              "id": "cut-away-k2",
+              "t": 3,
+              "segmentId": "cut-away",
+              "reviewed": true,
+              "source": "known fixture transform anchors",
+              "imagePoints": [
+                [
+                  0.05,
+                  0.25
+                ],
+                [
+                  0.8500000000000001,
+                  0.25
+                ],
+                [
+                  0.8500000000000001,
+                  0.767
+                ],
+                [
+                  0.05,
+                  0.767
+                ]
+              ]
+            }
+          ],
+          "checkpoints": [
+            {
+              "id": "cut-away-c0-0",
+              "t": 2.25,
+              "court": [
+                10,
+                10
+              ],
+              "image": [
+                0.21750000000000003,
+                0.38249999999999995
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            },
+            {
+              "id": "cut-away-c0-1",
+              "t": 2.25,
+              "court": [
+                30,
+                30
+              ],
+              "image": [
+                0.47750000000000004,
+                0.5725
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            },
+            {
+              "id": "cut-away-c1-0",
+              "t": 2.75,
+              "court": [
+                10,
+                10
+              ],
+              "image": [
+                0.2125,
+                0.36749999999999994
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            },
+            {
+              "id": "cut-away-c1-1",
+              "t": 2.75,
+              "court": [
+                30,
+                30
+              ],
+              "image": [
+                0.5125,
+                0.5774999999999999
+              ],
+              "independent": true,
+              "source": "separate known interior fixture point"
+            }
+          ],
+          "invalidIntervals": []
+        }
+      ]
+    }
+  },
+  "occlusion": {
+    "segmentId": "pan-zoom",
+    "start": 1,
+    "end": 1.5,
+    "reason": "synthetic court occlusion",
+    "kind": "occlusion"
+  }
+}

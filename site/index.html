@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="CourtLens 篮球证据工作台：把比赛画面、深度指标与可核验解说放在同一个回合。公开合成演练，可查看轨迹叠加、片段筛选、指标比较与证据链。">
+  <meta name="theme-color" content="#071B36"><title>CourtLens · 每一次判断，都有回合依据</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css">
+  <script src="app.js" type="module"></script>
+</head>
+<body>
+<a class="skip-link" href="#workspace">跳到比赛工作台</a>
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="CourtLens 首页"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11"/><path d="M5 16h22M16 5v22M8 8c10 3 10 13 0 16M24 8c-10 3-10 13 0 16"/></svg></span><span>CourtLens<small>篮球证据工作台</small></span></a>
+  <nav aria-label="主导航"><a class="active" href="#workspace">交互演练</a><a href="#comparison">数据视角</a><a href="#method">方法与来源</a></nav>
+  <a class="source-link" href="https://github.com/dingyucanada/courtlens" target="_blank" rel="noreferrer">GitHub 源码 <span aria-hidden="true">↗</span></a>
+</header>
+<main id="top">
+  <section class="intro">
+    <div><p class="eyebrow"><span></span> COURTSIDE INTELLIGENCE</p><h1>看见转折，<em>也看见依据。</em></h1><p class="intro-copy">让画面、深度指标与解说在同一时刻对齐。每一个结论，都能回到证据。</p></div>
+    <div class="intro-stats" aria-label="演练范围"><div><strong>36<small>秒</small></strong><span>同步视频</span></div><div><strong>03</strong><span>可核验回合</span></div><div><strong>12</strong><span>同步字幕段</span></div></div>
+  </section>
+  <div class="sample-notice"><span class="notice-tag">合成功能演练</span><span>视频、轨迹、指标均为自行生成，不代表真实 NBA 比赛。</span><a href="#method">查看口径 <span aria-hidden="true">↗</span></a></div>
+  <section id="workspace" class="workspace" aria-label="比赛回放与证据工作台">
+    <div class="film-column">
+      <div class="panel film-panel">
+        <div class="panel-heading"><div><span class="section-index">01 / REPLAY</span><h2>回合回放</h2></div><div class="view-switch" role="group" aria-label="解说视角"><button id="fan" class="selected" aria-pressed="true">球迷视角</button><button id="analyst" aria-pressed="false">分析师视角</button></div></div>
+        <div class="video-stage" id="video-stage">
+          <video id="video" playsinline preload="metadata" aria-label="36 秒合成篮球视频"></video>
+          <svg id="overlay" viewBox="0 0 1280 720" aria-hidden="true"></svg>
+          <div class="video-label"><span class="record-dot"></span><span>HOU × DAL</span><small>合成演练</small></div>
+          <div class="caption" id="caption" aria-live="off"></div>
+          <button class="stage-play" id="stage-play" aria-label="播放演练视频"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 11 7-11 7z"/></svg></button>
+          <div class="media-error" id="media-error" hidden><strong>视频未能载入</strong><span>数据与证据仍可查看。请重新载入页面后重试。</span></div>
+        </div>
+        <div class="playback">
+          <div class="transport"><button id="play" aria-label="播放视频">▶</button><output id="time">00:00 / 00:36</output><label class="overlay-toggle"><input id="overlay-toggle" type="checkbox" checked><span>画面注释</span></label><button id="fullscreen" aria-label="全屏查看视频">⛶</button></div>
+          <label class="sr-only" for="scrubber">视频进度，单位秒</label><input id="scrubber" class="scrubber" type="range" min="0" max="36" step="0.04" value="0">
+          <div id="timeline-labels" class="timeline-labels"><button data-seek="0">00:00</button><button data-seek="12">00:12</button><button data-seek="24">00:24</button><span>00:36</span></div>
+        </div>
+        <div class="film-footer"><span id="overlay-status">正在匹配视频与轨迹…</span><span>原始合成画面 · 25 fps</span></div>
+      </div>
+      <div class="clip-heading"><h3>值得回看的 3 个回合</h3><span>按编辑筛选分排序 · 点击跳转</span></div><div class="clips" id="clips"></div>
+    </div>
+    <aside class="panel intelligence" aria-label="当前回合解说与证据">
+      <div class="agent-heading"><span class="agent-icon" aria-hidden="true">✦</span><div><span class="section-index">EVIDENCE AGENT</span><h2>先看事实，再做判断</h2></div><span class="rule-label">规则引擎</span></div>
+      <div class="current-play"><span class="current-tag" id="current-tag">P01 · HOU</span><h3 id="current-title">载入回合…</h3><p id="current-context"></p></div>
+      <div class="metric-grid" id="metrics"></div>
+      <div class="narration-block"><div class="small-heading"><span id="narration-label">球迷解读 · 赛后摘要</span><span class="evidence-dot">● 关联证据</span></div><p id="narration"></p></div>
+      <div class="question-block"><label for="question">问一个有证据的问题</label><div class="question-input"><select id="question"><option value="selection">为什么优先看这个回合？</option><option value="xfg">预期命中概率是什么？</option><option value="gravity">Gravity 能说明什么？</option><option value="leverage">回合胜率机会差是什么？</option><option value="compare">比较全部回合的指标</option><option value="causal">能否证明战术因果？</option><option value="sources">列出当前回合的证据</option></select><button id="ask" aria-label="查看证据回答">↗</button></div><p class="question-hint">本地规则回答 · 数字来自同一分析引擎</p></div>
+      <div id="answer-panel" class="answer-panel" hidden><div class="small-heading"><strong>证据回答</strong><button id="close-answer" aria-label="关闭证据回答">×</button></div><p id="answer"></p><div id="answer-refs" class="ref-list"></div><details><summary>查看工具调用记录</summary><ol id="trace"></ol></details></div>
+      <div class="evidence-heading"><h3>逐条核验</h3><span>点击回到时间锚</span></div><div class="evidence-list" id="evidence-list"></div>
+    </aside>
+  </section>
+  <section id="comparison" class="comparison-grid" aria-label="回合数据比较">
+    <article class="panel comparison-panel"><div class="panel-heading"><div><span class="section-index">02 / COMPARE</span><h2>概率与结果，分开看。</h2></div><label class="sr-only" for="compare-metric">选择比较指标</label><select id="compare-metric"><option value="xfg_pct">预期命中概率</option><option value="leverage">回合胜率机会差</option><option value="gravity">Gravity</option></select></div><p class="chart-deck" id="chart-deck">一次低概率命中，不能证明预测有误；一次高概率投失，也不能证明出手选择差。</p><div id="metric-chart" class="metric-chart" role="img" aria-label="三回合指标比较图"></div><div class="chart-axis" id="chart-axis"><span>0%</span><span>50%</span><span>100%</span></div><p class="chart-note">合成输入，n = 3。用于检验解释逻辑，不能据此评估预测准确率。</p></article>
+    <article class="panel ranking-panel"><div class="panel-heading"><div><span class="section-index">03 / EXPLAIN</span><h2>为什么把 P01 排在前面？</h2></div><span class="method-pill">公开公式</span></div><p class="chart-deck">编辑分把回合机会、出手难度和结果反差分开计分，每一部分都能复算。</p><div class="rank-legend"><span><i class="opportunity"></i>机会差 × 70</span><span><i class="difficulty"></i>难度 × 20</span><span><i class="surprise"></i>反差 × 10</span></div><div id="rank-chart" class="rank-chart" role="img" aria-label="三回合编辑筛选分组成"></div><div class="rank-axis"><span>0</span><span>50</span><span>100 分</span></div><p class="chart-note">Gravity 不进入排序。编辑分不是胜率、模型精度或 NBA 官方关键度。</p></article>
+  </section>
+  <section class="panel data-panel" aria-label="输入数据表"><div class="panel-heading"><div><span class="section-index">04 / SOURCE OF TRUTH</span><h2>把关键数字摆在台面上。</h2></div><button id="download-analysis" class="secondary-button">下载分析 JSON ↓</button></div><div class="table-scroll"><table><caption class="sr-only">全部 3 个合成回合的输入与分析值</caption><thead><tr><th scope="col">回合 / 球员</th><th scope="col">出手时刻</th><th scope="col">Shot xFG%</th><th scope="col">Gravity</th><th scope="col">回合胜率机会差</th><th scope="col">输入结果</th><th scope="col">编辑分</th><th scope="col">画面</th></tr></thead><tbody id="data-rows"></tbody></table></div><p class="table-note">所有数值均标记为合成输入。Gravity 保留输入单位；回合机会差不等同于球员累计 Leverage Score。</p></section>
+  <section id="method" class="method-section"><div class="method-intro"><p class="eyebrow">BUILT ON EVIDENCE</p><h2>有边界的分析，<br>才值得信任。</h2><p>解说负责让观众看懂，证据负责让结论站得住。</p><a class="secondary-button" href="https://github.com/dingyucanada/courtlens/tree/main/docs" target="_blank" rel="noreferrer">阅读完整方法文档 ↗</a></div><div class="method-cards"><article><span>01</span><h3>指标不偷换</h3><p>xFG 是单次出手概率；Gravity 来自提供者；回合机会差遵循自己的口径。缺失信息保持缺失。</p><a href="https://www.nba.com/news/intro-to-expected-field-goal-percentage" target="_blank" rel="noreferrer">NBA · Shot xFG% ↗</a></article><article><span>02</span><h3>画面与文字同一时刻</h3><p>字幕、轨迹和注释都有时间锚。结果字幕只在输入的结果时刻后出现，轨迹不跨镜头或长缺口插值。</p><a href="data/demo.json" download>查看合成数据与时间锚 ↓</a></article><article><span>03</span><h3>不把相关说成因果</h3><p>画面注释标出给定位置；一个 Gravity 数值不能证明牵制导致命中。回答超出证据时明确停止。</p><a href="https://www.nba.com/news/intro-to-gravity-stat-nba-2025" target="_blank" rel="noreferrer">NBA · Gravity 指标 ↗</a></article></div></section>
+  <section class="download-panel" id="download"><div><span class="section-index">FROM DEMO TO WORKSPACE</span><h2>把自己的比赛，带进工作台。</h2><p>完整本地产品支持视频与数据导入、项目版本管理、人工标注、质量校验与视频导出。<br>当前网页是免安装的固定演练，所有操作在浏览器内完成。</p></div><div class="download-actions"><a class="primary-button" href="https://github.com/dingyucanada/courtlens" target="_blank" rel="noreferrer">获取完整产品 ↗</a><a class="secondary-button" id="presentation-link" href="https://github.com/dingyucanada/courtlens/tree/main/docs" target="_blank" rel="noreferrer">产品文档 ↗</a><a class="subtle-link" href="media/narrated-demo.mp4" download>下载带解说演示视频 ↓</a></div></section>
+</main>
+<footer><a class="brand" href="#top"><strong>CourtLens</strong><span>从回合，到理由。</span></a><p>独立参赛作品 · 无 NBA / AWS 官方授权或隶属关系</p><a href="https://github.com/dingyucanada/courtlens" target="_blank" rel="noreferrer">Source on GitHub ↗</a></footer>
+<dialog id="evidence-dialog"><button class="dialog-close" id="dialog-close" aria-label="关闭证据详情">×</button><span class="section-index">EVIDENCE DETAIL</span><h2 id="detail-title"></h2><p class="detail-id" id="detail-id"></p><dl id="detail-fields"></dl><details><summary>原始结构化值</summary><pre id="detail-raw"></pre></details><button id="detail-seek" class="primary-button">回到视频时间锚 ↗</button></dialog>
+<div id="loading-error" class="loading-error" role="alert" hidden><strong>数据未能载入</strong><span>请检查连接并刷新页面。下载源码也可在本地运行完整产品。</span></div>
+<div id="toast" class="toast" role="status" hidden></div>
+<noscript><p class="noscript">交互演练需要启用 JavaScript。你仍可从 GitHub 获取源码、方法文档与演示视频。</p></noscript>
+</body></html>

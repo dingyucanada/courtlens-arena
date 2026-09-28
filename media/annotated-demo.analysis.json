@@ -1,0 +1,1207 @@
+{
+  "mode": "deterministic-evidence-agent",
+  "provenance": {
+    "kind": "synthetic",
+    "label": "纯合成功能演练 · 非真实 NBA 事件",
+    "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。"
+  },
+  "summary": "已分析 3 个回合；优先回看“低预期命中的高机会回合”（编辑分 76.00）。本演练全部为合成内容。",
+  "possessions": [
+    {
+      "id": "p01",
+      "title": "低预期命中的高机会回合",
+      "start": 0,
+      "end": 12,
+      "rank_score": 76.0,
+      "rank_reasons": [
+        "编辑筛选公式：70×回合胜率机会差 + 20×(1−xFG) + 10×结果反差；不是胜率或模型准确率。",
+        "胜率机会差贡献 57.40 分；投篮难度贡献 12.40 分；结果反差贡献 6.20 分。",
+        "结果反差：命中用 1−xFG，未中用 xFG，结果未知用 0；Gravity 不进入排序。"
+      ],
+      "headline": "H3 命中 · 预期命中 38.0%",
+      "fan_narration": "H3 的 3 分投篮，命中。该次出手预期命中概率 38.0%，不保证实际结果。输入回合胜率机会差 82.0%，不等于实际胜率增减。",
+      "analyst_narration": "H3 的 3 分投篮，命中。该次出手预期命中概率 38.0%，不保证实际结果。输入 Gravity 为 1.8；不能单凭此值断言牵制导致命中。输入回合胜率机会差 82.0%，不等于实际胜率增减。",
+      "claims": [
+        {
+          "id": "p01:claim:event",
+          "text": "H3 执行 3 分投篮。",
+          "type": "observed",
+          "evidence_ids": [
+            "p01:event"
+          ]
+        },
+        {
+          "id": "p01:claim:result",
+          "text": "输入投篮结果：命中。",
+          "type": "observed",
+          "evidence_ids": [
+            "p01:result"
+          ]
+        },
+        {
+          "id": "p01:claim:xfg",
+          "text": "该次出手预期命中概率 38.0%，不保证实际结果。",
+          "type": "observed",
+          "evidence_ids": [
+            "p01:metric:xfg_pct"
+          ]
+        },
+        {
+          "id": "p01:claim:gravity",
+          "text": "输入 Gravity 为 1.8；不能单凭此值断言牵制导致命中。",
+          "type": "observed",
+          "evidence_ids": [
+            "p01:metric:gravity"
+          ]
+        },
+        {
+          "id": "p01:claim:leverage",
+          "text": "输入回合胜率机会差 82.0%，不等于实际胜率增减。",
+          "type": "observed",
+          "evidence_ids": [
+            "p01:metric:leverage"
+          ]
+        },
+        {
+          "id": "p01:claim:rank",
+          "text": "编辑筛选分 76.00，仅用于挑选片段。",
+          "type": "inferred",
+          "evidence_ids": [
+            "p01:rank"
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "id": "p01:metric:xfg_pct",
+          "label": "Shot xFG%",
+          "value": 0.38,
+          "unit": "probability (0–1)",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 9,
+          "definition": "Shot xFG%：单次出手的预测命中概率（0–1）；本演练为合成输入值，不是现场识别结果、期望得分或实际命中率。"
+        },
+        {
+          "id": "p01:metric:gravity",
+          "label": "Gravity",
+          "value": 1.8,
+          "unit": "输入单位",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 9,
+          "definition": "Gravity：来源提供的牵制指标，保留来源单位；本演练为合成输入值，不由最近防守者距离计算，不能作为得分因果证据。"
+        },
+        {
+          "id": "p01:metric:leverage",
+          "label": "回合胜率机会差",
+          "value": 0.82,
+          "unit": "probability (0–1)",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 9,
+          "definition": "本演练口径：回合胜率机会差（0–1）；为合成输入值，不是该回合实际胜率变化，也不是球员 -10…+10 累计 Leverage Score。正式数据必须按数据字典做语义适配，不能仅改名或缩放。"
+        },
+        {
+          "id": "p01:event",
+          "label": "输入出手记录",
+          "value": {
+            "shooter": "H3",
+            "shot_value": 3,
+            "offense": "HOU"
+          },
+          "unit": "事件",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 9,
+          "definition": "由输入记录描述投篮球员与投篮分值；不是模型从视频识别的结论。结果另有独立证据与时间锚。"
+        },
+        {
+          "id": "p01:result",
+          "label": "输入投篮结果",
+          "value": "made",
+          "unit": "事件结果",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 10.5,
+          "definition": "输入结果记录；按 result_time 才能显示结果字幕。"
+        },
+        {
+          "id": "p01:tracking",
+          "label": "出手附近轨迹样本",
+          "value": {
+            "sample_time": 9.0,
+            "player": {
+              "id": "H3",
+              "team": "HOU",
+              "x": 0.698043,
+              "y": 0.412641
+            },
+            "ball": {
+              "x": 0.698043,
+              "y": 0.412641
+            }
+          },
+          "unit": "归一化画面坐标 (0–1)",
+          "source": "输入轨迹样本；未跨镜头插值",
+          "time": 9.0,
+          "definition": "从同一已标定镜头内取距投篮时刻不超过 0.75 秒的最近样本；画面距离不能视为球场米数。"
+        },
+        {
+          "id": "p01:geometry:movement",
+          "label": "画面注释：H3 移动轨迹",
+          "value": {
+            "annotations": [
+              {
+                "id": "p01-arrow",
+                "kind": "arrow",
+                "start": 4,
+                "end": 8,
+                "points": [
+                  [
+                    0.695974,
+                    0.382948
+                  ],
+                  [
+                    0.687013,
+                    0.40318
+                  ]
+                ],
+                "label": "H3 移动轨迹"
+              }
+            ],
+            "track_sample": {
+              "t": 8.0,
+              "players": [
+                {
+                  "id": "H1",
+                  "team": "HOU",
+                  "x": 0.500724,
+                  "y": 0.62659
+                },
+                {
+                  "id": "H2",
+                  "team": "HOU",
+                  "x": 0.253753,
+                  "y": 0.474048
+                },
+                {
+                  "id": "H3",
+                  "team": "HOU",
+                  "x": 0.687013,
+                  "y": 0.40318
+                },
+                {
+                  "id": "H4",
+                  "team": "HOU",
+                  "x": 0.394464,
+                  "y": 0.364878
+                },
+                {
+                  "id": "H5",
+                  "team": "HOU",
+                  "x": 0.61854,
+                  "y": 0.341836
+                },
+                {
+                  "id": "D1",
+                  "team": "DAL",
+                  "x": 0.530161,
+                  "y": 0.58179
+                },
+                {
+                  "id": "D2",
+                  "team": "DAL",
+                  "x": 0.2898,
+                  "y": 0.429248
+                },
+                {
+                  "id": "D3",
+                  "team": "DAL",
+                  "x": 0.70232,
+                  "y": 0.35838
+                },
+                {
+                  "id": "D4",
+                  "team": "DAL",
+                  "x": 0.376616,
+                  "y": 0.320078
+                },
+                {
+                  "id": "D5",
+                  "team": "DAL",
+                  "x": 0.590537,
+                  "y": 0.297036
+                }
+              ],
+              "ball": {
+                "x": 0.695013,
+                "y": 0.39418
+              }
+            }
+          },
+          "unit": "归一化画面坐标 (0–1)",
+          "source": "合成输入注释几何 + 同镜头轨迹样本",
+          "time": 4,
+          "definition": "箭头与区域只标示给定的画面位置或轨迹；不证明牵制效果或投篮因果。"
+        },
+        {
+          "id": "p01:geometry:shot-zone",
+          "label": "画面注释：H3 出手区域",
+          "value": {
+            "annotations": [
+              {
+                "id": "p01-zone",
+                "kind": "zone",
+                "start": 8,
+                "end": 11,
+                "points": [
+                  [
+                    0.663043,
+                    0.377641
+                  ],
+                  [
+                    0.733043,
+                    0.377641
+                  ],
+                  [
+                    0.733043,
+                    0.447641
+                  ],
+                  [
+                    0.663043,
+                    0.447641
+                  ]
+                ],
+                "label": "H3 出手区域"
+              }
+            ],
+            "track_sample": {
+              "t": 9.0,
+              "players": [
+                {
+                  "id": "H1",
+                  "team": "HOU",
+                  "x": 0.495509,
+                  "y": 0.631284
+                },
+                {
+                  "id": "H2",
+                  "team": "HOU",
+                  "x": 0.249009,
+                  "y": 0.482623
+                },
+                {
+                  "id": "H3",
+                  "team": "HOU",
+                  "x": 0.698043,
+                  "y": 0.412641
+                },
+                {
+                  "id": "H4",
+                  "team": "HOU",
+                  "x": 0.402153,
+                  "y": 0.371919
+                },
+                {
+                  "id": "H5",
+                  "team": "HOU",
+                  "x": 0.632353,
+                  "y": 0.343998
+                },
+                {
+                  "id": "D1",
+                  "team": "DAL",
+                  "x": 0.525257,
+                  "y": 0.586484
+                },
+                {
+                  "id": "D2",
+                  "team": "DAL",
+                  "x": 0.285389,
+                  "y": 0.437823
+                },
+                {
+                  "id": "D3",
+                  "team": "DAL",
+                  "x": 0.713174,
+                  "y": 0.367841
+                },
+                {
+                  "id": "D4",
+                  "team": "DAL",
+                  "x": 0.38373,
+                  "y": 0.327119
+                },
+                {
+                  "id": "D5",
+                  "team": "DAL",
+                  "x": 0.603641,
+                  "y": 0.299198
+                }
+              ],
+              "ball": {
+                "x": 0.698043,
+                "y": 0.412641
+              }
+            }
+          },
+          "unit": "归一化画面坐标 (0–1)",
+          "source": "合成输入注释几何 + 同镜头轨迹样本",
+          "time": 8,
+          "definition": "箭头与区域只标示给定的画面位置或轨迹；不证明牵制效果或投篮因果。"
+        },
+        {
+          "id": "p01:rank",
+          "label": "编辑筛选分",
+          "value": 76.0,
+          "unit": "编辑分（0–100）",
+          "source": "公开确定性公式；不使用 Gravity，不补齐缺失项",
+          "time": 0,
+          "definition": "70×回合胜率机会差 + 20×(1−xFG) + 10×结果反差。命中反差=1−xFG，未中反差=xFG，未知=0。此分数不是胜率、模型精度或官方关键度。"
+        }
+      ],
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 4.0,
+          "text": "HOU · H3 · 3 分回合",
+          "evidence_ids": [
+            "p01:event"
+          ]
+        },
+        {
+          "start": 4.0,
+          "end": 8.0,
+          "text": "胜率机会差 82.0%",
+          "evidence_ids": [
+            "p01:metric:leverage"
+          ]
+        },
+        {
+          "start": 8.0,
+          "end": 10.5,
+          "text": "预期命中概率 38.0%",
+          "evidence_ids": [
+            "p01:metric:xfg_pct"
+          ]
+        },
+        {
+          "start": 10.5,
+          "end": 12,
+          "text": "命中 · 3 分投篮",
+          "evidence_ids": [
+            "p01:result",
+            "p01:event"
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "p03",
+      "title": "较高牵制输入值的命中回合",
+      "start": 24,
+      "end": 36,
+      "rank_score": 42.2,
+      "rank_reasons": [
+        "编辑筛选公式：70×回合胜率机会差 + 20×(1−xFG) + 10×结果反差；不是胜率或模型准确率。",
+        "胜率机会差贡献 30.80 分；投篮难度贡献 7.60 分；结果反差贡献 3.80 分。",
+        "结果反差：命中用 1−xFG，未中用 xFG，结果未知用 0；Gravity 不进入排序。"
+      ],
+      "headline": "H5 命中 · 预期命中 62.0%",
+      "fan_narration": "H5 的 3 分投篮，命中。该次出手预期命中概率 62.0%，不保证实际结果。输入回合胜率机会差 44.0%，不等于实际胜率增减。",
+      "analyst_narration": "H5 的 3 分投篮，命中。该次出手预期命中概率 62.0%，不保证实际结果。输入 Gravity 为 2.4；不能单凭此值断言牵制导致命中。输入回合胜率机会差 44.0%，不等于实际胜率增减。",
+      "claims": [
+        {
+          "id": "p03:claim:event",
+          "text": "H5 执行 3 分投篮。",
+          "type": "observed",
+          "evidence_ids": [
+            "p03:event"
+          ]
+        },
+        {
+          "id": "p03:claim:result",
+          "text": "输入投篮结果：命中。",
+          "type": "observed",
+          "evidence_ids": [
+            "p03:result"
+          ]
+        },
+        {
+          "id": "p03:claim:xfg",
+          "text": "该次出手预期命中概率 62.0%，不保证实际结果。",
+          "type": "observed",
+          "evidence_ids": [
+            "p03:metric:xfg_pct"
+          ]
+        },
+        {
+          "id": "p03:claim:gravity",
+          "text": "输入 Gravity 为 2.4；不能单凭此值断言牵制导致命中。",
+          "type": "observed",
+          "evidence_ids": [
+            "p03:metric:gravity"
+          ]
+        },
+        {
+          "id": "p03:claim:leverage",
+          "text": "输入回合胜率机会差 44.0%，不等于实际胜率增减。",
+          "type": "observed",
+          "evidence_ids": [
+            "p03:metric:leverage"
+          ]
+        },
+        {
+          "id": "p03:claim:rank",
+          "text": "编辑筛选分 42.20，仅用于挑选片段。",
+          "type": "inferred",
+          "evidence_ids": [
+            "p03:rank"
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "id": "p03:metric:xfg_pct",
+          "label": "Shot xFG%",
+          "value": 0.62,
+          "unit": "probability (0–1)",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 33,
+          "definition": "Shot xFG%：单次出手的预测命中概率（0–1）；本演练为合成输入值，不是现场识别结果、期望得分或实际命中率。"
+        },
+        {
+          "id": "p03:metric:gravity",
+          "label": "Gravity",
+          "value": 2.4,
+          "unit": "输入单位",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 33,
+          "definition": "Gravity：来源提供的牵制指标，保留来源单位；本演练为合成输入值，不由最近防守者距离计算，不能作为得分因果证据。"
+        },
+        {
+          "id": "p03:metric:leverage",
+          "label": "回合胜率机会差",
+          "value": 0.44,
+          "unit": "probability (0–1)",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 33,
+          "definition": "本演练口径：回合胜率机会差（0–1）；为合成输入值，不是该回合实际胜率变化，也不是球员 -10…+10 累计 Leverage Score。正式数据必须按数据字典做语义适配，不能仅改名或缩放。"
+        },
+        {
+          "id": "p03:event",
+          "label": "输入出手记录",
+          "value": {
+            "shooter": "H5",
+            "shot_value": 3,
+            "offense": "HOU"
+          },
+          "unit": "事件",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 33,
+          "definition": "由输入记录描述投篮球员与投篮分值；不是模型从视频识别的结论。结果另有独立证据与时间锚。"
+        },
+        {
+          "id": "p03:result",
+          "label": "输入投篮结果",
+          "value": "made",
+          "unit": "事件结果",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 34.5,
+          "definition": "输入结果记录；按 result_time 才能显示结果字幕。"
+        },
+        {
+          "id": "p03:tracking",
+          "label": "出手附近轨迹样本",
+          "value": {
+            "sample_time": 33.0,
+            "player": {
+              "id": "H5",
+              "team": "HOU",
+              "x": 0.714313,
+              "y": 0.427017
+            },
+            "ball": {
+              "x": 0.714313,
+              "y": 0.427017
+            }
+          },
+          "unit": "归一化画面坐标 (0–1)",
+          "source": "输入轨迹样本；未跨镜头插值",
+          "time": 33.0,
+          "definition": "从同一已标定镜头内取距投篮时刻不超过 0.75 秒的最近样本；画面距离不能视为球场米数。"
+        },
+        {
+          "id": "p03:geometry:movement",
+          "label": "画面注释：H5 移动轨迹",
+          "value": {
+            "annotations": [
+              {
+                "id": "p03-arrow",
+                "kind": "arrow",
+                "start": 28,
+                "end": 32,
+                "points": [
+                  [
+                    0.613684,
+                    0.366039
+                  ],
+                  [
+                    0.697631,
+                    0.422234
+                  ]
+                ],
+                "label": "H5 移动轨迹"
+              }
+            ],
+            "track_sample": {
+              "t": 32.0,
+              "players": [
+                {
+                  "id": "H1",
+                  "team": "HOU",
+                  "x": 0.489787,
+                  "y": 0.637808
+                },
+                {
+                  "id": "H2",
+                  "team": "HOU",
+                  "x": 0.252528,
+                  "y": 0.490851
+                },
+                {
+                  "id": "H3",
+                  "team": "HOU",
+                  "x": 0.703285,
+                  "y": 0.419698
+                },
+                {
+                  "id": "H4",
+                  "team": "HOU",
+                  "x": 0.41162,
+                  "y": 0.375341
+                },
+                {
+                  "id": "H5",
+                  "team": "HOU",
+                  "x": 0.697631,
+                  "y": 0.422234
+                },
+                {
+                  "id": "D1",
+                  "team": "DAL",
+                  "x": 0.51991,
+                  "y": 0.593008
+                },
+                {
+                  "id": "D2",
+                  "team": "DAL",
+                  "x": 0.288888,
+                  "y": 0.446051
+                },
+                {
+                  "id": "D3",
+                  "team": "DAL",
+                  "x": 0.718422,
+                  "y": 0.374898
+                },
+                {
+                  "id": "D4",
+                  "team": "DAL",
+                  "x": 0.39265,
+                  "y": 0.330541
+                },
+                {
+                  "id": "D5",
+                  "team": "DAL",
+                  "x": 0.606871,
+                  "y": 0.297789
+                }
+              ],
+              "ball": {
+                "x": 0.705631,
+                "y": 0.413234
+              }
+            }
+          },
+          "unit": "归一化画面坐标 (0–1)",
+          "source": "合成输入注释几何 + 同镜头轨迹样本",
+          "time": 28,
+          "definition": "箭头与区域只标示给定的画面位置或轨迹；不证明牵制效果或投篮因果。"
+        },
+        {
+          "id": "p03:geometry:shot-zone",
+          "label": "画面注释：H5 出手区域",
+          "value": {
+            "annotations": [
+              {
+                "id": "p03-zone",
+                "kind": "zone",
+                "start": 32,
+                "end": 35,
+                "points": [
+                  [
+                    0.679313,
+                    0.392017
+                  ],
+                  [
+                    0.749313,
+                    0.392017
+                  ],
+                  [
+                    0.749313,
+                    0.462017
+                  ],
+                  [
+                    0.679313,
+                    0.462017
+                  ]
+                ],
+                "label": "H5 出手区域"
+              }
+            ],
+            "track_sample": {
+              "t": 33.0,
+              "players": [
+                {
+                  "id": "H1",
+                  "team": "HOU",
+                  "x": 0.495635,
+                  "y": 0.647051
+                },
+                {
+                  "id": "H2",
+                  "team": "HOU",
+                  "x": 0.257127,
+                  "y": 0.499853
+                },
+                {
+                  "id": "H3",
+                  "team": "HOU",
+                  "x": 0.719133,
+                  "y": 0.425315
+                },
+                {
+                  "id": "H4",
+                  "team": "HOU",
+                  "x": 0.42013,
+                  "y": 0.37561
+                },
+                {
+                  "id": "H5",
+                  "team": "HOU",
+                  "x": 0.714313,
+                  "y": 0.427017
+                },
+                {
+                  "id": "D1",
+                  "team": "DAL",
+                  "x": 0.525776,
+                  "y": 0.602251
+                },
+                {
+                  "id": "D2",
+                  "team": "DAL",
+                  "x": 0.293438,
+                  "y": 0.455053
+                },
+                {
+                  "id": "D3",
+                  "team": "DAL",
+                  "x": 0.733759,
+                  "y": 0.380515
+                },
+                {
+                  "id": "D4",
+                  "team": "DAL",
+                  "x": 0.400755,
+                  "y": 0.33081
+                },
+                {
+                  "id": "D5",
+                  "team": "DAL",
+                  "x": 0.614419,
+                  "y": 0.292617
+                }
+              ],
+              "ball": {
+                "x": 0.714313,
+                "y": 0.427017
+              }
+            }
+          },
+          "unit": "归一化画面坐标 (0–1)",
+          "source": "合成输入注释几何 + 同镜头轨迹样本",
+          "time": 32,
+          "definition": "箭头与区域只标示给定的画面位置或轨迹；不证明牵制效果或投篮因果。"
+        },
+        {
+          "id": "p03:rank",
+          "label": "编辑筛选分",
+          "value": 42.2,
+          "unit": "编辑分（0–100）",
+          "source": "公开确定性公式；不使用 Gravity，不补齐缺失项",
+          "time": 24,
+          "definition": "70×回合胜率机会差 + 20×(1−xFG) + 10×结果反差。命中反差=1−xFG，未中反差=xFG，未知=0。此分数不是胜率、模型精度或官方关键度。"
+        }
+      ],
+      "cues": [
+        {
+          "start": 24.0,
+          "end": 28.0,
+          "text": "HOU · H5 · 3 分回合",
+          "evidence_ids": [
+            "p03:event"
+          ]
+        },
+        {
+          "start": 28.0,
+          "end": 32.0,
+          "text": "胜率机会差 44.0%",
+          "evidence_ids": [
+            "p03:metric:leverage"
+          ]
+        },
+        {
+          "start": 32.0,
+          "end": 34.5,
+          "text": "预期命中概率 62.0%",
+          "evidence_ids": [
+            "p03:metric:xfg_pct"
+          ]
+        },
+        {
+          "start": 34.5,
+          "end": 36,
+          "text": "命中 · 3 分投篮",
+          "evidence_ids": [
+            "p03:result",
+            "p03:event"
+          ]
+        }
+      ],
+      "warnings": []
+    },
+    {
+      "id": "p02",
+      "title": "较高预期命中的未中回合",
+      "start": 12,
+      "end": 24,
+      "rank_score": 26.9,
+      "rank_reasons": [
+        "编辑筛选公式：70×回合胜率机会差 + 20×(1−xFG) + 10×结果反差；不是胜率或模型准确率。",
+        "胜率机会差贡献 14.00 分；投篮难度贡献 5.80 分；结果反差贡献 7.10 分。",
+        "结果反差：命中用 1−xFG，未中用 xFG，结果未知用 0；Gravity 不进入排序。"
+      ],
+      "headline": "D2 未中 · 预期命中 71.0%",
+      "fan_narration": "D2 的 2 分投篮，未中。该次出手预期命中概率 71.0%，不保证实际结果。输入回合胜率机会差 20.0%，不等于实际胜率增减。",
+      "analyst_narration": "D2 的 2 分投篮，未中。该次出手预期命中概率 71.0%，不保证实际结果。输入 Gravity 为 1.2；不能单凭此值断言牵制导致命中。输入回合胜率机会差 20.0%，不等于实际胜率增减。",
+      "claims": [
+        {
+          "id": "p02:claim:event",
+          "text": "D2 执行 2 分投篮。",
+          "type": "observed",
+          "evidence_ids": [
+            "p02:event"
+          ]
+        },
+        {
+          "id": "p02:claim:result",
+          "text": "输入投篮结果：未中。",
+          "type": "observed",
+          "evidence_ids": [
+            "p02:result"
+          ]
+        },
+        {
+          "id": "p02:claim:xfg",
+          "text": "该次出手预期命中概率 71.0%，不保证实际结果。",
+          "type": "observed",
+          "evidence_ids": [
+            "p02:metric:xfg_pct"
+          ]
+        },
+        {
+          "id": "p02:claim:gravity",
+          "text": "输入 Gravity 为 1.2；不能单凭此值断言牵制导致命中。",
+          "type": "observed",
+          "evidence_ids": [
+            "p02:metric:gravity"
+          ]
+        },
+        {
+          "id": "p02:claim:leverage",
+          "text": "输入回合胜率机会差 20.0%，不等于实际胜率增减。",
+          "type": "observed",
+          "evidence_ids": [
+            "p02:metric:leverage"
+          ]
+        },
+        {
+          "id": "p02:claim:rank",
+          "text": "编辑筛选分 26.90，仅用于挑选片段。",
+          "type": "inferred",
+          "evidence_ids": [
+            "p02:rank"
+          ]
+        }
+      ],
+      "evidence": [
+        {
+          "id": "p02:metric:xfg_pct",
+          "label": "Shot xFG%",
+          "value": 0.71,
+          "unit": "probability (0–1)",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 21,
+          "definition": "Shot xFG%：单次出手的预测命中概率（0–1）；本演练为合成输入值，不是现场识别结果、期望得分或实际命中率。"
+        },
+        {
+          "id": "p02:metric:gravity",
+          "label": "Gravity",
+          "value": 1.2,
+          "unit": "输入单位",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 21,
+          "definition": "Gravity：来源提供的牵制指标，保留来源单位；本演练为合成输入值，不由最近防守者距离计算，不能作为得分因果证据。"
+        },
+        {
+          "id": "p02:metric:leverage",
+          "label": "回合胜率机会差",
+          "value": 0.2,
+          "unit": "probability (0–1)",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 21,
+          "definition": "本演练口径：回合胜率机会差（0–1）；为合成输入值，不是该回合实际胜率变化，也不是球员 -10…+10 累计 Leverage Score。正式数据必须按数据字典做语义适配，不能仅改名或缩放。"
+        },
+        {
+          "id": "p02:event",
+          "label": "输入出手记录",
+          "value": {
+            "shooter": "D2",
+            "shot_value": 2,
+            "offense": "DAL"
+          },
+          "unit": "事件",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 21,
+          "definition": "由输入记录描述投篮球员与投篮分值；不是模型从视频识别的结论。结果另有独立证据与时间锚。"
+        },
+        {
+          "id": "p02:result",
+          "label": "输入投篮结果",
+          "value": "missed",
+          "unit": "事件结果",
+          "source": "合成演练数值；不对应真实 NBA 事件",
+          "time": 22.5,
+          "definition": "输入结果记录；按 result_time 才能显示结果字幕。"
+        },
+        {
+          "id": "p02:tracking",
+          "label": "出手附近轨迹样本",
+          "value": {
+            "sample_time": 21.0,
+            "player": {
+              "id": "D2",
+              "team": "DAL",
+              "x": 0.36993,
+              "y": 0.414716
+            },
+            "ball": {
+              "x": 0.36993,
+              "y": 0.414716
+            }
+          },
+          "unit": "归一化画面坐标 (0–1)",
+          "source": "输入轨迹样本；未跨镜头插值",
+          "time": 21.0,
+          "definition": "从同一已标定镜头内取距投篮时刻不超过 0.75 秒的最近样本；画面距离不能视为球场米数。"
+        },
+        {
+          "id": "p02:geometry:movement",
+          "label": "画面注释：D2 移动轨迹",
+          "value": {
+            "annotations": [
+              {
+                "id": "p02-arrow",
+                "kind": "arrow",
+                "start": 16,
+                "end": 20,
+                "points": [
+                  [
+                    0.348225,
+                    0.433428
+                  ],
+                  [
+                    0.356729,
+                    0.413707
+                  ]
+                ],
+                "label": "D2 移动轨迹"
+              }
+            ],
+            "track_sample": {
+              "t": 20.0,
+              "players": [
+                {
+                  "id": "H1",
+                  "team": "HOU",
+                  "x": 0.522953,
+                  "y": 0.586045
+                },
+                {
+                  "id": "H2",
+                  "team": "HOU",
+                  "x": 0.287411,
+                  "y": 0.437174
+                },
+                {
+                  "id": "H3",
+                  "team": "HOU",
+                  "x": 0.709027,
+                  "y": 0.367208
+                },
+                {
+                  "id": "H4",
+                  "team": "HOU",
+                  "x": 0.383966,
+                  "y": 0.326724
+                },
+                {
+                  "id": "H5",
+                  "team": "HOU",
+                  "x": 0.599514,
+                  "y": 0.299179
+                },
+                {
+                  "id": "D1",
+                  "team": "DAL",
+                  "x": 0.493128,
+                  "y": 0.630845
+                },
+                {
+                  "id": "D2",
+                  "team": "DAL",
+                  "x": 0.356729,
+                  "y": 0.413707
+                },
+                {
+                  "id": "D3",
+                  "team": "DAL",
+                  "x": 0.693723,
+                  "y": 0.412008
+                },
+                {
+                  "id": "D4",
+                  "team": "DAL",
+                  "x": 0.402389,
+                  "y": 0.371524
+                },
+                {
+                  "id": "D5",
+                  "team": "DAL",
+                  "x": 0.628016,
+                  "y": 0.343979
+                }
+              ],
+              "ball": {
+                "x": 0.364729,
+                "y": 0.404707
+              }
+            }
+          },
+          "unit": "归一化画面坐标 (0–1)",
+          "source": "合成输入注释几何 + 同镜头轨迹样本",
+          "time": 16,
+          "definition": "箭头与区域只标示给定的画面位置或轨迹；不证明牵制效果或投篮因果。"
+        },
+        {
+          "id": "p02:geometry:shot-zone",
+          "label": "画面注释：D2 出手区域",
+          "value": {
+            "annotations": [
+              {
+                "id": "p02-zone",
+                "kind": "zone",
+                "start": 20,
+                "end": 23,
+                "points": [
+                  [
+                    0.33493,
+                    0.379716
+                  ],
+                  [
+                    0.40493,
+                    0.379716
+                  ],
+                  [
+                    0.40493,
+                    0.449716
+                  ],
+                  [
+                    0.33493,
+                    0.449716
+                  ]
+                ],
+                "label": "D2 出手区域"
+              }
+            ],
+            "track_sample": {
+              "t": 21.0,
+              "players": [
+                {
+                  "id": "H1",
+                  "team": "HOU",
+                  "x": 0.52315,
+                  "y": 0.593611
+                },
+                {
+                  "id": "H2",
+                  "team": "HOU",
+                  "x": 0.28762,
+                  "y": 0.446716
+                },
+                {
+                  "id": "H3",
+                  "team": "HOU",
+                  "x": 0.723012,
+                  "y": 0.375393
+                },
+                {
+                  "id": "H4",
+                  "team": "HOU",
+                  "x": 0.392448,
+                  "y": 0.330693
+                },
+                {
+                  "id": "H5",
+                  "team": "HOU",
+                  "x": 0.61056,
+                  "y": 0.297545
+                },
+                {
+                  "id": "D1",
+                  "team": "DAL",
+                  "x": 0.493135,
+                  "y": 0.638411
+                },
+                {
+                  "id": "D2",
+                  "team": "DAL",
+                  "x": 0.36993,
+                  "y": 0.414716
+                },
+                {
+                  "id": "D3",
+                  "team": "DAL",
+                  "x": 0.708071,
+                  "y": 0.420193
+                },
+                {
+                  "id": "D4",
+                  "team": "DAL",
+                  "x": 0.411412,
+                  "y": 0.375493
+                },
+                {
+                  "id": "D5",
+                  "team": "DAL",
+                  "x": 0.639593,
+                  "y": 0.342345
+                }
+              ],
+              "ball": {
+                "x": 0.36993,
+                "y": 0.414716
+              }
+            }
+          },
+          "unit": "归一化画面坐标 (0–1)",
+          "source": "合成输入注释几何 + 同镜头轨迹样本",
+          "time": 20,
+          "definition": "箭头与区域只标示给定的画面位置或轨迹；不证明牵制效果或投篮因果。"
+        },
+        {
+          "id": "p02:rank",
+          "label": "编辑筛选分",
+          "value": 26.9,
+          "unit": "编辑分（0–100）",
+          "source": "公开确定性公式；不使用 Gravity，不补齐缺失项",
+          "time": 12,
+          "definition": "70×回合胜率机会差 + 20×(1−xFG) + 10×结果反差。命中反差=1−xFG，未中反差=xFG，未知=0。此分数不是胜率、模型精度或官方关键度。"
+        }
+      ],
+      "cues": [
+        {
+          "start": 12.0,
+          "end": 16.0,
+          "text": "DAL · D2 · 2 分回合",
+          "evidence_ids": [
+            "p02:event"
+          ]
+        },
+        {
+          "start": 16.0,
+          "end": 20.0,
+          "text": "胜率机会差 20.0%",
+          "evidence_ids": [
+            "p02:metric:leverage"
+          ]
+        },
+        {
+          "start": 20.0,
+          "end": 22.5,
+          "text": "预期命中概率 71.0%",
+          "evidence_ids": [
+            "p02:metric:xfg_pct"
+          ]
+        },
+        {
+          "start": 22.5,
+          "end": 24,
+          "text": "本次投篮未中",
+          "evidence_ids": [
+            "p02:result",
+            "p02:event"
+          ]
+        }
+      ],
+      "warnings": []
+    }
+  ],
+  "trace": [
+    {
+      "step": "1",
+      "tool": "validate_dataset",
+      "status": "ok",
+      "detail": "校验 3 个回合：时序、有限数字、坐标、唯一 ID、指标及口径。"
+    },
+    {
+      "step": "2",
+      "tool": "collect_evidence",
+      "status": "ok",
+      "detail": "读取输入事件、指标、同镜头轨迹与注释几何；缺失信息保留为空。"
+    },
+    {
+      "step": "3",
+      "tool": "selection_score",
+      "status": "ok",
+      "detail": "使用公开编辑公式排序；不把 xFG 当作关键度，不使用 Gravity 代理值。"
+    },
+    {
+      "step": "4",
+      "tool": "compose_grounded_narration",
+      "status": "ok",
+      "detail": "按 球迷视角生成短字幕与逐条证据引用；不推断战术因果。"
+    }
+  ],
+  "warnings": [
+    "离线确定性证据 Agent：不调用语言模型，不从视频检测球员，不估计官方指标。",
+    "合成数据仅验证功能，不对应真实 NBA 比赛、球员或官方统计。",
+    "Shot xFG% 是该次出手的预测命中概率；Gravity 保留输入口径；回合胜率机会差不是实际胜率变化或球员累计 Leverage Score。"
+  ],
+  "media_binding": {
+    "sha256": "ee477fccadef5a27af33ab9e229f311715c70ddf570629b0ccf0fbb4d33926f8",
+    "width": 1280,
+    "height": 720,
+    "duration": 36.0,
+    "meaning": "File identity checked; calibration and source authenticity are not certified"
+  }
+}

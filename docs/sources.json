@@ -1,0 +1,582 @@
+{
+  "title": "NBA sports product and research landscape sources",
+  "accessed_at": "2026-09-22",
+  "scope": "Independent bounded research for 12-hour NBA augmented-video agent; no development, no external contact",
+  "source_policy": "Primary publisher/product documents, official technical documentation, original research and dataset maintainer material; marketing is not treated as independent efficacy evidence",
+  "sources": [
+    {
+      "id": "S01",
+      "title": "NBA Powered by AWS",
+      "publisher": "AWS",
+      "url": "https://aws.amazon.com/sports/nba/",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_product_page",
+      "supports": [
+        "Lists Shot Difficulty, Defensive Pressure, Gravity and Leverage in the NBA advanced statistics programme."
+      ],
+      "limitations": "Product description; not independent accuracy evaluation."
+    },
+    {
+      "id": "S02",
+      "title": "NBA selects AWS as official cloud and cloud AI partner for basketball innovation",
+      "publisher": "Amazon",
+      "url": "https://www.aboutamazon.com/news/aws/nba-aws-cloud-ai-partnership-basketball-innovation",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_announcement",
+      "supports": [
+        "Shot Difficulty considers shooter setup, position and defensive contest.",
+        "Gravity concerns attention drawn from defenders and opportunities for teammates.",
+        "Play Finder is described as an individual-play search capability; some fan-facing versions are explicitly future iterations."
+      ],
+      "limitations": "Do not treat every announced feature as publicly available or proven at arbitrary-video recognition."
+    },
+    {
+      "id": "S03",
+      "title": "Intro to Expected Field Goal Percentage",
+      "publisher": "NBA",
+      "url": "https://www.nba.com/news/intro-to-expected-field-goal-percentage",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_metric_definition",
+      "supports": [
+        "Player-agnostic xFG definition."
+      ],
+      "limitations": "Definition differs from a shorthand in the AWS Leverage article; use competition data dictionary."
+    },
+    {
+      "id": "S04",
+      "title": "Intro to Gravity",
+      "publisher": "NBA",
+      "url": "https://www.nba.com/news/intro-to-gravity-stat-nba-2025",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_metric_definition",
+      "supports": [
+        "Gravity compares actual with expected defensive attention."
+      ],
+      "limitations": "Cannot infer an official Gravity score from nearest-defender distance alone."
+    },
+    {
+      "id": "S05",
+      "title": "Intro to Defensive Pressure Score",
+      "publisher": "NBA",
+      "url": "https://www.nba.com/news/understanding-defensive-pressure-score",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_metric_definition",
+      "supports": [
+        "Higher pressure does not necessarily mean better defense."
+      ],
+      "limitations": "Specific scoring implementation must follow the supplied metric version."
+    },
+    {
+      "id": "S06",
+      "title": "How the NBA and AWS built an AI system to measure what actually wins basketball games",
+      "publisher": "AWS",
+      "url": "https://aws.amazon.com/blogs/media/how-the-nba-and-aws-built-an-ai-system-to-measure-what-actually-wins-basketball-games/",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_engineering_article",
+      "supports": [
+        "Leverage uses actual versus counterfactual outcomes, with credit across players.",
+        "It combines win probability and contextual attribution, including Shot Difficulty.",
+        "The article reports LightGBM trained on about 3,700 games and 500,000 possessions; this is not a hackathon-reproducible model specification.",
+        "Reported Shot Difficulty latency is 10–12 seconds; subsecond latency is an optimization target."
+      ],
+      "limitations": "System-provider claims, not independent benchmark. Describes shooter skill in xFG shorthand; NBA specialist definition is player-agnostic."
+    },
+    {
+      "id": "S07",
+      "title": "NBA and Genius Sports / Second Spectrum Expand Partnership",
+      "publisher": "Genius Sports",
+      "url": "https://investors.geniussports.com/news/news-details/2023/NBA-and-Genius-Sports--Second-Spectrum-Expand-Partnership-to-Deepen-NBA-League-Pass-Innovations-With-Enhanced-Basketball-Analytics-and-Develop-New-Next-Gen-Platform/default.aspx",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_announcement",
+      "supports": [
+        "2023 partnership expansion covers League Pass augmentation and team analytics.",
+        "Graphics are based on optical on-court data.",
+        "Dragon is described in this release as research and development, not completed universal deployment."
+      ],
+      "limitations": "Do not cite 2023 roadmap wording as proof of present-day feature coverage."
+    },
+    {
+      "id": "S08",
+      "title": "GeniusIQ offering fans a new game-watching experience at FIBA U19 Basketball World Cup",
+      "publisher": "Genius Sports",
+      "url": "https://www.geniussports.com/newsroom/geniusiq-offering-fans-a-new-game-watching-experience-at-fiba-u19-basketball-world-cup/",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_deployment_case",
+      "supports": [
+        "2025 Lausanne case uses 12 strategically placed iPhones for optical tracking.",
+        "Broadcast overlays include player speed, shot charts and momentum."
+      ],
+      "limitations": "Vendor-reported deployment; no independent accuracy measurements; multiple fixed cameras are not one television video."
+    },
+    {
+      "id": "S09",
+      "title": "Shot Chart Viewing and Tagging in the Synergy Editor",
+      "publisher": "Synergy Sports Support",
+      "url": "https://support.synergysports.com/support/solutions/articles/77000576098-shot-chart-viewing-and-tagging-in-the-synergy-editor",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "product_help",
+      "supports": [
+        "Double-clicking a plotted shot opens its associated video clip."
+      ],
+      "limitations": "Documents workflow, not automatic tactical interpretation."
+    },
+    {
+      "id": "S10",
+      "title": "Basketball game analysis | Hudl Assist",
+      "publisher": "Hudl",
+      "url": "https://www.hudl.com/products/assist/basketball",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_product_page",
+      "supports": [
+        "Reports link data points to video and offer game/season filtering.",
+        "Shot charts expose floor-area percentages."
+      ],
+      "limitations": "Marketing product page; no numerical accuracy evidence retrieved."
+    },
+    {
+      "id": "S11",
+      "title": "Synergy Basketball FAQs",
+      "publisher": "Sportradar Developer",
+      "url": "https://developer.sportradar.com/basketball/reference/synergy-basketball-faqs",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_api_documentation",
+      "supports": [
+        "Synergy possession context is manually tagged.",
+        "Synergy enriched analytics include play types, pick-and-roll details, lineups and shot coordinates.",
+        "Synergy is post-game, distinct from official live event data; FAQ says it should not be considered an official data source."
+      ],
+      "limitations": "Coverage, package, season access and ID mapping differ from other Sportradar APIs."
+    },
+    {
+      "id": "S12",
+      "title": "Automated Video Solutions",
+      "publisher": "Sportradar",
+      "url": "https://sportradar.com/teams-leagues-federations/synergy-coaching-scouting/automated-video-solutions/",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_product_and_case",
+      "supports": [
+        "Describes automatic capture, production and streaming with graphical overlays.",
+        "Lists automated camera installations across 36 arenas in French basketball’s top two tiers."
+      ],
+      "limitations": "Broadcast quality is promotional wording; full hardware workflow is not reproduced by an editing prototype."
+    },
+    {
+      "id": "S13",
+      "title": "HomeCourt",
+      "publisher": "HomeCourt",
+      "url": "https://www.homecourt.ai/",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_product_page",
+      "supports": [
+        "Basketball training app offers shot tracking and skill feedback using mobile-device cameras."
+      ],
+      "limitations": "Training use case is not equivalent to full NBA broadcast understanding."
+    },
+    {
+      "id": "S14",
+      "title": "Setup FAQ",
+      "publisher": "HomeCourt",
+      "url": "https://www.homecourt.ai/faq/setup",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_product_help",
+      "supports": [
+        "Improved operating conditions include good light, hoop net, clear court lines and a single shooter."
+      ],
+      "limitations": "Strong evidence that capture conditions matter; not an accuracy benchmark."
+    },
+    {
+      "id": "S15",
+      "title": "NBA and Sony’s Hawk-Eye Innovations launch strategic partnership powering next generation tracking technology",
+      "publisher": "NBA Communications",
+      "url": "https://pr.nba.com/nba-sony-hawk-eye-innovations-partnership/",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_announcement",
+      "supports": [
+        "Partnership begins with 2023–24 deployment of 3D optical tracking.",
+        "The release distinguishes tracking and pose applications from future automated officiating opportunities."
+      ],
+      "limitations": "Not evidence that a single broadcast camera yields equivalent 3D data or that every future officiating use shipped."
+    },
+    {
+      "id": "S16",
+      "title": "WNBA Inside the Game, powered by AWS: AI Meets the Next Era of Women’s Basketball",
+      "publisher": "AWS",
+      "url": "https://aws.amazon.com/blogs/media/wnba-inside-the-game-powered-by-aws-ai-meets-the-next-era-of-womens-basketball/",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_engineering_and_launch",
+      "supports": [
+        "Explains Gravity as actual pressure minus expected pressure conditioned on offensive spacing and ball position.",
+        "Includes normalized Gravity descriptions and an applied enhanced-broadcast use case."
+      ],
+      "limitations": "WNBA article is a related implementation, not the NBA challenge schema. Its heading and body give different frame-rate wording; no frame-rate claim is carried into the recommendation."
+    },
+    {
+      "id": "S17",
+      "title": "POINTWISE: Predicting Points and Valuing Decisions in Real Time with NBA Optical Tracking Data",
+      "publisher": "Cervone, D’Amour, Bornn, Goldsberry",
+      "url": "https://www.lukebornn.com/papers/cervone_ssac_2014.pdf",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "primary_research_pdf",
+      "supports": [
+        "Proposes expected possession value from player tracking and models pre-terminal decisions.",
+        "Reports application to 2012–13 season tracking data."
+      ],
+      "limitations": "Research model; not publicly downloadable current official NBA service or a shortcut using only box scores."
+    },
+    {
+      "id": "S18",
+      "title": "A Multiresolution Stochastic Process Model for Predicting Basketball Possession Outcomes",
+      "publisher": "Cervone, D’Amour, Bornn, Goldsberry",
+      "url": "https://arxiv.org/abs/1408.0777",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "primary_research",
+      "supports": [
+        "Uses optical player tracking and models continuous movements plus discrete possession events to estimate expected points."
+      ],
+      "limitations": "No claim of direct equivalence with modern xFG, Gravity or Leverage."
+    },
+    {
+      "id": "S19",
+      "title": "Characterizing the spatial structure of defensive skill in professional basketball",
+      "publisher": "Franks, Miller, Bornn, Goldsberry",
+      "url": "https://arxiv.org/abs/1405.0231",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "primary_research",
+      "supports": [
+        "Uses player tracking and spatial/statistical modelling for defensive analysis."
+      ],
+      "limitations": "Defensive contribution is model-dependent; nearest-defender proximity alone is insufficient proof of responsibility."
+    },
+    {
+      "id": "S20",
+      "title": "pbpstats Documentation",
+      "publisher": "PBPStats maintainers",
+      "url": "https://pbpstats.readthedocs.io/en/latest/",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "maintainer_documentation",
+      "supports": [
+        "Adds lineups and possession start/end context to play-by-play.",
+        "Corrects event order in some common cases."
+      ],
+      "limitations": "Derived parsing can need manual overrides; docs are not evidence every historical game parses perfectly."
+    },
+    {
+      "id": "S21",
+      "title": "nba_data repository",
+      "publisher": "Vladislav Shufinskiy",
+      "url": "https://github.com/shufinskiy/nba_data",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "dataset_maintainer",
+      "supports": [
+        "Provides downloadable seasonal PBP and shot-detail archives collected from NBA/PBPStats endpoints.",
+        "Repository advertises Apache 2.0."
+      ],
+      "limitations": "Community provenance; upstream rights do not follow automatically from repository license. README season range can lag file list."
+    },
+    {
+      "id": "S22",
+      "title": "nba_data archive index",
+      "publisher": "Vladislav Shufinskiy",
+      "url": "https://raw.githubusercontent.com/shufinskiy/nba_data/main/list_data.txt",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "dataset_manifest",
+      "supports": [
+        "Contains direct tar.xz archive URLs for data variants and seasons."
+      ],
+      "limitations": "This is the index; file download checks are separately recorded below."
+    },
+    {
+      "id": "S23",
+      "title": "nba_data field dictionary",
+      "publisher": "Vladislav Shufinskiy",
+      "url": "https://raw.githubusercontent.com/shufinskiy/nba_data/main/description_fields.md",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "dataset_dictionary",
+      "supports": [
+        "Describes shot coordinates, event IDs, period/clock, make flag and PBPStats possession fields."
+      ],
+      "limitations": "Some fields are undocumented. Verify coordinate units and ID joins before use."
+    },
+    {
+      "id": "S24",
+      "title": "nba_data LICENSE",
+      "publisher": "Vladislav Shufinskiy repository",
+      "url": "https://raw.githubusercontent.com/shufinskiy/nba_data/main/LICENSE",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "repository_license",
+      "supports": [
+        "Repository contains the Apache License 2.0 text."
+      ],
+      "limitations": "Does not itself demonstrate that the uploader can sublicense all underlying NBA data or video."
+    },
+    {
+      "id": "S25",
+      "title": "nba_api repository",
+      "publisher": "swar/nba_api maintainers",
+      "url": "https://github.com/swar/nba_api",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "client_library_maintainer",
+      "supports": [
+        "Community Python NBA API client is MIT-licensed."
+      ],
+      "limitations": "Library software license does not grant NBA data usage rights or availability guarantees."
+    },
+    {
+      "id": "S26",
+      "title": "nba_api live PlayByPlay endpoint documentation",
+      "publisher": "swar/nba_api maintainers",
+      "url": "https://raw.githubusercontent.com/swar/nba_api/master/docs/nba_api/live/endpoints/playbyplay.md",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "client_library_documentation",
+      "supports": [
+        "Documents CDN endpoint format, game-ID parameter and event fields.",
+        "Fields are conditional by action type."
+      ],
+      "limitations": "Documented endpoint returned HTTP 403 in our target-game test."
+    },
+    {
+      "id": "S27",
+      "title": "NBA Game Play-by-Play",
+      "publisher": "Sportradar Developer",
+      "url": "https://developer.sportradar.com/basketball/reference/nba-play-by-play",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_api_documentation",
+      "supports": [
+        "Documents event locations on a 1128 by 600 inch court, scores, clocks and event descriptions.",
+        "On-court participants are conditional on the track_on_court flag.",
+        "API access uses trial or production access levels."
+      ],
+      "limitations": "Not raw player-and-ball trajectories; not proof our account has access."
+    },
+    {
+      "id": "S28",
+      "title": "Your Account",
+      "publisher": "Sportradar Developer",
+      "url": "https://developer.sportradar.com/getting-started/docs/your-account",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_api_documentation",
+      "supports": [
+        "Default trials are 30 days, 1,000 rolling-period requests and 1 QPS.",
+        "Production access is for customers and some products are not self-issued trials."
+      ],
+      "limitations": "Quotas may differ by package; no account was created and no purchase made."
+    },
+    {
+      "id": "S29",
+      "title": "Sportradar US Master Terms and Conditions",
+      "publisher": "Sportradar",
+      "url": "https://developer.sportradar.com/sportradar-updates/page/terms-and-conditions",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_terms",
+      "supports": [
+        "Free trials are for internal evaluation and do not authorize publication/display of data.",
+        "Paid use is tied to products and properties in the order form."
+      ],
+      "limitations": "Terms dated August 5, 2026. Competition-specific permissions must be obtained from organizer documentation."
+    },
+    {
+      "id": "S30",
+      "title": "NBA-Player-Movements",
+      "publisher": "linouk23",
+      "url": "https://github.com/linouk23/NBA-Player-Movements",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "repository_maintainer",
+      "supports": [
+        "Repository contains visualization code and a 2016 raw SportVU logs directory."
+      ],
+      "limitations": "No clear data redistribution license was verified in this review; not selected for default deliverable."
+    },
+    {
+      "id": "S31",
+      "title": "Terms of Use: NBA Statistics",
+      "publisher": "NBA",
+      "url": "https://www.nba.com/termsofuse",
+      "accessed_at": "2026-09-22",
+      "opened": true,
+      "source_type": "official_terms",
+      "supports": [
+        "Statistics have specific usage restrictions."
+      ],
+      "limitations": "Consult Section 9 and competition-specific authorization; no legal conclusion about a particular competition grant is made."
+    }
+  ],
+  "download_checks": [
+    {
+      "name": "cdnnba_po_2023",
+      "status": 200,
+      "compressed_bytes": 1160972,
+      "csv_member": "cdnnba_po_2023.csv",
+      "data_rows": 43452,
+      "fields_verified": [
+        "actionNumber",
+        "clock",
+        "period",
+        "x",
+        "y",
+        "scoreHome",
+        "scoreAway",
+        "xLegacy",
+        "yLegacy",
+        "gameId"
+      ],
+      "game_id_note": "CSV stores IDs without leading zeroes.",
+      "url": "https://raw.githubusercontent.com/shufinskiy/nba_data/main/datasets/cdnnba_po_2023.tar.xz",
+      "accessed_at": "2026-09-22",
+      "method": "HTTP GET; decompress tar.xz in memory; parse CSV; no downloaded dataset retained",
+      "rights_status": "Download availability verified; no upstream commercial/video redistribution grant verified"
+    },
+    {
+      "name": "shotdetail_po_2023",
+      "status": 200,
+      "compressed_bytes": 183112,
+      "csv_member": "shotdetail_po_2023.csv",
+      "data_rows": 13840,
+      "fields_verified": [
+        "GAME_ID",
+        "GAME_EVENT_ID",
+        "LOC_X",
+        "LOC_Y",
+        "SHOT_MADE_FLAG"
+      ],
+      "url": "https://raw.githubusercontent.com/shufinskiy/nba_data/main/datasets/shotdetail_po_2023.tar.xz",
+      "accessed_at": "2026-09-22",
+      "method": "HTTP GET; decompress tar.xz in memory; parse CSV; no downloaded dataset retained",
+      "rights_status": "Download availability verified; no upstream commercial/video redistribution grant verified"
+    },
+    {
+      "name": "pbpstats_po_2023",
+      "status": 200,
+      "compressed_bytes": 976520,
+      "csv_member": "pbpstats_po_2023.csv",
+      "data_rows": 30532,
+      "fields_verified": [
+        "STARTTIME",
+        "ENDTIME",
+        "GAMEID",
+        "PERIOD",
+        "EVENTS",
+        "OFFENSIVEREBOUNDS",
+        "URL"
+      ],
+      "note": "Rows have not been de-duplicated or certified as one row per possession; NBA video URLs found but not downloaded.",
+      "url": "https://raw.githubusercontent.com/shufinskiy/nba_data/main/datasets/pbpstats_po_2023.tar.xz",
+      "accessed_at": "2026-09-22",
+      "method": "HTTP GET; decompress tar.xz in memory; parse CSV; no downloaded dataset retained",
+      "rights_status": "Download availability verified; no upstream commercial/video redistribution grant verified"
+    },
+    {
+      "name": "shotdetail_2023",
+      "status": 200,
+      "compressed_bytes": 2812692,
+      "csv_member": "shotdetail_2023.csv",
+      "data_rows": 218701,
+      "sha256": "303e71f967c199568b345cd73a75e595f1f99532cca3e6ce59afb286b63f840d",
+      "target_matches": [
+        {
+          "game_id": "0022300059",
+          "date": "2023-11-28",
+          "home": "DAL",
+          "away": "HOU",
+          "shot_rows": 174
+        },
+        {
+          "game_id": "0022300385",
+          "date": "2023-12-22",
+          "home": "HOU",
+          "away": "DAL",
+          "shot_rows": 196
+        },
+        {
+          "game_id": "0022301083",
+          "date": "2024-03-31",
+          "home": "HOU",
+          "away": "DAL",
+          "shot_rows": 185
+        },
+        {
+          "game_id": "0022301131",
+          "date": "2024-04-07",
+          "home": "DAL",
+          "away": "HOU",
+          "shot_rows": 178
+        }
+      ],
+      "url": "https://raw.githubusercontent.com/shufinskiy/nba_data/main/datasets/shotdetail_2023.tar.xz",
+      "accessed_at": "2026-09-22",
+      "method": "HTTP GET; decompress tar.xz in memory; parse CSV; no downloaded dataset retained",
+      "rights_status": "Download availability verified; no upstream commercial/video redistribution grant verified"
+    },
+    {
+      "name": "nbastats_2023",
+      "status": 200,
+      "compressed_bytes": 8480776,
+      "csv_member": "nbastats_2023.csv",
+      "data_rows": 567665,
+      "sha256": "ec0029c0d45a90b769d173010f60b73c6c8866acf1d4d914a72476373ce3a913",
+      "target_game": "0022301131",
+      "target_event_rows": 548,
+      "target_final_period": 5,
+      "target_final_score_string": "136 - 147",
+      "fields_verified": [
+        "GAME_ID",
+        "EVENTNUM",
+        "EVENTMSGTYPE",
+        "PERIOD",
+        "PCTIMESTRING",
+        "SCORE",
+        "SCOREMARGIN",
+        "PLAYER1_ID"
+      ],
+      "note": "Same target game as shot table exists; exact event-key join not yet exhaustively tested.",
+      "url": "https://raw.githubusercontent.com/shufinskiy/nba_data/main/datasets/nbastats_2023.tar.xz",
+      "accessed_at": "2026-09-22",
+      "method": "HTTP GET; decompress tar.xz in memory; parse CSV; no downloaded dataset retained",
+      "rights_status": "Download availability verified; no upstream commercial/video redistribution grant verified"
+    },
+    {
+      "name": "NBA CDN target PBP",
+      "url": "https://cdn.nba.com/static/json/liveData/playbyplay/playbyplay_0022301131.json",
+      "accessed_at": "2026-09-22",
+      "status": 403,
+      "method": "Single HTTP GET",
+      "note": "Blocked; no evasion or retry with alternate identities attempted."
+    }
+  ],
+  "unverified": [
+    "Official challenge video and deep metric files have not been received.",
+    "Exact competition scoring weights and data/video publication scope are not known.",
+    "No HomeCourt, Synergy, Hudl, Genius or Hawk-Eye accuracy benchmark was independently reproduced.",
+    "No unofficial source is assumed to contain modern official xFG, Gravity and Leverage."
+  ],
+  "recommended_data_policy": "Prefer organizer-authorized files; use conspicuously labelled synthetic calibration assets before delivery; keep raw restricted data out of public code repository unless explicitly permitted."
+}

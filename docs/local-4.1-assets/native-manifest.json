@@ -1,0 +1,339 @@
+{
+  "schema": "courtlens-release/1",
+  "createdAt": "2026-09-28T13:23:51.896Z",
+  "renderIdentity": "d9cb9da67310168b8428326343320ec574658ef9d26c4fe454d8ee675fd8bbd5",
+  "releaseIdentity": "91a717a241336ad68954a0e5bbc1aaae071f3f53e4ca3ea8ff27fe274a234332",
+  "storyPlanHash": "a8fbdd8d1a781232fa0b12303d65c3e95387c76c7d13633213e41c6be595659c",
+  "reviewedContentHash": "949926b043352fb5504573011043e4d3864ff05f14ffe4f227d53344cb43fef7",
+  "inputHash": "0aa29e4dfb30b4ff041accc0d315437dd98d9f27858a5f2cf9a3afd926edd3a4",
+  "source": {
+    "sha256": "ee477fccadef5a27af33ab9e229f311715c70ddf570629b0ccf0fbb4d33926f8",
+    "bytes": 857398,
+    "frameRate": "25/1",
+    "authenticated": false
+  },
+  "renderer": {
+    "name": "courtlens-portable-canvas-ffmpeg/1",
+    "assets": [
+      {
+        "name": "tools/export_story_plan.mjs",
+        "sha256": "a8ac3f5ba65d61160ffb9ae4cde2a05bb147d9009b837b07b34e0667f556affa"
+      },
+      {
+        "name": "pro/story-plan.mjs",
+        "sha256": "e08556217de46bbe26b6a3c2a4898f57aa44a2e1080afed8b6e917e5c2a6ce77"
+      },
+      {
+        "name": "pro/render.mjs",
+        "sha256": "fcf16762a9efbc59fac23db3ab6b99fcf94e9404fe2bfc902d3ffa741a5eaaa9"
+      },
+      {
+        "name": "pro/calibration.mjs",
+        "sha256": "6e7f03e1c8a00fa5f963da5f4ff83ee10514af0ed7c854e5cc8da58104db9c28"
+      },
+      {
+        "name": "pro/camera-view.mjs",
+        "sha256": "54dc6aa5c69c7af6fbedbce98d8024bec4896d9f122643f6b273f7a18ac737cb"
+      },
+      {
+        "name": "pro/director.mjs",
+        "sha256": "5444bc8ed7b1435941968f23e40a4e03eb1a18ea6609adbb259023a5317992dc"
+      },
+      {
+        "name": "pro/model.mjs",
+        "sha256": "62e26719721c342baa34627f9f205fee468cbc46d087e8ef96620b3673a21df0"
+      },
+      {
+        "name": "ffmpeg-binary",
+        "sha256": "d94d8e7af675f813e0a0faf036ff936d334ceb18daaec3a10a355679994e0311"
+      },
+      {
+        "name": "ffprobe-binary",
+        "sha256": "96f53c2099a3f59fc20efb424dd36d5510373f735cf9af50479c2f4d458695af"
+      },
+      {
+        "name": "ffmpeg-version",
+        "sha256": "339526c9952afc08b61cf79bcd537a0db05b6bbd1a7cde83846cae0bfd88becc"
+      },
+      {
+        "name": "node-runtime",
+        "sha256": "d3f1d7925c76f8612a642346f5a6301b65badfdef3062c829365d4ae112e42c5"
+      },
+      {
+        "name": "@napi-rs/canvas/package.json",
+        "sha256": "8379e15beeaecdedc863f8ff0e2548935eed4fb7505b93a207600a212d7bc2c5"
+      },
+      {
+        "name": "@napi-rs/canvas/index.js",
+        "sha256": "bbdad32cab670261983ea56d4625fc7d07b1382f8bb7d6d31232bb2834861597"
+      },
+      {
+        "name": "@napi-rs/canvas/js-binding.js",
+        "sha256": "be59c8d4888630cf88656f65b63dd150e60bdb1d5eab0ba5b47c0a6cb389533e"
+      },
+      {
+        "name": "@napi-rs/canvas/load-image.js",
+        "sha256": "b4527335ec1d0505daf51be5ef919a8f951fc8296d88f4c5016e6ce772971570"
+      },
+      {
+        "name": "@napi-rs/canvas-darwin-arm64",
+        "sha256": "6f774039cadbf46426a8e0b09496f578cb782a0c2442c7adb087a869efa5bbb3"
+      }
+    ],
+    "font": {
+      "sha256": "f8fa4a63e2cf500e98e64d4c73260daaba049306cf85dec9e3729bc285b7d645",
+      "family": "Arena Reviewed"
+    },
+    "audio": {
+      "mode": "silent"
+    },
+    "width": 1280,
+    "height": 720,
+    "fps": 25
+  },
+  "review": {
+    "status": "approved",
+    "contentHash": "949926b043352fb5504573011043e4d3864ff05f14ffe4f227d53344cb43fef7",
+    "reviewer": "本地制作端人工复核",
+    "reason": "操作者确认当前模式、图层、逐句文句、身份、时间与来源；结构校验不认证篮球因果。",
+    "at": "2026-09-28T12:29:30.544Z"
+  },
+  "outputs": [
+    {
+      "name": "film.mp4",
+      "bytes": 759823,
+      "sha256": "f2d2bbff766554eb91ea92a6b052333517f2f128f88401d7ab4b9eeb39cd85b8"
+    },
+    {
+      "name": "captions.vtt",
+      "bytes": 427,
+      "sha256": "5df1ae312a630d9a5dafb90ca2cfb33326d4d6b16b928d801603fb1a6d257501"
+    },
+    {
+      "name": "story-plan.json",
+      "bytes": 917374,
+      "sha256": "861914a30a48d6547474aae7ec81b8314696599f16f9c073498b6e157a8836a2"
+    }
+  ],
+  "timing": {
+    "basis": "constant-fps-resampling-grid",
+    "sourceToPresentation": [
+      {
+        "end": 36,
+        "playId": "p03",
+        "start": 24,
+        "outputStart": 0,
+        "outputEnd": 12
+      }
+    ],
+    "cues": [
+      {
+        "basisStart": 24,
+        "clipIndex": 0,
+        "end": 3,
+        "evidenceIds": [
+          "p03:event"
+        ],
+        "facts": [],
+        "id": "cue-0-0",
+        "origin": "evidence-engine",
+        "originalText": "Q3 07:17 · HOU进攻",
+        "playId": "p03",
+        "playerIds": [],
+        "start": 0,
+        "text": "Q3 07:17 · HOU进攻",
+        "sourceStart": 24,
+        "sourceEnd": 27
+      },
+      {
+        "basisStart": 27,
+        "clipIndex": 0,
+        "end": 5.5,
+        "evidenceIds": [
+          "p03:window-first:H5:0"
+        ],
+        "facts": [
+          {
+            "decimals": 3,
+            "evidenceId": "p03:window-first:H5:0",
+            "format": "raw",
+            "path": "distanceFt",
+            "value": 6.739
+          }
+        ],
+        "id": "cue-0-1",
+        "origin": "evidence-engine",
+        "originalText": "H5 在这一帧的近防距离为 6.739 ft，值得留意这个空间。",
+        "playId": "p03",
+        "playerIds": [],
+        "start": 3,
+        "text": "H5 在这一帧的近防距离为 6.739 ft，值得留意这个空间。",
+        "sourceStart": 27,
+        "sourceEnd": 29.5
+      },
+      {
+        "basisStart": 29.5,
+        "clipIndex": 0,
+        "end": 8.5,
+        "evidenceIds": [
+          "p03:window:H5:0"
+        ],
+        "facts": [
+          {
+            "decimals": 3,
+            "evidenceId": "p03:window:H5:0",
+            "format": "raw",
+            "path": "duration",
+            "value": 3
+          },
+          {
+            "decimals": 2,
+            "evidenceId": "p03:window:H5:0",
+            "format": "raw",
+            "path": "duration",
+            "value": 3
+          },
+          {
+            "decimals": 1,
+            "evidenceId": "p03:window:H5:0",
+            "format": "raw",
+            "path": "duration",
+            "value": 3
+          },
+          {
+            "decimals": 0,
+            "evidenceId": "p03:window:H5:0",
+            "format": "raw",
+            "path": "duration",
+            "value": 3
+          },
+          {
+            "decimals": 0,
+            "evidenceId": "p03:window:H5:0",
+            "format": "raw",
+            "path": "minDistanceFt",
+            "value": 6.191
+          },
+          {
+            "decimals": 3,
+            "evidenceId": "p03:window:H5:0",
+            "format": "raw",
+            "path": "thresholdFt",
+            "value": 6
+          },
+          {
+            "decimals": 2,
+            "evidenceId": "p03:window:H5:0",
+            "format": "raw",
+            "path": "thresholdFt",
+            "value": 6
+          },
+          {
+            "decimals": 1,
+            "evidenceId": "p03:window:H5:0",
+            "format": "raw",
+            "path": "thresholdFt",
+            "value": 6
+          },
+          {
+            "decimals": 0,
+            "evidenceId": "p03:window:H5:0",
+            "format": "raw",
+            "path": "thresholdFt",
+            "value": 6
+          }
+        ],
+        "id": "cue-0-2",
+        "origin": "evidence-engine",
+        "originalText": "H5 在采样画面中保持 6 ft 以上防守距离，观察窗 3 秒。",
+        "playId": "p03",
+        "playerIds": [],
+        "start": 5.5,
+        "text": "H5 在采样画面中保持 6 ft 以上防守距离，观察窗 3 秒。",
+        "sourceStart": 29.5,
+        "sourceEnd": 32.5
+      },
+      {
+        "basisStart": 33,
+        "clipIndex": 0,
+        "end": 10.5,
+        "evidenceIds": [
+          "p03:metric:difficulty",
+          "p03:event"
+        ],
+        "facts": [
+          {
+            "decimals": 3,
+            "evidenceId": "p03:metric:difficulty",
+            "format": "percent",
+            "path": "",
+            "value": 0.62
+          },
+          {
+            "decimals": 2,
+            "evidenceId": "p03:metric:difficulty",
+            "format": "percent",
+            "path": "",
+            "value": 0.62
+          },
+          {
+            "decimals": 1,
+            "evidenceId": "p03:metric:difficulty",
+            "format": "percent",
+            "path": "",
+            "value": 0.62
+          },
+          {
+            "decimals": 0,
+            "evidenceId": "p03:metric:difficulty",
+            "format": "percent",
+            "path": "",
+            "value": 0.62
+          }
+        ],
+        "id": "cue-0-3",
+        "origin": "evidence-engine",
+        "originalText": "H5出手 · 预期命中概率 62%，概率不保证结果。",
+        "playId": "p03",
+        "playerIds": [],
+        "start": 9,
+        "text": "H5出手 · 预期命中概率 62%，概率不保证结果。",
+        "sourceStart": 33,
+        "sourceEnd": 34.5
+      },
+      {
+        "basisStart": 34.5,
+        "clipIndex": 0,
+        "end": 12,
+        "evidenceIds": [
+          "p03:outcome"
+        ],
+        "facts": [],
+        "id": "cue-0-4",
+        "origin": "evidence-engine",
+        "originalText": "投篮命中 · 3 分。",
+        "playId": "p03",
+        "playerIds": [],
+        "start": 10.5,
+        "text": "投篮命中 · 3 分。",
+        "sourceStart": 34.5,
+        "sourceEnd": 36
+      }
+    ],
+    "plannedDuration": 12,
+    "actualDuration": 12,
+    "frames": 300
+  },
+  "validation": {
+    "hashesVerified": true,
+    "contentValidated": true,
+    "videoAIInference": false,
+    "frameAlignmentCertified": false
+  },
+  "limitations": [
+    "No video AI inference or source authentication is asserted.",
+    "Human-reviewed prose and manual arrow geometry are retained, not automatically semantically certified.",
+    "Silent MP4; source audio is omitted. Variable-frame-rate footage needs separate frame review."
+  ],
+  "manifestHash": "1054eb7bbe34c4f26d92cbcf786e51e05fa96e7fa242122291a6d6a88479118d"
+}

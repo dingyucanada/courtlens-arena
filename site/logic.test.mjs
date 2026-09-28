@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {cueAt,trackAt,rankingParts,sanitizeState,possessionAt,formatTime} from './logic.mjs';
+const d=JSON.parse(fs.readFileSync(new URL('../data/demo.json',import.meta.url)));
+test('editorial decomposition matches published scores',()=>{const scores={p01:76,p02:26.9,p03:42.2};for(const p of d.possessions)assert.ok(Math.abs(rankingParts(p).reduce((a,b)=>a+b,0)-scores[p.id])<1e-8);});
+test('missing metrics are not imputed',()=>{const p=structuredClone(d.possessions[0]);p.metrics.xfg_pct=null;assert.deepEqual(rankingParts(p),[57.4,0,0]);});
+test('URL state accepts known possessions and audience only',()=>{assert.deepEqual(sanitizeState('?play=p03&view=analyst',d),{possessionId:'p03',audience:'analyst'});assert.deepEqual(sanitizeState('?play=unknown&view=evil',d),{possessionId:'p01',audience:'fan'});});
+test('time boundaries move to the next possession',()=>{assert.equal(possessionAt(d,12).id,'p02');assert.equal(possessionAt(d,36).id,'p03');assert.equal(possessionAt(d,-1),null);});
+test('cue boundaries cannot announce result early',()=>{const a={cues:[{start:8,end:10.5,text:'xFG'},{start:10.5,end:12,text:'命中'}]};assert.equal(cueAt(a,10.49).text,'xFG');assert.equal(cueAt(a,10.5).text,'命中');assert.equal(cueAt(a,12),null);});
+test('tracking interpolates only within bounded samples',()=>{const p=d.possessions[0],t=.13,frame=trackAt(p,t);assert.ok(frame);assert.equal(frame.players.length,10);assert.equal(trackAt(p,-.01),null);});
+test('tracking is disabled for uncalibrated segments',()=>{const p=structuredClone(d.possessions[0]);p.camera_segments.forEach(s=>s.calibrated=false);assert.equal(trackAt(p,4),null);});
+test('tracking never extrapolates or fills a >1 second gap',()=>{const p=structuredClone(d.possessions[0]);p.tracks=p.tracks.filter(f=>f.t<2||f.t>4);assert.equal(trackAt(p,3),null);});
+test('tracking does not interpolate over a camera switch',()=>{const p=structuredClone(d.possessions[0]);p.camera_segments=[{start:0,end:4.1,calibrated:true},{start:4.1,end:12,calibrated:true}];p.tracks=p.tracks.filter(f=>f.t!==4);assert.equal(trackAt(p,4.1),null);});
+test('time formatting has a finite fallback',()=>{assert.equal(formatTime(36),'00:36');assert.equal(formatTime(NaN),'00:00');});

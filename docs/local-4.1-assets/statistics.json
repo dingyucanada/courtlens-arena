@@ -1,0 +1,86 @@
+{
+  "kind": "synthetic-local-acceptance",
+  "slides": 10,
+  "source": "data/demo.json + rehearsalProject + analyzePossession",
+  "xfg": [
+    {
+      "playId": "p01",
+      "probability": 0.38,
+      "outcome": "made"
+    },
+    {
+      "playId": "p02",
+      "probability": 0.71,
+      "outcome": "missed"
+    },
+    {
+      "playId": "p03",
+      "probability": 0.62,
+      "outcome": "made"
+    }
+  ],
+  "camera": [
+    {
+      "t": 0.25,
+      "x": 0.2825000000000001,
+      "y": 0.39874999999999994
+    },
+    {
+      "t": 1.75,
+      "x": 0.41750000000000004,
+      "y": 0.39125
+    },
+    {
+      "t": 2,
+      "x": 0.33999999999999997,
+      "y": 0.4799999999999999
+    },
+    {
+      "t": 2.25,
+      "x": 0.3475000000000001,
+      "y": 0.47750000000000004
+    }
+  ],
+  "browserPass": 15,
+  "film": {
+    "duration": 12,
+    "frames": 300,
+    "bytes": 759823,
+    "sha256": "f2d2bbff766554eb91ea92a6b052333517f2f128f88401d7ab4b9eeb39cd85b8"
+  },
+  "config": {
+    "nodePassed": 504,
+    "nodeNew": 367,
+    "nodeLegacy": 137,
+    "nodeSkipped": 0,
+    "pythonPassed": 197,
+    "pythonTotal": 198,
+    "pythonSkipped": 1,
+    "testSource": "/private/tmp/courtlens-node-p1-final.log; /private/tmp/courtlens-legacy-js-hydrated.log; /private/tmp/courtlens-python-final.log",
+    "nativeManifest": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/native-manifest.json",
+    "assets": {
+      "dynamic": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/dynamic.png",
+      "frame0": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/frame0.png",
+      "frame1": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/frame1.png",
+      "frame2": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/frame2.png",
+      "film": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/film.png",
+      "watch": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/watch.png",
+      "mobile": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/mobile.png",
+      "director": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/director.png"
+    },
+    "filmFrameTime": 9,
+    "browserPassed": 15,
+    "verifiedAt": "2026-09-28",
+    "browserExpected": 15
+  },
+  "assets": {
+    "dynamic": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/dynamic.png",
+    "frame0": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/frame0.png",
+    "frame1": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/frame1.png",
+    "frame2": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/frame2.png",
+    "film": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/film.png",
+    "watch": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/watch.png",
+    "mobile": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/mobile.png",
+    "director": "/Users/ding/Documents/Codex/2026-09-22/wo-x/work/courtlens/publish-repo/docs/local-4.1-assets/director.png"
+  }
+}

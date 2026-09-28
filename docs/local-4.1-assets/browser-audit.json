@@ -1,0 +1,133 @@
+{
+  "checks": [
+    {
+      "name": "actual-h264-decode",
+      "details": {
+        "duration": 36,
+        "width": 1280,
+        "height": 720
+      },
+      "status": "pass"
+    },
+    {
+      "name": "raw-enhanced-time-preserved",
+      "details": {
+        "time": 9,
+        "rawtime": 9
+      },
+      "status": "pass"
+    },
+    {
+      "name": "metric-time-gate",
+      "details": {},
+      "status": "pass"
+    },
+    {
+      "name": "cue-to-source-evidence",
+      "details": {},
+      "status": "pass"
+    },
+    {
+      "name": "mobile-layout",
+      "details": {
+        "width": 390
+      },
+      "status": "pass"
+    },
+    {
+      "name": "ui-arrow-retained-in-reviewed-plan",
+      "details": {
+        "points": [
+          {
+            "x": 0.30000000742308497,
+            "y": 0.45
+          },
+          {
+            "x": 0.6499999851538301,
+            "y": 0.45
+          }
+        ],
+        "source": {
+          "end": 27.48,
+          "evidenceId": "p03:manual",
+          "frameReviewed": true,
+          "id": "4b921014-bdd4-4f39-a6cc-d411f10b0663",
+          "origin": "manual",
+          "points": [
+            [
+              0.30000000742308497,
+              0.45
+            ],
+            [
+              0.6499999851538301,
+              0.45
+            ]
+          ],
+          "source": null,
+          "start": 24.48
+        }
+      },
+      "status": "pass"
+    },
+    {
+      "name": "reviewed-plan-download",
+      "details": {
+        "planHash": "c670f03fc6b6abd7d26559e0df2357a90c85d3455b58019b43472f8784980612",
+        "cues": 5
+      },
+      "status": "pass"
+    },
+    {
+      "name": "actual-browser-film",
+      "details": {
+        "bytes": 2504959
+      },
+      "status": "pass"
+    },
+    {
+      "name": "actual-film-hash",
+      "details": "93db5a252ca59d27b6a5b39afadbb1348b321422e625e3352eae950e421e04e4",
+      "status": "pass"
+    },
+    {
+      "name": "edit-invalidates-review-and-film",
+      "details": {},
+      "status": "pass"
+    },
+    {
+      "name": "metric-v2-blocks-double-sync",
+      "details": "指标 v2 已明确使用视频绝对秒；不能再次对整份项目应用来源轴偏移。请保留当前数据，用时间锚核对；若需换时间轴，请把回合、指标的观察／可用／有效区间与轨迹明确映射到同一新视频秒后重新导入 v2 文件。",
+      "status": "pass"
+    },
+    {
+      "name": "metric-v2-replay-validity",
+      "details": {
+        "at12_5": "1.80 example-index",
+        "at15": "expired"
+      },
+      "status": "pass"
+    },
+    {
+      "name": "metric-v2-real-import-original-unit",
+      "details": {
+        "probability": "62.0%",
+        "seasonScore": 6.2
+      },
+      "status": "pass"
+    },
+    {
+      "name": "dynamic-editor-preserves-source-camera-id",
+      "details": {
+        "segmentId": "pan-zoom",
+        "keyframes": 6
+      },
+      "status": "pass"
+    },
+    {
+      "name": "browser-page-errors",
+      "details": [],
+      "status": "pass"
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "courtlens-metrics/2",
+  "name": "指标 v2 口径演练 · 非真实比赛",
+  "provenance": {"kind": "synthetic", "source": "CourtLens 本地契约样例；数字为演练，不是官方指标或测量结果"},
+  "dictionary": {
+    "id": "courtlens-local-example",
+    "version": "example-2.0",
+    "provenance": {"kind": "synthetic", "source": "示例提供者字典；正式接入须替换为经核对的原始字典"},
+    "metrics": {
+      "example-xfg": {"version": "example-1", "label": "示例预期命中概率", "role": "difficulty", "semantics": "shot_make_probability", "unit": "percent", "definition": "仅演示明确的单次出手命中概率百分数；不是测量或模型输出。", "granularity": "shot", "transforms": {"probability": "percent-to-probability", "editorial": "one-minus-probability"}},
+      "example-gravity-on": {"version": "example-1", "label": "示例有球 Gravity", "role": "gravity", "semantics": "provider_on_ball_gravity_index", "unit": "example-index", "definition": "仅演示提供者有球指标独立保存，不用防守距离替代。", "granularity": "event", "ballState": "on-ball"},
+      "example-gravity-off": {"version": "example-1", "label": "示例无球 Gravity", "role": "gravity", "semantics": "provider_off_ball_gravity_index", "unit": "example-index", "definition": "仅演示提供者无球指标独立保存，不推断战术因果。", "granularity": "event", "ballState": "off-ball"},
+      "example-leverage-season": {"version": "example-1", "label": "示例赛季 Leverage Score", "role": "leverage", "semantics": "provider_player_season_leverage_score", "unit": "example-score", "definition": "仅演示未知尺度赛季累计指标，不能解释为本回合胜率差。", "granularity": "season"}
+    }
+  },
+  "bindings": {"difficulty": "example-xfg", "gravity": "example-gravity-on", "leverage": "example-leverage-season"},
+  "plays": [
+    {"id": "p01", "title": "原单位与统计范围演练", "start": 10, "end": 16, "shotTime": 14, "resultTime": null, "playerId": "example-H1", "player": "示例球员甲", "team": "示例队", "seasonId": "example-season", "shotId": "example-shot-1", "outcome": "unknown"}
+  ],
+  "records": [
+    {"id": "example-r-xfg", "metricId": "example-xfg", "value": 62, "scope": {"granularity": "shot", "playId": "p01", "shotId": "example-shot-1", "playerId": "example-H1"}, "time": {"timeBase": "video", "observedAt": 14, "availableAt": 14}},
+    {"id": "example-r-on", "metricId": "example-gravity-on", "value": 1.8, "scope": {"granularity": "event", "playId": "p01", "eventId": "example-event-1", "playerId": "example-H1"}, "time": {"timeBase": "video", "observedAt": 12, "availableAt": 12, "validFrom": 12, "validTo": 15}},
+    {"id": "example-r-off", "metricId": "example-gravity-off", "value": 2.4, "scope": {"granularity": "event", "playId": "p01", "eventId": "example-event-1", "playerId": "example-H2"}, "time": {"timeBase": "video", "observedAt": 12, "availableAt": 12, "validFrom": 12, "validTo": 15}},
+    {"id": "example-r-season", "metricId": "example-leverage-season", "value": 6.2, "scope": {"granularity": "season", "seasonId": "example-season", "playerId": "example-H1"}, "aggregation": {"start": "example-season-start", "end": "before-this-example-game", "label": "本演练比赛前的示例赛季范围"}, "time": {"timeBase": "video", "observedAt": null, "availableAt": 0}}
+  ]
+}

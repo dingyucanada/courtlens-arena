@@ -1,0 +1,130 @@
+{
+  "renderer": "offline-shared-arena-canvas",
+  "browserRecording": false,
+  "durationSeconds": 12.0,
+  "plannedDurationSeconds": 12,
+  "bytes": 691179,
+  "resolution": "1280x720",
+  "format": "MP4 / H.264 + AAC",
+  "videoCodec": "h264",
+  "audioCodec": "aac",
+  "hasAudio": true,
+  "fps": "25/1",
+  "frames": 300,
+  "sha256": "50072ea0c7063bef2ed809a18769c9267b08e93a7f34a55819210da9748eb578",
+  "voiceReport": {
+    "provider": "macos-say-local",
+    "voice": "Tingting",
+    "local": true,
+    "cueCount": 5,
+    "durationSeconds": 12.0,
+    "plannedDurationSeconds": 12.0,
+    "inputDurationSeconds": 12.0,
+    "timingDriftSeconds": 0.0,
+    "timingScale": 1.0,
+    "timingToleranceSeconds": 0.5,
+    "alignment": "small-uniform-duration-adjustment-approximate",
+    "cueFrameAlignmentVerified": false,
+    "sourceAuthenticated": false,
+    "originalAudio": "omitted",
+    "provenanceKind": "synthetic",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "bytes": 691179,
+    "resolution": {
+      "width": 1280,
+      "height": 720
+    },
+    "cues": [
+      {
+        "start": 0.0,
+        "end": 3.0,
+        "text": "合成演练，红队进攻。",
+        "evidenceIds": [
+          "p03:event"
+        ],
+        "origin": "manual",
+        "outputStart": 0.0,
+        "outputEnd": 3.0,
+        "speechOriginalSeconds": 1.710249,
+        "speechSeconds": 1.71025,
+        "speechEndSeconds": 1.71025,
+        "tempo": 1.0,
+        "tailTruncated": false
+      },
+      {
+        "start": 3.0,
+        "end": 5.5,
+        "text": "五号附近出现空间窗。",
+        "evidenceIds": [
+          "p03:window-first:H5:0"
+        ],
+        "origin": "manual",
+        "outputStart": 3.0,
+        "outputEnd": 5.5,
+        "speechOriginalSeconds": 1.646168,
+        "speechSeconds": 1.646187,
+        "speechEndSeconds": 4.646187,
+        "tempo": 1.0,
+        "tailTruncated": false
+      },
+      {
+        "start": 5.5,
+        "end": 8.5,
+        "text": "七个采样，观察窗三秒。",
+        "evidenceIds": [
+          "p03:window:H5:0"
+        ],
+        "origin": "manual",
+        "outputStart": 5.5,
+        "outputEnd": 8.5,
+        "speechOriginalSeconds": 1.902857,
+        "speechSeconds": 1.902875,
+        "speechEndSeconds": 7.402875,
+        "tempo": 1.0,
+        "tailTruncated": false
+      },
+      {
+        "start": 9.0,
+        "end": 10.5,
+        "text": "预期命中率，六成二。",
+        "evidenceIds": [
+          "p03:metric:difficulty",
+          "p03:event"
+        ],
+        "origin": "manual",
+        "outputStart": 9.0,
+        "outputEnd": 10.5,
+        "speechOriginalSeconds": 1.54127,
+        "speechSeconds": 1.419333,
+        "speechEndSeconds": 10.419333,
+        "tempo": 1.085401,
+        "tailTruncated": false
+      },
+      {
+        "start": 10.5,
+        "end": 12.0,
+        "text": "三分命中。",
+        "evidenceIds": [
+          "p03:outcome"
+        ],
+        "origin": "manual",
+        "outputStart": 10.5,
+        "outputEnd": 12.0,
+        "speechOriginalSeconds": 0.739456,
+        "speechSeconds": 0.739458,
+        "speechEndSeconds": 11.239458,
+        "tempo": 1.0,
+        "tailTruncated": false
+      }
+    ]
+  },
+  "sourceAuthenticated": false,
+  "cueFrameAlignmentVerified": false,
+  "origin": "synthetic source + shared Arena overlay engine + manually shortened evidence-linked cues + local Tingting TTS",
+  "warnings": [
+    "输出按25fps重采样；对可变帧率原片应另行逐帧核对。",
+    "演示文句为标明来源的人工精简，不代表模型推理已验收。",
+    "原片声音未写入；中文配音通过本机语音服务另行合成。"
+  ]
+}

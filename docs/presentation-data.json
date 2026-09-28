@@ -1,0 +1,205 @@
+{
+  "synthetic": true,
+  "source": "data/demo.json and core/engine.py",
+  "possessions": [
+    {
+      "id": "p01",
+      "xfg": 0.38,
+      "leverage": 0.82,
+      "gravity": 1.8,
+      "result": "made",
+      "shot_time": 9,
+      "result_time": 10.5,
+      "contributions": [
+        57.4,
+        12.4,
+        6.2
+      ],
+      "rank": 76.0
+    },
+    {
+      "id": "p02",
+      "xfg": 0.71,
+      "leverage": 0.2,
+      "gravity": 1.2,
+      "result": "missed",
+      "shot_time": 21,
+      "result_time": 22.5,
+      "contributions": [
+        14.0,
+        5.8,
+        7.1
+      ],
+      "rank": 26.9
+    },
+    {
+      "id": "p03",
+      "xfg": 0.62,
+      "leverage": 0.44,
+      "gravity": 2.4,
+      "result": "made",
+      "shot_time": 33,
+      "result_time": 34.5,
+      "contributions": [
+        30.8,
+        7.6,
+        3.8
+      ],
+      "rank": 42.2
+    }
+  ],
+  "cues": [
+    {
+      "id": "p01",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 4.0,
+          "text": "HOU · H3 · 3 分回合",
+          "evidence_ids": [
+            "p01:event"
+          ]
+        },
+        {
+          "start": 4.0,
+          "end": 8.0,
+          "text": "Gravity 1.8（输入单位）",
+          "evidence_ids": [
+            "p01:metric:gravity"
+          ]
+        },
+        {
+          "start": 8.0,
+          "end": 10.5,
+          "text": "预期命中概率 38.0%",
+          "evidence_ids": [
+            "p01:metric:xfg_pct"
+          ]
+        },
+        {
+          "start": 10.5,
+          "end": 12,
+          "text": "命中 · 3 分投篮",
+          "evidence_ids": [
+            "p01:result",
+            "p01:event"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p03",
+      "cues": [
+        {
+          "start": 24.0,
+          "end": 28.0,
+          "text": "HOU · H5 · 3 分回合",
+          "evidence_ids": [
+            "p03:event"
+          ]
+        },
+        {
+          "start": 28.0,
+          "end": 32.0,
+          "text": "Gravity 2.4（输入单位）",
+          "evidence_ids": [
+            "p03:metric:gravity"
+          ]
+        },
+        {
+          "start": 32.0,
+          "end": 34.5,
+          "text": "预期命中概率 62.0%",
+          "evidence_ids": [
+            "p03:metric:xfg_pct"
+          ]
+        },
+        {
+          "start": 34.5,
+          "end": 36,
+          "text": "命中 · 3 分投篮",
+          "evidence_ids": [
+            "p03:result",
+            "p03:event"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "p02",
+      "cues": [
+        {
+          "start": 12.0,
+          "end": 16.0,
+          "text": "DAL · D2 · 2 分回合",
+          "evidence_ids": [
+            "p02:event"
+          ]
+        },
+        {
+          "start": 16.0,
+          "end": 20.0,
+          "text": "Gravity 1.2（输入单位）",
+          "evidence_ids": [
+            "p02:metric:gravity"
+          ]
+        },
+        {
+          "start": 20.0,
+          "end": 22.5,
+          "text": "预期命中概率 71.0%",
+          "evidence_ids": [
+            "p02:metric:xfg_pct"
+          ]
+        },
+        {
+          "start": 22.5,
+          "end": 24,
+          "text": "本次投篮未中",
+          "evidence_ids": [
+            "p02:result",
+            "p02:event"
+          ]
+        }
+      ]
+    }
+  ],
+  "tests": {
+    "python": 118,
+    "node": 59,
+    "python_duration_seconds": 11.622,
+    "node_duration_milliseconds": 290.301292
+  },
+  "media": {
+    "duration_seconds": 36,
+    "fps": 25,
+    "frames": 900,
+    "cues": 12
+  },
+  "archive_research": {
+    "scope": "2023–24 community shot table availability checks; not organizer data or model validation",
+    "games": [
+      {
+        "game_id": "0022300059",
+        "date": "2023-11-28",
+        "shots": 174
+      },
+      {
+        "game_id": "0022300385",
+        "date": "2023-12-22",
+        "shots": 196
+      },
+      {
+        "game_id": "0022301083",
+        "date": "2024-03-31",
+        "shots": 185
+      },
+      {
+        "game_id": "0022301131",
+        "date": "2024-04-07",
+        "shots": 178
+      }
+    ],
+    "source": "docs/专业产品研究.md and docs/sources.json"
+  }
+}

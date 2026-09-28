@@ -1,0 +1,141 @@
+{
+  "title": "CourtLens Arena 产品与参赛方案",
+  "slides": 18,
+  "format": "16:9",
+  "palette": {
+    "navy": "0B1933",
+    "blue": "17408B",
+    "red": "C9082A",
+    "white": "FFFFFF"
+  },
+  "outline": [
+    {
+      "slide": 1,
+      "title": "CourtLens Arena",
+      "visual": "cover",
+      "purpose": "原画面中的可核对篮球故事"
+    },
+    {
+      "slide": 2,
+      "title": "比赛要求与可见交付",
+      "visual": "watch + native table",
+      "purpose": "逐条对应官方赛题"
+    },
+    {
+      "slide": 3,
+      "title": "专业科技的借鉴与边界",
+      "visual": "Smartshot reference photograph + native table",
+      "purpose": "NBA/AWS、Synergy/Hudl、Noah/Curry 的可借鉴方法"
+    },
+    {
+      "slide": 4,
+      "title": "完整产品流程",
+      "visual": "native editable workflow (actual pipeline screenshot when available)",
+      "purpose": "接入、同步、分析、复核、成片与修订"
+    },
+    {
+      "slide": 5,
+      "title": "投篮预期与实际结果",
+      "visual": "ranking + native chart",
+      "purpose": "合成演练 38%、71%、62% 与结果分开解释"
+    },
+    {
+      "slide": 6,
+      "title": "先选择，再揭晓结果",
+      "visual": "decision",
+      "purpose": "用 asOf 阻止未来证据泄漏，未知出手时刻保持 null，result-only 解读保留"
+    },
+    {
+      "slide": 7,
+      "title": "采样中的空间机会",
+      "visual": "native quantitative chart + kernel statistics table",
+      "purpose": "p03 H5 的真实内核计算，26.5–29.5 秒，标合成演练"
+    },
+    {
+      "slide": 8,
+      "title": "同一证据，两种观看视角",
+      "visual": "fan + analyst",
+      "purpose": "普通球迷与专业解读"
+    },
+    {
+      "slide": 9,
+      "title": "双回合同屏比较",
+      "visual": "compare",
+      "purpose": "按原画面核对同类选择"
+    },
+    {
+      "slide": 10,
+      "title": "逐句解说的画面锚点",
+      "visual": "evidence + native timeline chart",
+      "purpose": "每句都有来源与绝对视频秒"
+    },
+    {
+      "slide": 11,
+      "title": "故事制作与发布复核",
+      "visual": "native editing workflow + actual watch screenshot (director screenshot when available)",
+      "purpose": "可编辑解说、人工标注、片单、裁剪与复核"
+    },
+    {
+      "slide": 12,
+      "title": "实机跑通的有声战术成片",
+      "visual": "export-frame + native metadata table",
+      "purpose": "实际编码的视频文件、字幕与证据报告，按真实 metadata 说明录制方式和音轨"
+    },
+    {
+      "slide": 13,
+      "title": "指标定义与证据边界",
+      "visual": "native table",
+      "purpose": "官方 xFG、Gravity、Leverage 与自定义描述区别，实验室比较核对 definition"
+    },
+    {
+      "slide": 14,
+      "title": "Agent 与视频制作架构",
+      "visual": "native editable diagram",
+      "purpose": "本地分析、可选真实工具模型、证据编译、视频叠加"
+    },
+    {
+      "slide": 15,
+      "title": "验证范围与实测证据",
+      "visual": "native validation diagram + measured test table (actual projects screenshot when available)",
+      "purpose": "报告真实测试计数、模型 mock 边界和产品实测"
+    },
+    {
+      "slide": 16,
+      "title": "官方素材的现场接入",
+      "visual": "native table",
+      "purpose": "字典、时间轴、坐标系、标定、复核与输出"
+    },
+    {
+      "slide": 17,
+      "title": "真实使用场景",
+      "visual": "native table",
+      "purpose": "解说准备、球迷内容、教学与自有视频复盘"
+    },
+    {
+      "slide": 18,
+      "title": "Demo 与作品交付",
+      "visual": "minimal navy ending",
+      "purpose": "公开演示、代码仓库、成片与项目备份"
+    }
+  ],
+  "assetKeys": [
+    "cover",
+    "watch",
+    "pipeline",
+    "ranking",
+    "decision",
+    "window",
+    "fan",
+    "analyst",
+    "compare",
+    "evidence",
+    "director",
+    "export-frame",
+    "projects"
+  ],
+  "sourceLabels": {
+    "demo": "合成演练",
+    "modelTests": "离线协议测试，未声称真实云模型调用",
+    "officialData": "主办方正式素材待提供"
+  }
+}

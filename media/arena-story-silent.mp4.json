@@ -1,0 +1,2831 @@
+{
+  "renderer": "offline-shared-arena-canvas",
+  "browserRecording": false,
+  "sourceAuthenticated": false,
+  "cueFrameAlignmentVerified": false,
+  "frameTimeBasis": "constant-25fps-resampling-grid",
+  "sourceFrameRate": "25/1",
+  "sourceSha256": "ee477fccadef5a27af33ab9e229f311715c70ddf570629b0ccf0fbb4d33926f8",
+  "sourceProvenance": {
+    "kind": "synthetic",
+    "label": "纯合成功能演练 · 非真实 NBA 事件",
+    "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。"
+  },
+  "plannedDurationSeconds": 12,
+  "durationSeconds": 12,
+  "frames": 300,
+  "width": 1280,
+  "height": 720,
+  "fps": 25,
+  "bytes": 763539,
+  "sha256": "b6c6134c0590dedc048a7ade65aaa577f3e45ea9d970459ef8579b9449c1304c",
+  "hasAudio": false,
+  "clips": [
+    {
+      "playId": "p03",
+      "start": 24,
+      "end": 36,
+      "outputStart": 0,
+      "outputEnd": 12
+    }
+  ],
+  "cues": [
+    {
+      "start": 0,
+      "end": 3,
+      "text": "合成演练，红队进攻。",
+      "evidenceIds": [
+        "p03:event"
+      ],
+      "relativeStart": 0,
+      "relativeEnd": 3,
+      "originalText": "Q3 07:17 · HOU进攻",
+      "origin": "manual",
+      "sourceStart": 24,
+      "sourceEnd": 27,
+      "playId": "p03"
+    },
+    {
+      "start": 3,
+      "end": 5.5,
+      "text": "五号附近出现空间窗。",
+      "evidenceIds": [
+        "p03:window-first:H5:0"
+      ],
+      "relativeStart": 3,
+      "relativeEnd": 5.5,
+      "originalText": "H5 在这一帧的近防距离为 6.739 ft，值得留意这个空间。",
+      "origin": "manual",
+      "sourceStart": 27,
+      "sourceEnd": 29.5,
+      "playId": "p03"
+    },
+    {
+      "start": 5.5,
+      "end": 8.5,
+      "text": "七个采样，观察窗三秒。",
+      "evidenceIds": [
+        "p03:window:H5:0"
+      ],
+      "relativeStart": 5.5,
+      "relativeEnd": 8.5,
+      "originalText": "H5 在采样画面中保持 6 ft 以上防守距离，观察窗 3 秒。",
+      "origin": "manual",
+      "sourceStart": 29.5,
+      "sourceEnd": 32.5,
+      "playId": "p03"
+    },
+    {
+      "start": 9,
+      "end": 10.5,
+      "text": "预期命中率，六成二。",
+      "evidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ],
+      "relativeStart": 9,
+      "relativeEnd": 10.5,
+      "originalText": "H5出手 · 预期命中概率 62%，概率不保证结果。",
+      "origin": "manual",
+      "sourceStart": 33,
+      "sourceEnd": 34.5,
+      "playId": "p03"
+    },
+    {
+      "start": 10.5,
+      "end": 12,
+      "text": "三分命中。",
+      "evidenceIds": [
+        "p03:outcome"
+      ],
+      "relativeStart": 10.5,
+      "relativeEnd": 12,
+      "originalText": "投篮命中 · 3 分。",
+      "origin": "manual",
+      "sourceStart": 34.5,
+      "sourceEnd": 36,
+      "playId": "p03"
+    }
+  ],
+  "frameAudit": [
+    {
+      "outputTime": 0,
+      "sourceTime": 24,
+      "playId": "p03",
+      "overlayItems": 12,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.04,
+      "sourceTime": 24.04,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.08,
+      "sourceTime": 24.08,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.12,
+      "sourceTime": 24.12,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.16,
+      "sourceTime": 24.16,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.2,
+      "sourceTime": 24.2,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.24,
+      "sourceTime": 24.24,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.28,
+      "sourceTime": 24.28,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.32,
+      "sourceTime": 24.32,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.36,
+      "sourceTime": 24.36,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.4,
+      "sourceTime": 24.4,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.44,
+      "sourceTime": 24.44,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.48,
+      "sourceTime": 24.48,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.52,
+      "sourceTime": 24.52,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.56,
+      "sourceTime": 24.56,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.6,
+      "sourceTime": 24.6,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.64,
+      "sourceTime": 24.64,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.68,
+      "sourceTime": 24.68,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.72,
+      "sourceTime": 24.72,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.76,
+      "sourceTime": 24.76,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.8,
+      "sourceTime": 24.8,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.84,
+      "sourceTime": 24.84,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.88,
+      "sourceTime": 24.88,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.92,
+      "sourceTime": 24.92,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 0.96,
+      "sourceTime": 24.96,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1,
+      "sourceTime": 25,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.04,
+      "sourceTime": 25.04,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.08,
+      "sourceTime": 25.08,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.12,
+      "sourceTime": 25.12,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.16,
+      "sourceTime": 25.16,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.2,
+      "sourceTime": 25.2,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.24,
+      "sourceTime": 25.24,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.28,
+      "sourceTime": 25.28,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.32,
+      "sourceTime": 25.32,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.36,
+      "sourceTime": 25.36,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.4,
+      "sourceTime": 25.4,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.44,
+      "sourceTime": 25.44,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.48,
+      "sourceTime": 25.48,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.52,
+      "sourceTime": 25.52,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.56,
+      "sourceTime": 25.56,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.6,
+      "sourceTime": 25.6,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.64,
+      "sourceTime": 25.64,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.68,
+      "sourceTime": 25.68,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.72,
+      "sourceTime": 25.72,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.76,
+      "sourceTime": 25.76,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.8,
+      "sourceTime": 25.8,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.84,
+      "sourceTime": 25.84,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.88,
+      "sourceTime": 25.88,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.92,
+      "sourceTime": 25.92,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 1.96,
+      "sourceTime": 25.96,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2,
+      "sourceTime": 26,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.04,
+      "sourceTime": 26.04,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.08,
+      "sourceTime": 26.08,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.12,
+      "sourceTime": 26.12,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.16,
+      "sourceTime": 26.16,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.2,
+      "sourceTime": 26.2,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.24,
+      "sourceTime": 26.240000000000002,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.28,
+      "sourceTime": 26.28,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.32,
+      "sourceTime": 26.32,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.36,
+      "sourceTime": 26.36,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.4,
+      "sourceTime": 26.4,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.44,
+      "sourceTime": 26.44,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.48,
+      "sourceTime": 26.48,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.52,
+      "sourceTime": 26.52,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.56,
+      "sourceTime": 26.56,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.6,
+      "sourceTime": 26.6,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.64,
+      "sourceTime": 26.64,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.68,
+      "sourceTime": 26.68,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.72,
+      "sourceTime": 26.72,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.76,
+      "sourceTime": 26.759999999999998,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.8,
+      "sourceTime": 26.8,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.84,
+      "sourceTime": 26.84,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.88,
+      "sourceTime": 26.88,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.92,
+      "sourceTime": 26.92,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 2.96,
+      "sourceTime": 26.96,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 3,
+      "sourceTime": 27,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.04,
+      "sourceTime": 27.04,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.08,
+      "sourceTime": 27.08,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.12,
+      "sourceTime": 27.12,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.16,
+      "sourceTime": 27.16,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.2,
+      "sourceTime": 27.2,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.24,
+      "sourceTime": 27.240000000000002,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.28,
+      "sourceTime": 27.28,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.32,
+      "sourceTime": 27.32,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.36,
+      "sourceTime": 27.36,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.4,
+      "sourceTime": 27.4,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.44,
+      "sourceTime": 27.44,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.48,
+      "sourceTime": 27.48,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.52,
+      "sourceTime": 27.52,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.56,
+      "sourceTime": 27.56,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.6,
+      "sourceTime": 27.6,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.64,
+      "sourceTime": 27.64,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.68,
+      "sourceTime": 27.68,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.72,
+      "sourceTime": 27.72,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.76,
+      "sourceTime": 27.759999999999998,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.8,
+      "sourceTime": 27.8,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.84,
+      "sourceTime": 27.84,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.88,
+      "sourceTime": 27.88,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.92,
+      "sourceTime": 27.92,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 3.96,
+      "sourceTime": 27.96,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4,
+      "sourceTime": 28,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.04,
+      "sourceTime": 28.04,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.08,
+      "sourceTime": 28.08,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.12,
+      "sourceTime": 28.12,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.16,
+      "sourceTime": 28.16,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.2,
+      "sourceTime": 28.2,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.24,
+      "sourceTime": 28.240000000000002,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.28,
+      "sourceTime": 28.28,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.32,
+      "sourceTime": 28.32,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.36,
+      "sourceTime": 28.36,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.4,
+      "sourceTime": 28.4,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.44,
+      "sourceTime": 28.44,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.48,
+      "sourceTime": 28.48,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.52,
+      "sourceTime": 28.52,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.56,
+      "sourceTime": 28.56,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.6,
+      "sourceTime": 28.6,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.64,
+      "sourceTime": 28.64,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.68,
+      "sourceTime": 28.68,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.72,
+      "sourceTime": 28.72,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.76,
+      "sourceTime": 28.759999999999998,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.8,
+      "sourceTime": 28.8,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.84,
+      "sourceTime": 28.84,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.88,
+      "sourceTime": 28.88,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.92,
+      "sourceTime": 28.92,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 4.96,
+      "sourceTime": 28.96,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5,
+      "sourceTime": 29,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.04,
+      "sourceTime": 29.04,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.08,
+      "sourceTime": 29.08,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.12,
+      "sourceTime": 29.12,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.16,
+      "sourceTime": 29.16,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.2,
+      "sourceTime": 29.2,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.24,
+      "sourceTime": 29.240000000000002,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.28,
+      "sourceTime": 29.28,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.32,
+      "sourceTime": 29.32,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.36,
+      "sourceTime": 29.36,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.4,
+      "sourceTime": 29.4,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.44,
+      "sourceTime": 29.44,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.48,
+      "sourceTime": 29.48,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window-first:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.52,
+      "sourceTime": 29.52,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.56,
+      "sourceTime": 29.56,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.6,
+      "sourceTime": 29.6,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.64,
+      "sourceTime": 29.64,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.68,
+      "sourceTime": 29.68,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.72,
+      "sourceTime": 29.72,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.76,
+      "sourceTime": 29.759999999999998,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.8,
+      "sourceTime": 29.8,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.84,
+      "sourceTime": 29.84,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.88,
+      "sourceTime": 29.88,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.92,
+      "sourceTime": 29.92,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 5.96,
+      "sourceTime": 29.96,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6,
+      "sourceTime": 30,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.04,
+      "sourceTime": 30.04,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.08,
+      "sourceTime": 30.08,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.12,
+      "sourceTime": 30.12,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.16,
+      "sourceTime": 30.16,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.2,
+      "sourceTime": 30.2,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.24,
+      "sourceTime": 30.240000000000002,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.28,
+      "sourceTime": 30.28,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.32,
+      "sourceTime": 30.32,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.36,
+      "sourceTime": 30.36,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.4,
+      "sourceTime": 30.4,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.44,
+      "sourceTime": 30.44,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.48,
+      "sourceTime": 30.48,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.52,
+      "sourceTime": 30.52,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.56,
+      "sourceTime": 30.56,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.6,
+      "sourceTime": 30.6,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.64,
+      "sourceTime": 30.64,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.68,
+      "sourceTime": 30.68,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.72,
+      "sourceTime": 30.72,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.76,
+      "sourceTime": 30.759999999999998,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.8,
+      "sourceTime": 30.8,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.84,
+      "sourceTime": 30.84,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.88,
+      "sourceTime": 30.88,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.92,
+      "sourceTime": 30.92,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 6.96,
+      "sourceTime": 30.96,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7,
+      "sourceTime": 31,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.04,
+      "sourceTime": 31.04,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.08,
+      "sourceTime": 31.08,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.12,
+      "sourceTime": 31.12,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.16,
+      "sourceTime": 31.16,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.2,
+      "sourceTime": 31.2,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.24,
+      "sourceTime": 31.240000000000002,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.28,
+      "sourceTime": 31.28,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.32,
+      "sourceTime": 31.32,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.36,
+      "sourceTime": 31.36,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.4,
+      "sourceTime": 31.4,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.44,
+      "sourceTime": 31.44,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.48,
+      "sourceTime": 31.48,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.52,
+      "sourceTime": 31.52,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.56,
+      "sourceTime": 31.56,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.6,
+      "sourceTime": 31.6,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.64,
+      "sourceTime": 31.64,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.68,
+      "sourceTime": 31.68,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.72,
+      "sourceTime": 31.72,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.76,
+      "sourceTime": 31.759999999999998,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.8,
+      "sourceTime": 31.8,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.84,
+      "sourceTime": 31.84,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.88,
+      "sourceTime": 31.88,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.92,
+      "sourceTime": 31.92,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 7.96,
+      "sourceTime": 31.96,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8,
+      "sourceTime": 32,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.04,
+      "sourceTime": 32.04,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.08,
+      "sourceTime": 32.08,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.12,
+      "sourceTime": 32.12,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.16,
+      "sourceTime": 32.16,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.2,
+      "sourceTime": 32.2,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.24,
+      "sourceTime": 32.24,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.28,
+      "sourceTime": 32.28,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.32,
+      "sourceTime": 32.32,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.36,
+      "sourceTime": 32.36,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.4,
+      "sourceTime": 32.4,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.44,
+      "sourceTime": 32.44,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.48,
+      "sourceTime": 32.480000000000004,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:window:H5:0"
+      ]
+    },
+    {
+      "outputTime": 8.52,
+      "sourceTime": 32.519999999999996,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.56,
+      "sourceTime": 32.56,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.6,
+      "sourceTime": 32.6,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.64,
+      "sourceTime": 32.64,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.68,
+      "sourceTime": 32.68,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.72,
+      "sourceTime": 32.72,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.76,
+      "sourceTime": 32.76,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.8,
+      "sourceTime": 32.8,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.84,
+      "sourceTime": 32.84,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.88,
+      "sourceTime": 32.88,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.92,
+      "sourceTime": 32.92,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 8.96,
+      "sourceTime": 32.96,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": []
+    },
+    {
+      "outputTime": 9,
+      "sourceTime": 33,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.04,
+      "sourceTime": 33.04,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.08,
+      "sourceTime": 33.08,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.12,
+      "sourceTime": 33.12,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.16,
+      "sourceTime": 33.16,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.2,
+      "sourceTime": 33.2,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.24,
+      "sourceTime": 33.24,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.28,
+      "sourceTime": 33.28,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.32,
+      "sourceTime": 33.32,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.36,
+      "sourceTime": 33.36,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.4,
+      "sourceTime": 33.4,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.44,
+      "sourceTime": 33.44,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.48,
+      "sourceTime": 33.480000000000004,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.52,
+      "sourceTime": 33.519999999999996,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.56,
+      "sourceTime": 33.56,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.6,
+      "sourceTime": 33.6,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.64,
+      "sourceTime": 33.64,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.68,
+      "sourceTime": 33.68,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.72,
+      "sourceTime": 33.72,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.76,
+      "sourceTime": 33.76,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.8,
+      "sourceTime": 33.8,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.84,
+      "sourceTime": 33.84,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.88,
+      "sourceTime": 33.88,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.92,
+      "sourceTime": 33.92,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 9.96,
+      "sourceTime": 33.96,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10,
+      "sourceTime": 34,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.04,
+      "sourceTime": 34.04,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.08,
+      "sourceTime": 34.08,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.12,
+      "sourceTime": 34.12,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.16,
+      "sourceTime": 34.16,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.2,
+      "sourceTime": 34.2,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.24,
+      "sourceTime": 34.24,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.28,
+      "sourceTime": 34.28,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.32,
+      "sourceTime": 34.32,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.36,
+      "sourceTime": 34.36,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.4,
+      "sourceTime": 34.4,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.44,
+      "sourceTime": 34.44,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.48,
+      "sourceTime": 34.480000000000004,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:metric:difficulty",
+        "p03:event"
+      ]
+    },
+    {
+      "outputTime": 10.52,
+      "sourceTime": 34.519999999999996,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.56,
+      "sourceTime": 34.56,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.6,
+      "sourceTime": 34.6,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.64,
+      "sourceTime": 34.64,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.68,
+      "sourceTime": 34.68,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.72,
+      "sourceTime": 34.72,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.76,
+      "sourceTime": 34.76,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.8,
+      "sourceTime": 34.8,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.84,
+      "sourceTime": 34.84,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.88,
+      "sourceTime": 34.88,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.92,
+      "sourceTime": 34.92,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 10.96,
+      "sourceTime": 34.96,
+      "playId": "p03",
+      "overlayItems": 14,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11,
+      "sourceTime": 35,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.04,
+      "sourceTime": 35.04,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.08,
+      "sourceTime": 35.08,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.12,
+      "sourceTime": 35.12,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.16,
+      "sourceTime": 35.16,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.2,
+      "sourceTime": 35.2,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.24,
+      "sourceTime": 35.24,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.28,
+      "sourceTime": 35.28,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.32,
+      "sourceTime": 35.32,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.36,
+      "sourceTime": 35.36,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.4,
+      "sourceTime": 35.4,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.44,
+      "sourceTime": 35.44,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.48,
+      "sourceTime": 35.480000000000004,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.52,
+      "sourceTime": 35.519999999999996,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.56,
+      "sourceTime": 35.56,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.6,
+      "sourceTime": 35.6,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.64,
+      "sourceTime": 35.64,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.68,
+      "sourceTime": 35.68,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.72,
+      "sourceTime": 35.72,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.76,
+      "sourceTime": 35.76,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.8,
+      "sourceTime": 35.8,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.84,
+      "sourceTime": 35.84,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.88,
+      "sourceTime": 35.88,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.92,
+      "sourceTime": 35.92,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    },
+    {
+      "outputTime": 11.96,
+      "sourceTime": 35.96,
+      "playId": "p03",
+      "overlayItems": 13,
+      "cueEvidenceIds": [
+        "p03:outcome"
+      ]
+    }
+  ],
+  "limitations": [
+    "输出按25fps重采样；对可变帧率原片应另行逐帧核对。",
+    "演示文句为标明来源的人工精简，不代表模型推理已验收。",
+    "原片声音未写入；中文配音通过本机语音服务另行合成。"
+  ]
+}

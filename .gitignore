@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+.venv/
+cloud-answer.json
+.DS_Store
+workspace/
+*.sqlite3
+*.sqlite3-*
+
+site-dist/
+dist/

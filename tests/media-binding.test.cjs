@@ -1,0 +1,10 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');
+const {check}=require('../web/media-binding.js');
+const expected={sha256:'a'.repeat(64),width:1280,height:720,duration:36};
+const actual={ready:true,sha256:'a'.repeat(64),width:1280,height:720,duration:36};
+test('matching fingerprint dimensions and duration enables synchronization',()=>assert.equal(check(expected,actual).ok,true));
+test('same duration different bytes fails closed',()=>assert.equal(check(expected,{...actual,sha256:'b'.repeat(64)}).ok,false));
+test('shorter and longer media fail closed',()=>{for(const duration of [35,37])assert.equal(check(expected,{...actual,duration}).ok,false)});
+test('dimension mismatch fails despite same fingerprint',()=>assert.equal(check(expected,{...actual,width:960}).ok,false));
+test('matching non-16:9 input is supported',()=>assert.equal(check({...expected,width:960},{...actual,width:960}).ok,true));
+test('absent hash, pending read and decoding error cannot synchronize',()=>{for(const a of [{...actual,ready:false},{...actual,sha256:null},{...actual,error:'failed'}])assert.equal(check(expected,a).ok,false);assert.equal(check({...expected,sha256:null},actual).ok,false)});

@@ -1,0 +1,11 @@
+{
+  "name": "courtlens-arena",
+  "version": "4.1.0",
+  "private": true,
+  "description": "Source-backed basketball viewing and local artifact rendering",
+  "scripts": {
+    "test": "node --test tests/test-pro-*.mjs",
+    "render:demo": "node tools/export_arena.mjs"
+  },
+  "dependencies": { "@napi-rs/canvas": "0.1.100" }
+}

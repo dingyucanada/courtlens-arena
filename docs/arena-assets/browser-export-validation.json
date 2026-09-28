@@ -1,0 +1,102 @@
+{
+  "scope": "actual IAB recording → local speech → persistent HTTP artifact → native browser download; synthetic rehearsal",
+  "browserRecording": true,
+  "browserDownloadVerified": true,
+  "downloadSha256Matched": true,
+  "sha256": "7587b302d1cfdef6e0ee530d56d78499ad935a7b453b51f367bf5e9c405a0e2f",
+  "bytes": 736735,
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1280,
+        "height": 720,
+        "avg_frame_rate": "4500/181",
+        "nb_frames": "300"
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "avg_frame_rate": "0/0",
+        "nb_frames": "564"
+      }
+    ],
+    "format": {
+      "duration": "12.008333",
+      "size": "736735"
+    }
+  },
+  "artifact": {
+    "filename": "HOU × DAL · 观赛演练-战术故事.mp4",
+    "bytes": 736735,
+    "sha256": "7587b302d1cfdef6e0ee530d56d78499ad935a7b453b51f367bf5e9c405a0e2f",
+    "contentType": "video/mp4",
+    "extension": "mp4",
+    "durationSeconds": 12.008333,
+    "width": 1280,
+    "height": 720,
+    "codec": "h264",
+    "storage": "local-workspace",
+    "sourceAuthenticated": false,
+    "cueFrameAlignmentVerified": false,
+    "clientReport": {
+      "mime": "video/webm;codecs=vp9",
+      "duration": 12,
+      "durationBasis": "playlist-plan",
+      "recordedWallSeconds": 11.9955,
+      "frameClock": "decoded-media-time",
+      "captureMode": "manual-frame-request",
+      "frameCount": 300,
+      "clips": [
+        {
+          "playId": "p03",
+          "outputStart": 0,
+          "outputEnd": 12,
+          "requestedStart": 24,
+          "requestedEnd": 36,
+          "firstFrameTime": 24,
+          "lastFrameTime": 35.96,
+          "frameCount": 300,
+          "maxObservedFrameGap": 0.04000000000000625
+        }
+      ],
+      "width": 1280,
+      "height": 720,
+      "audioIncluded": false,
+      "warnings": [
+        "浏览器实时编码可能产生片长偏差；返回 duration 是片单计划时长，成片仍须复核。",
+        "当前成片不包含原视频声音。"
+      ],
+      "bytes": 736735,
+      "voiceReport": {
+        "provider": "macos-say-local",
+        "voice": "Tingting",
+        "cueCount": 5,
+        "durationSeconds": 12.008333,
+        "plannedDurationSeconds": 12,
+        "inputDurationSeconds": 12.008,
+        "timingDriftSeconds": 0.008,
+        "timingScale": 1.000666667,
+        "alignment": "small-uniform-duration-adjustment-approximate",
+        "originalAudio": "omitted",
+        "sourceAuthenticated": false,
+        "cueFrameAlignmentVerified": false,
+        "browserRecording": true
+      },
+      "sourceRevision": 12,
+      "sourceProject": "arena-rehearsal",
+      "sourceAuthenticated": false,
+      "cueFrameAlignmentVerified": false
+    }
+  },
+  "sourceAuthenticated": false,
+  "cueFrameAlignmentVerified": false,
+  "notes": [
+    "实际录制为可变编码帧间隔，不能标记恒定25fps。",
+    "原片声音未写入；仅本机中文配音。",
+    "语音计划时钟作小幅统一时长校正，不等于逐句画面语义认证。"
+  ]
+}

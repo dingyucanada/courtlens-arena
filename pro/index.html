@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#080e1a">
+  <title>CourtLens Arena · 看见比赛的另一层</title>
+  <link rel="icon" href="favicon.svg">
+  <link rel="stylesheet" href="pro/styles.css">
+  <script type="module" src="pro/app.mjs"></script>
+</head>
+<body>
+  <a class="skip" href="#main">跳至比赛工作区</a>
+  <header class="app-header">
+    <a class="brand" href="#/watch"><span class="brand-mark" aria-hidden="true">C<span></span></span><span>COURTLENS<small>ARENA / BASKETBALL INTELLIGENCE</small></span></a>
+    <nav id="navigation" aria-label="主导航"></nav>
+    <div class="header-actions"><button id="project-switch" class="project-switch" data-action="projects">比赛项目 <span>⌄</span></button><button class="button primary compact" data-action="import">＋ 接入素材</button></div>
+  </header>
+  <main id="main" tabindex="-1"><div class="boot"><span class="brand-mark">C</span><p>正在打开比赛工作区…</p></div></main>
+  <footer class="app-footer"><span>COURTLENS ARENA <b>4.1 LOCAL</b> · 独立参赛作品</span><span id="storage-status">浏览器本机存储</span><a href="media/arena-local-4.1.mp4" target="_blank" rel="noopener">4.1 合成成片 ↗</a><a href="media/arena-browser-story.mp4" target="_blank" rel="noopener">早期演练成片 ↗</a><a id="presentation-link" href="presentation.pptx" hidden>产品与参赛方案 ↗</a><a href="https://github.com/dingyucanada/courtlens" target="_blank" rel="noopener">早期公开代码 ↗</a></footer>
+  <div id="toast" role="status" hidden></div>
+  <dialog id="dialog"><div id="dialog-content"></div></dialog>
+  <input type="file" id="video-input" accept="video/*" hidden>
+  <input type="file" id="data-input" accept=".json,.csv,application/json,text/csv" hidden>
+</body>
+</html>

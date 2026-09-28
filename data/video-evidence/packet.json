@@ -1,0 +1,64 @@
+{
+  "schema": "courtlens-video-evidence/1",
+  "source": {
+    "sha256": "ee477fccadef5a27af33ab9e229f311715c70ddf570629b0ccf0fbb4d33926f8",
+    "bytes": 857398,
+    "label": "合成攻防演练，非真实NBA比赛",
+    "authenticated": false
+  },
+  "video": {
+    "duration": 36.0,
+    "codec_name": "h264",
+    "width": 1280,
+    "height": 720
+  },
+  "frames": [
+    {
+      "id": "frame-00",
+      "requestedTime": 8.0,
+      "sourcePTS": 8.0,
+      "decodedFrameIndex": 200,
+      "timingErrorSeconds": 0.0,
+      "image": "frame-00.png",
+      "sha256": "6d6a5d2f6ecf49ac8725982813acda925fd24be972f7e9ead5112c2d79d1ce5e",
+      "source": "decoded-video-frame",
+      "identityVerified": false
+    },
+    {
+      "id": "frame-01",
+      "requestedTime": 9.0,
+      "sourcePTS": 9.0,
+      "decodedFrameIndex": 225,
+      "timingErrorSeconds": 0.0,
+      "image": "frame-01.png",
+      "sha256": "be6c0ba01d3761609de24cae94cefdb2b0fbb38d86dd85d97642185db1f3e70e",
+      "source": "decoded-video-frame",
+      "identityVerified": false
+    },
+    {
+      "id": "frame-02",
+      "requestedTime": 10.5,
+      "sourcePTS": 10.48,
+      "decodedFrameIndex": 262,
+      "timingErrorSeconds": 0.019999999999999574,
+      "image": "frame-02.png",
+      "sha256": "59a450015e3b9f727752c2515fbd7320b6c78d5db2d3dc506efbadf7ed07277a",
+      "source": "decoded-video-frame",
+      "identityVerified": false
+    }
+  ],
+  "scope": "Actual decoded frames; no model inference or event/player identity certification",
+  "providerContract": {
+    "tool": "read_video_frame",
+    "requestFields": [
+      "frameId",
+      "sourceSha256"
+    ],
+    "responseFields": [
+      "sourcePTS",
+      "sha256",
+      "image"
+    ],
+    "instructions": "Use only supplied video observations and dictionary-backed metric records. Missing identity/causality stays uncertain. Proposed StoryPlan requires validation and human review."
+  }
+}

@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "scope": "2026-09-28 training strategy revision; verification statuses assess current v4 baseline, not completed future deployment",
+  "source_url": "https://csdn.feishu.cn/docx/FS05dToF1oUmTGxaEjdckPD1nwe",
+  "source_sha256": "9960f66d8efcd0150713d2093f6f7e61199eaf6b21b1445b4d3bc7218ffb48e0",
+  "score_weights": {
+    "machine": 35,
+    "human": 55,
+    "quiz": 4,
+    "shooting": 6
+  },
+  "score_subweights": null,
+  "submission_ready": false,
+  "official_cloud": {
+    "account_id": null,
+    "region": null,
+    "agent_service_name": null,
+    "model_ids": [],
+    "cloudfront_url": null,
+    "portal_binding": null
+  },
+  "deadlines": {
+    "exam_release": "2026-10-10T18:00:00+08:00",
+    "submission_cutoff": "2026-10-10T20:00:00+08:00",
+    "timezone_basis": "Execution assumption from Zhuhai/Macao local time; confirm exact displayed Portal deadline"
+  },
+  "requirements": [
+    {
+      "id": "R01",
+      "requirement": "队伍、资格与身份条件",
+      "kind": "competition_gate",
+      "source_timestamp": "01:02:56；01:18:22",
+      "verification_status": "unknown",
+      "baseline_evidence": "实际队员、入围及证件不能由软件确认",
+      "required_evidence": "队伍通知与本人核验"
+    },
+    {
+      "id": "R02",
+      "requirement": "10/10 18:00考试片、20:00硬截止；08:00抽签",
+      "kind": "competition_gate",
+      "source_timestamp": "01:08:38；01:19:16；01:49:18",
+      "verification_status": "unknown",
+      "baseline_evidence": "时点已纳入现场手册；尚未发生正式提交",
+      "required_evidence": "Portal有效提交回执与服务器记录"
+    },
+    {
+      "id": "R03",
+      "requirement": "使用对应官方视频和深度数据，素材来源合规",
+      "kind": "competition_gate",
+      "source_timestamp": "01:08:38；01:19:16；02:09:39",
+      "verification_status": "unknown",
+      "baseline_evidence": "当前内置素材合成，官方片未接入",
+      "required_evidence": "原件ID/哈希/授权范围/字段版本"
+    },
+    {
+      "id": "R04",
+      "requirement": "Agent真实理解和解读当前输入",
+      "kind": "content_requirement",
+      "source_timestamp": "01:05:17；01:05:38",
+      "verification_status": "unknown",
+      "baseline_evidence": "现有本地证据引擎与协议测试不是实际云视频理解",
+      "required_evidence": "真实输入、模型能力、工具调用、结果核验"
+    },
+    {
+      "id": "R05",
+      "requirement": "内容目标：识别并解释本回合重要事件或选择（示例按实际素材取舍）",
+      "kind": "content_requirement",
+      "source_timestamp": "01:07:37",
+      "verification_status": "unknown",
+      "baseline_evidence": "已有证据回放；不要求每段都回答某一种传球/出手问题，考试片仍待验收",
+      "required_evidence": "实际片逐事件和逐句检查"
+    },
+    {
+      "id": "R06",
+      "requirement": "将相关可视化叠加原片；箭头/区域/球员标签按证据选择",
+      "kind": "content_requirement",
+      "source_timestamp": "01:05:38；01:07:37",
+      "verification_status": "unknown",
+      "baseline_evidence": "已有叠加，移动镜头需升级；不把全部示例图形类型当作每片必做项",
+      "required_evidence": "镜头/遮挡/投影漂移检查及降级记录"
+    },
+    {
+      "id": "R07",
+      "requirement": "解说、数据与画面准确对应",
+      "kind": "content_requirement",
+      "source_timestamp": "01:07:37；01:10:59",
+      "verification_status": "unknown",
+      "baseline_evidence": "已有引用/时钟机制；官方素材未验收，音轨非强制",
+      "required_evidence": "全量句子/身份/数值/输出时间核对"
+    },
+    {
+      "id": "R08",
+      "requirement": "可交互并能被评委实际访问的作品",
+      "kind": "competition_gate",
+      "source_timestamp": "01:50:30",
+      "verification_status": "fail",
+      "baseline_evidence": "v4为Pages/本机，未完成指定云闭环",
+      "required_evidence": "独立浏览器与实际CloudFront交互记录"
+    },
+    {
+      "id": "R09",
+      "requirement": "GitHub私有仓库并正确绑定Portal",
+      "kind": "competition_gate",
+      "source_timestamp": "01:35:46；01:36:51；01:38:51",
+      "verification_status": "fail",
+      "baseline_evidence": "已发布v4基线为公开库，独立参赛私有库尚未建立绑定",
+      "required_evidence": "private属性/仓库身份/Portal读取证据"
+    },
+    {
+      "id": "R10",
+      "requirement": "代码与说明文档；具体提交模板待最终指南",
+      "kind": "content_requirement",
+      "source_timestamp": "官网“完成作品交付”；培训01:36:51（代码）",
+      "verification_status": "unknown",
+      "baseline_evidence": "说明文档依据原官网交付要求；01:47:06只是介绍参赛指南，不证明规定了提交模板",
+      "required_evidence": "正式指南逐项对照",
+      "source_urls": [
+        "https://builderx.csdn.net/bcast-code#challenge",
+        "https://csdn.feishu.cn/docx/FS05dToF1oUmTGxaEjdckPD1nwe"
+      ]
+    },
+    {
+      "id": "R11",
+      "requirement": "完成可播放的考试增强成片",
+      "kind": "content_requirement",
+      "source_timestamp": "01:05:38；02:09:39",
+      "verification_status": "unknown",
+      "baseline_evidence": "只有合成演练成片，最终规格未知",
+      "required_evidence": "官方素材版实际解码/全程播放/规格检查"
+    },
+    {
+      "id": "R12",
+      "requirement": "技术轮与效果轮分开准备",
+      "kind": "content_requirement",
+      "source_timestamp": "01:12:43；01:13:05；01:17:44",
+      "verification_status": "unknown",
+      "baseline_evidence": "讲述顺序已设计；真实云图/考试片/时长待定",
+      "required_evidence": "两版实际演示、现场时间核对"
+    },
+    {
+      "id": "R13",
+      "requirement": "原创/开源/AI使用及账号纪律",
+      "kind": "operating_constraint",
+      "source_timestamp": "01:55:43；01:58:26–01:59:47；02:01:22",
+      "verification_status": "unknown",
+      "baseline_evidence": "已记录允许项；具体代码复用、素材许可与配额待核",
+      "required_evidence": "来源记录、正式指南与账号授权"
+    },
+    {
+      "id": "R14",
+      "requirement": "35/55/4/6官方大项权重",
+      "kind": "scoring_context",
+      "source_timestamp": "01:10:24；01:10:59；01:12:10",
+      "verification_status": "pass",
+      "baseline_evidence": "仅规则提取与计划映射通过，不表示已得分；细项分值未知",
+      "required_evidence": "培训逐字稿与本轮规划对照"
+    },
+    {
+      "id": "R15",
+      "requirement": "提交CloudFront作品URL",
+      "kind": "competition_gate",
+      "source_timestamp": "01:50:30；01:52:15",
+      "verification_status": "fail",
+      "baseline_evidence": "当前公开演示为GitHub Pages",
+      "required_evidence": "CloudFront分配域名、外部访问、Portal保存回执"
+    },
+    {
+      "id": "R16",
+      "requirement": "AWS CDK部署",
+      "kind": "competition_gate",
+      "source_timestamp": "01:52:15；01:53:09",
+      "verification_status": "fail",
+      "baseline_evidence": "当前v4无CDK部署工程与真实栈证据",
+      "required_evidence": "CDK源码/合成模板/实际部署事件/栈输出"
+    },
+    {
+      "id": "R17",
+      "requirement": "Agent部署到赛方认可AWS Agent服务",
+      "kind": "competition_gate",
+      "source_timestamp": "01:53:09；01:53:46",
+      "verification_status": "fail",
+      "baseline_evidence": "本地引擎或模型接口不足；准确服务名待核",
+      "required_evidence": "指南中的服务名、实际资源身份、成功调用链"
+    },
+    {
+      "id": "R18",
+      "requirement": "必须使用赛方提供团队AWS账号",
+      "kind": "competition_gate",
+      "source_timestamp": "01:40:27；02:04:10、02:04:21",
+      "verification_status": "unknown",
+      "baseline_evidence": "团队账号尚未取得核验",
+      "required_evidence": "实际调用身份与Portal分配信息一致"
+    },
+    {
+      "id": "R19",
+      "requirement": "只能使用指定区域",
+      "kind": "competition_gate",
+      "source_timestamp": "01:42:54；01:54:51",
+      "verification_status": "unknown",
+      "baseline_evidence": "准确region待核；不默认us-east-1",
+      "required_evidence": "明确区域配置、资源清单及推理路由核查"
+    },
+    {
+      "id": "R20",
+      "requirement": "抽签考试片不得更换、按要求标识",
+      "kind": "competition_gate",
+      "source_timestamp": "01:08:38；01:19:16；02:09:39",
+      "verification_status": "unknown",
+      "baseline_evidence": "具体素材与官方标识格式尚未下发",
+      "required_evidence": "Team ID/抽签队伍/考试素材ID/页面标识"
+    },
+    {
+      "id": "R21",
+      "requirement": "合理使用托管服务；避免滥用",
+      "kind": "operating_constraint",
+      "source_timestamp": "01:53:46；01:54:51；01:59:47",
+      "verification_status": "unknown",
+      "baseline_evidence": "服务职责已规划，未实际部署或计量",
+      "required_evidence": "实际资源与调用日志、预算/并发/超时控制"
+    },
+    {
+      "id": "R22",
+      "requirement": "三核心数据表达清晰，不堆叠",
+      "kind": "content_requirement",
+      "source_timestamp": "01:22:10–01:28:32",
+      "verification_status": "unknown",
+      "baseline_evidence": "已改叙事策略，正式字典与成片仍未验收",
+      "required_evidence": "三指标原始口径、全部重要叙述与画面审核"
+    }
+  ]
+}

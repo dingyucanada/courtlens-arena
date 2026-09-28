@@ -1,0 +1,995 @@
+{
+  "generatedAt": "2026-09-28T08:01:53.073Z",
+  "source": "data/demo.json + pro/model.mjs rehearsalProject + pro/analytics.mjs",
+  "kind": "synthetic-and-schematic",
+  "plays": [
+    {
+      "id": "p01",
+      "xfg": 0.38,
+      "result": "made",
+      "frames": 25,
+      "cues": [
+        {
+          "start": 0,
+          "end": 3,
+          "text": "Q3 07:41 · HOU进攻",
+          "evidenceIds": [
+            "p01:event"
+          ],
+          "relativeStart": 0,
+          "relativeEnd": 3
+        },
+        {
+          "start": 9,
+          "end": 10.5,
+          "text": "H3出手 · 预期命中概率 38%，概率不保证结果。",
+          "evidenceIds": [
+            "p01:metric:difficulty",
+            "p01:event"
+          ],
+          "relativeStart": 9,
+          "relativeEnd": 10.5
+        },
+        {
+          "start": 10.5,
+          "end": 12,
+          "text": "投篮命中 · 3 分。",
+          "evidenceIds": [
+            "p01:outcome"
+          ],
+          "relativeStart": 10.5,
+          "relativeEnd": 12
+        }
+      ],
+      "evidence": [
+        {
+          "id": "p01:metric:difficulty",
+          "playId": "p01",
+          "t": 9,
+          "field": "metrics.xfg_pct",
+          "value": 0.38,
+          "kind": "synthetic",
+          "unit": "probability",
+          "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。",
+          "definition": "Shot xFG%：单次出手的预测命中概率（0–1）；本演练为合成输入值，不是现场识别结果、期望得分或实际命中率。",
+          "available": true,
+          "reason": null,
+          "semantics": "shot_make_probability",
+          "normalizedForEditorialRanking": 0.62
+        },
+        {
+          "id": "p01:metric:gravity",
+          "playId": "p01",
+          "t": 9,
+          "field": "metrics.gravity",
+          "value": 1.8,
+          "kind": "synthetic",
+          "unit": "source unit",
+          "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。",
+          "definition": "Gravity：来源提供的牵制指标，保留来源单位；本演练为合成输入值，不由最近防守者距离计算，不能作为得分因果证据。",
+          "available": true,
+          "reason": "unrankable-semantics",
+          "semantics": "supplied_metric",
+          "normalizedForEditorialRanking": null
+        },
+        {
+          "id": "p01:metric:leverage",
+          "playId": "p01",
+          "t": 9,
+          "field": "metrics.leverage",
+          "value": 0.82,
+          "kind": "synthetic",
+          "unit": "source unit",
+          "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。",
+          "definition": "本演练口径：回合胜率机会差（0–1）；为合成输入值，不是该回合实际胜率变化，也不是球员 -10…+10 累计 Leverage Score。正式数据必须按数据字典做语义适配，不能仅改名或缩放。",
+          "available": true,
+          "reason": null,
+          "semantics": "possession_win_probability_opportunity",
+          "normalizedForEditorialRanking": 0.82
+        },
+        {
+          "id": "p01:event",
+          "playId": "p01",
+          "t": 0,
+          "field": "team/player/shotValue",
+          "value": {
+            "team": "HOU",
+            "player": "H3",
+            "shotValue": 3
+          },
+          "kind": "unverified",
+          "unit": "event",
+          "source": "输入事件记录",
+          "available": true,
+          "definition": "输入事件记录；当前模块没有从视频识别出球员身份或出手分值。"
+        },
+        {
+          "id": "p01:shot-context",
+          "playId": "p01",
+          "t": 9,
+          "field": "tracks.players.shot-context",
+          "value": {
+            "nearestDefender": {
+              "id": "D3",
+              "name": "D3",
+              "team": "DAL",
+              "distanceFt": 3.98583473605464
+            },
+            "offenseSpacingFt": 23.774,
+            "sampleOffsetSec": 0,
+            "defendersComplete": true
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "出手时刻附近最近输入样本的几何关系；未跨缺口插值。不完整防守名单只能得到已记录防守者距离，不代表实际最近防守者。"
+        },
+        {
+          "id": "p01:alternative:H2",
+          "playId": "p01",
+          "t": 9,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "H2",
+            "passDistanceFt": 38.987,
+            "laneClearanceFt": 2.965,
+            "receivingDefenderDistanceFt": 3.985822009728709
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p01:alternative:H4",
+          "playId": "p01",
+          "t": 9,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "H4",
+            "passDistanceFt": 26.977,
+            "laneClearanceFt": 3.986,
+            "receivingDefenderDistanceFt": 3.985773956121148
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p01:alternative:H1",
+          "playId": "p01",
+          "t": 9,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "H1",
+            "passDistanceFt": 24.139,
+            "laneClearanceFt": 0.96,
+            "receivingDefenderDistanceFt": 3.985770849426438
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p01:alternative:H5",
+          "playId": "p01",
+          "t": 9,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "H5",
+            "passDistanceFt": 7.095,
+            "laneClearanceFt": 3.914,
+            "receivingDefenderDistanceFt": 3.9857609578801316
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p01:outcome",
+          "playId": "p01",
+          "t": 10.5,
+          "field": "outcome",
+          "value": "made",
+          "kind": "unverified",
+          "source": "输入结果记录",
+          "unit": "event",
+          "available": true,
+          "definition": "输入结果仅从独立的 resultTime 起揭晓，结果不参与关键回合排序。"
+        },
+        {
+          "id": "p01:rank",
+          "playId": "p01",
+          "t": 12,
+          "field": "editorial-ranking",
+          "kind": "derived",
+          "unit": "editorial-points",
+          "source": "公开确定性公式，输入结果不参与计算",
+          "available": true,
+          "value": {
+            "score": 75.33,
+            "priorityScore": 56.5,
+            "scoreInterval": [
+              56.5,
+              81.5
+            ],
+            "coverage": 0.75,
+            "components": [
+              {
+                "key": "leverage",
+                "weight": 50,
+                "normalized": 0.82,
+                "points": 41,
+                "evidenceIds": [
+                  "p01:metric:leverage"
+                ]
+              },
+              {
+                "key": "difficulty",
+                "weight": 25,
+                "normalized": 0.62,
+                "points": 15.5,
+                "evidenceIds": [
+                  "p01:metric:difficulty"
+                ]
+              },
+              {
+                "key": "gravity",
+                "weight": 15,
+                "normalized": null,
+                "points": null,
+                "evidenceIds": [
+                  "p01:metric:gravity"
+                ]
+              },
+              {
+                "key": "opportunity",
+                "weight": 10,
+                "normalized": null,
+                "points": null,
+                "evidenceIds": []
+              }
+            ]
+          },
+          "definition": "编辑权重：机会差 50、难度 25、可比引力 15、采样空间窗 10。score 为已知项权重内的描述分；priorityScore 使用区间下界保守排序，缺失读数仍为 null，不作为零测量。 编辑回看优先级；非官方关键度、胜率或模型准确率"
+        }
+      ]
+    },
+    {
+      "id": "p02",
+      "xfg": 0.71,
+      "result": "missed",
+      "frames": 25,
+      "cues": [
+        {
+          "start": 12,
+          "end": 15,
+          "text": "Q3 07:29 · DAL进攻",
+          "evidenceIds": [
+            "p02:event"
+          ],
+          "relativeStart": 0,
+          "relativeEnd": 3
+        },
+        {
+          "start": 20.5,
+          "end": 21,
+          "text": "D2 在这一帧的近防距离为 6.385 ft，值得留意这个空间。",
+          "evidenceIds": [
+            "p02:window-first:D2:0"
+          ],
+          "relativeStart": 8.5,
+          "relativeEnd": 9
+        },
+        {
+          "start": 21,
+          "end": 22.5,
+          "text": "D2出手 · 预期命中概率 71%，概率不保证结果。",
+          "evidenceIds": [
+            "p02:metric:difficulty",
+            "p02:event"
+          ],
+          "relativeStart": 9,
+          "relativeEnd": 10.5
+        },
+        {
+          "start": 22.5,
+          "end": 24,
+          "text": "本次投篮未中。",
+          "evidenceIds": [
+            "p02:outcome"
+          ],
+          "relativeStart": 10.5,
+          "relativeEnd": 12
+        }
+      ],
+      "evidence": [
+        {
+          "id": "p02:metric:difficulty",
+          "playId": "p02",
+          "t": 21,
+          "field": "metrics.xfg_pct",
+          "value": 0.71,
+          "kind": "synthetic",
+          "unit": "probability",
+          "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。",
+          "definition": "Shot xFG%：单次出手的预测命中概率（0–1）；本演练为合成输入值，不是现场识别结果、期望得分或实际命中率。",
+          "available": true,
+          "reason": null,
+          "semantics": "shot_make_probability",
+          "normalizedForEditorialRanking": 0.29000000000000004
+        },
+        {
+          "id": "p02:metric:gravity",
+          "playId": "p02",
+          "t": 21,
+          "field": "metrics.gravity",
+          "value": 1.2,
+          "kind": "synthetic",
+          "unit": "source unit",
+          "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。",
+          "definition": "Gravity：来源提供的牵制指标，保留来源单位；本演练为合成输入值，不由最近防守者距离计算，不能作为得分因果证据。",
+          "available": true,
+          "reason": "unrankable-semantics",
+          "semantics": "supplied_metric",
+          "normalizedForEditorialRanking": null
+        },
+        {
+          "id": "p02:metric:leverage",
+          "playId": "p02",
+          "t": 21,
+          "field": "metrics.leverage",
+          "value": 0.2,
+          "kind": "synthetic",
+          "unit": "source unit",
+          "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。",
+          "definition": "本演练口径：回合胜率机会差（0–1）；为合成输入值，不是该回合实际胜率变化，也不是球员 -10…+10 累计 Leverage Score。正式数据必须按数据字典做语义适配，不能仅改名或缩放。",
+          "available": true,
+          "reason": null,
+          "semantics": "possession_win_probability_opportunity",
+          "normalizedForEditorialRanking": 0.2
+        },
+        {
+          "id": "p02:event",
+          "playId": "p02",
+          "t": 12,
+          "field": "team/player/shotValue",
+          "value": {
+            "team": "DAL",
+            "player": "D2",
+            "shotValue": 2
+          },
+          "kind": "unverified",
+          "unit": "event",
+          "source": "输入事件记录",
+          "available": true,
+          "definition": "输入事件记录；当前模块没有从视频识别出球员身份或出手分值。"
+        },
+        {
+          "id": "p02:window-first:D2:0",
+          "playId": "p02",
+          "t": 20.5,
+          "field": "tracks.players.nearest-observed-defender",
+          "value": {
+            "playerId": "D2",
+            "distanceFt": 6.385,
+            "thresholdFt": 6
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "时间窗内的第二个有效位置样本；只说明这一帧的近防距离，不使用后来样本声称空位已经持续了整个时间窗。"
+        },
+        {
+          "id": "p02:window:D2:0",
+          "playId": "p02",
+          "t": 24,
+          "start": 20,
+          "end": 24,
+          "field": "tracks.players",
+          "value": {
+            "playerId": "D2",
+            "duration": 4,
+            "minDistanceFt": 6.003,
+            "thresholdFt": 6,
+            "sampleCount": 9,
+            "maxGap": 0.5
+          },
+          "kind": "schematic-derived",
+          "unit": "ft / seconds",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "在 9 个已记录样本中，该球员与最近防守者的距离均不小于 6 ft。时间窗是离散采样描述，间隙内未确认持续空位；不证明有可完成的传球。"
+        },
+        {
+          "id": "p02:shot-context",
+          "playId": "p02",
+          "t": 21,
+          "field": "tracks.players.shot-context",
+          "value": {
+            "nearestDefender": {
+              "id": "H4",
+              "name": "H4",
+              "team": "HOU",
+              "distanceFt": 6.272182044925418
+            },
+            "offenseSpacingFt": 20.759,
+            "sampleOffsetSec": 0,
+            "defendersComplete": true
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "出手时刻附近最近输入样本的几何关系；未跨缺口插值。不完整防守名单只能得到已记录防守者距离，不代表实际最近防守者。"
+        },
+        {
+          "id": "p02:alternative:D3",
+          "playId": "p02",
+          "t": 21,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "D3",
+            "passDistanceFt": 30.051,
+            "laneClearanceFt": 3.986,
+            "receivingDefenderDistanceFt": 3.985825262636312
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p02:alternative:D5",
+          "playId": "p02",
+          "t": 21,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "D5",
+            "passDistanceFt": 25.576,
+            "laneClearanceFt": 3.686,
+            "receivingDefenderDistanceFt": 3.985794033210499
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p02:alternative:D1",
+          "playId": "p02",
+          "t": 21,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "D1",
+            "passDistanceFt": 19.825,
+            "laneClearanceFt": 3.706,
+            "receivingDefenderDistanceFt": 3.9857895752708177
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p02:alternative:D4",
+          "playId": "p02",
+          "t": 21,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "D4",
+            "passDistanceFt": 4.437,
+            "laneClearanceFt": 3.986,
+            "receivingDefenderDistanceFt": 3.98578894728623
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p02:outcome",
+          "playId": "p02",
+          "t": 22.5,
+          "field": "outcome",
+          "value": "missed",
+          "kind": "unverified",
+          "source": "输入结果记录",
+          "unit": "event",
+          "available": true,
+          "definition": "输入结果仅从独立的 resultTime 起揭晓，结果不参与关键回合排序。"
+        },
+        {
+          "id": "p02:rank",
+          "playId": "p02",
+          "t": 24,
+          "field": "editorial-ranking",
+          "kind": "derived",
+          "unit": "editorial-points",
+          "source": "公开确定性公式，输入结果不参与计算",
+          "available": true,
+          "value": {
+            "score": 29.71,
+            "priorityScore": 25.25,
+            "scoreInterval": [
+              25.25,
+              40.25
+            ],
+            "coverage": 0.85,
+            "components": [
+              {
+                "key": "leverage",
+                "weight": 50,
+                "normalized": 0.2,
+                "points": 10,
+                "evidenceIds": [
+                  "p02:metric:leverage"
+                ]
+              },
+              {
+                "key": "difficulty",
+                "weight": 25,
+                "normalized": 0.29000000000000004,
+                "points": 7.25,
+                "evidenceIds": [
+                  "p02:metric:difficulty"
+                ]
+              },
+              {
+                "key": "gravity",
+                "weight": 15,
+                "normalized": null,
+                "points": null,
+                "evidenceIds": [
+                  "p02:metric:gravity"
+                ]
+              },
+              {
+                "key": "opportunity",
+                "weight": 10,
+                "normalized": 0.8,
+                "points": 8,
+                "evidenceIds": [
+                  "p02:window:D2:0"
+                ]
+              }
+            ]
+          },
+          "definition": "编辑权重：机会差 50、难度 25、可比引力 15、采样空间窗 10。score 为已知项权重内的描述分；priorityScore 使用区间下界保守排序，缺失读数仍为 null，不作为零测量。 编辑回看优先级；非官方关键度、胜率或模型准确率"
+        }
+      ]
+    },
+    {
+      "id": "p03",
+      "xfg": 0.62,
+      "result": "made",
+      "frames": 25,
+      "cues": [
+        {
+          "start": 24,
+          "end": 27,
+          "text": "Q3 07:17 · HOU进攻",
+          "evidenceIds": [
+            "p03:event"
+          ],
+          "relativeStart": 0,
+          "relativeEnd": 3
+        },
+        {
+          "start": 27,
+          "end": 29.5,
+          "text": "H5 在这一帧的近防距离为 6.739 ft，值得留意这个空间。",
+          "evidenceIds": [
+            "p03:window-first:H5:0"
+          ],
+          "relativeStart": 3,
+          "relativeEnd": 5.5
+        },
+        {
+          "start": 29.5,
+          "end": 32.5,
+          "text": "H5 在采样画面中保持 6 ft 以上防守距离，观察窗 3 秒。",
+          "evidenceIds": [
+            "p03:window:H5:0"
+          ],
+          "relativeStart": 5.5,
+          "relativeEnd": 8.5
+        },
+        {
+          "start": 33,
+          "end": 34.5,
+          "text": "H5出手 · 预期命中概率 62%，概率不保证结果。",
+          "evidenceIds": [
+            "p03:metric:difficulty",
+            "p03:event"
+          ],
+          "relativeStart": 9,
+          "relativeEnd": 10.5
+        },
+        {
+          "start": 34.5,
+          "end": 36,
+          "text": "投篮命中 · 3 分。",
+          "evidenceIds": [
+            "p03:outcome"
+          ],
+          "relativeStart": 10.5,
+          "relativeEnd": 12
+        }
+      ],
+      "evidence": [
+        {
+          "id": "p03:metric:difficulty",
+          "playId": "p03",
+          "t": 33,
+          "field": "metrics.xfg_pct",
+          "value": 0.62,
+          "kind": "synthetic",
+          "unit": "probability",
+          "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。",
+          "definition": "Shot xFG%：单次出手的预测命中概率（0–1）；本演练为合成输入值，不是现场识别结果、期望得分或实际命中率。",
+          "available": true,
+          "reason": null,
+          "semantics": "shot_make_probability",
+          "normalizedForEditorialRanking": 0.38
+        },
+        {
+          "id": "p03:metric:gravity",
+          "playId": "p03",
+          "t": 33,
+          "field": "metrics.gravity",
+          "value": 2.4,
+          "kind": "synthetic",
+          "unit": "source unit",
+          "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。",
+          "definition": "Gravity：来源提供的牵制指标，保留来源单位；本演练为合成输入值，不由最近防守者距离计算，不能作为得分因果证据。",
+          "available": true,
+          "reason": "unrankable-semantics",
+          "semantics": "supplied_metric",
+          "normalizedForEditorialRanking": null
+        },
+        {
+          "id": "p03:metric:leverage",
+          "playId": "p03",
+          "t": 33,
+          "field": "metrics.leverage",
+          "value": 0.44,
+          "kind": "synthetic",
+          "unit": "source unit",
+          "source": "CourtLens tools/build_demo_data.py：自行生成球员标记、运动轨迹、事件与示例指标；未使用官方比赛数据或版权比赛视频。",
+          "definition": "本演练口径：回合胜率机会差（0–1）；为合成输入值，不是该回合实际胜率变化，也不是球员 -10…+10 累计 Leverage Score。正式数据必须按数据字典做语义适配，不能仅改名或缩放。",
+          "available": true,
+          "reason": null,
+          "semantics": "possession_win_probability_opportunity",
+          "normalizedForEditorialRanking": 0.44
+        },
+        {
+          "id": "p03:event",
+          "playId": "p03",
+          "t": 24,
+          "field": "team/player/shotValue",
+          "value": {
+            "team": "HOU",
+            "player": "H5",
+            "shotValue": 3
+          },
+          "kind": "unverified",
+          "unit": "event",
+          "source": "输入事件记录",
+          "available": true,
+          "definition": "输入事件记录；当前模块没有从视频识别出球员身份或出手分值。"
+        },
+        {
+          "id": "p03:window-first:H5:0",
+          "playId": "p03",
+          "t": 27,
+          "field": "tracks.players.nearest-observed-defender",
+          "value": {
+            "playerId": "H5",
+            "distanceFt": 6.739,
+            "thresholdFt": 6
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "时间窗内的第二个有效位置样本；只说明这一帧的近防距离，不使用后来样本声称空位已经持续了整个时间窗。"
+        },
+        {
+          "id": "p03:window:H5:0",
+          "playId": "p03",
+          "t": 29.5,
+          "start": 26.5,
+          "end": 29.5,
+          "field": "tracks.players",
+          "value": {
+            "playerId": "H5",
+            "duration": 3,
+            "minDistanceFt": 6.191,
+            "thresholdFt": 6,
+            "sampleCount": 7,
+            "maxGap": 0.5
+          },
+          "kind": "schematic-derived",
+          "unit": "ft / seconds",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "在 7 个已记录样本中，该球员与最近防守者的距离均不小于 6 ft。时间窗是离散采样描述，间隙内未确认持续空位；不证明有可完成的传球。"
+        },
+        {
+          "id": "p03:shot-context",
+          "playId": "p03",
+          "t": 33,
+          "field": "tracks.players.shot-context",
+          "value": {
+            "nearestDefender": {
+              "id": "D3",
+              "name": "D3",
+              "team": "DAL",
+              "distanceFt": 4.357855492271697
+            },
+            "offenseSpacingFt": 24.257,
+            "sampleOffsetSec": 0,
+            "defendersComplete": true
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "出手时刻附近最近输入样本的几何关系；未跨缺口插值。不完整防守名单只能得到已记录防守者距离，不代表实际最近防守者。"
+        },
+        {
+          "id": "p03:alternative:H3",
+          "playId": "p03",
+          "t": 33,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "H3",
+            "passDistanceFt": 0.474,
+            "laneClearanceFt": 3.986,
+            "receivingDefenderDistanceFt": 3.985822304942395
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p03:alternative:H1",
+          "playId": "p03",
+          "t": 33,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "H1",
+            "passDistanceFt": 25.088,
+            "laneClearanceFt": 1.068,
+            "receivingDefenderDistanceFt": 3.9857973456936735
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p03:alternative:H2",
+          "playId": "p03",
+          "t": 33,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "H2",
+            "passDistanceFt": 39.194,
+            "laneClearanceFt": 2.952,
+            "receivingDefenderDistanceFt": 3.985778537342764
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p03:alternative:H4",
+          "playId": "p03",
+          "t": 33,
+          "field": "tracks.players.pass-segment",
+          "value": {
+            "playerId": "H4",
+            "passDistanceFt": 26.557,
+            "laneClearanceFt": 3.986,
+            "receivingDefenderDistanceFt": 3.98577639002055
+          },
+          "kind": "schematic-derived",
+          "unit": "ft",
+          "source": "自行生成的球场示意坐标，非 NBA 测量",
+          "definition": "连接出手球员与队友的静态直线，计算已记录防守者到线段的最短距离。2 ft 为自定义几何阈值。没有球速、朝向、反应及后续运动，不能预测传球成功或替代选择的得分收益。"
+        },
+        {
+          "id": "p03:outcome",
+          "playId": "p03",
+          "t": 34.5,
+          "field": "outcome",
+          "value": "made",
+          "kind": "unverified",
+          "source": "输入结果记录",
+          "unit": "event",
+          "available": true,
+          "definition": "输入结果仅从独立的 resultTime 起揭晓，结果不参与关键回合排序。"
+        },
+        {
+          "id": "p03:rank",
+          "playId": "p03",
+          "t": 36,
+          "field": "editorial-ranking",
+          "kind": "derived",
+          "unit": "editorial-points",
+          "source": "公开确定性公式，输入结果不参与计算",
+          "available": true,
+          "value": {
+            "score": 44.12,
+            "priorityScore": 37.5,
+            "scoreInterval": [
+              37.5,
+              52.5
+            ],
+            "coverage": 0.85,
+            "components": [
+              {
+                "key": "leverage",
+                "weight": 50,
+                "normalized": 0.44,
+                "points": 22,
+                "evidenceIds": [
+                  "p03:metric:leverage"
+                ]
+              },
+              {
+                "key": "difficulty",
+                "weight": 25,
+                "normalized": 0.38,
+                "points": 9.5,
+                "evidenceIds": [
+                  "p03:metric:difficulty"
+                ]
+              },
+              {
+                "key": "gravity",
+                "weight": 15,
+                "normalized": null,
+                "points": null,
+                "evidenceIds": [
+                  "p03:metric:gravity"
+                ]
+              },
+              {
+                "key": "opportunity",
+                "weight": 10,
+                "normalized": 0.6,
+                "points": 6,
+                "evidenceIds": [
+                  "p03:window:H5:0"
+                ]
+              }
+            ]
+          },
+          "definition": "编辑权重：机会差 50、难度 25、可比引力 15、采样空间窗 10。score 为已知项权重内的描述分；priorityScore 使用区间下界保守排序，缺失读数仍为 null，不作为零测量。 编辑回看优先级；非官方关键度、胜率或模型准确率"
+        }
+      ]
+    }
+  ],
+  "window": {
+    "playerId": "H5",
+    "playerName": "H5",
+    "start": 26.5,
+    "end": 29.5,
+    "minDistanceFt": 6.191,
+    "sampleCount": 7,
+    "maxGap": 0.5,
+    "firstConfirmedAt": 27,
+    "firstConfirmedDistanceFt": 6.739,
+    "duration": 3,
+    "timingUncertaintySec": 0.25,
+    "thresholdFt": 6,
+    "kind": "schematic-derived",
+    "evidenceId": "p03:window:H5:0",
+    "firstEvidenceId": "p03:window-first:H5:0"
+  },
+  "spacing": [
+    {
+      "t": 24,
+      "distance": 3.9858126929491617
+    },
+    {
+      "t": 24.5,
+      "distance": 4.4444638195981945
+    },
+    {
+      "t": 25,
+      "distance": 4.903129017388179
+    },
+    {
+      "t": 25.5,
+      "distance": 5.361856966822839
+    },
+    {
+      "t": 26,
+      "distance": 5.820702949639216
+    },
+    {
+      "t": 26.5,
+      "distance": 6.279586504518514
+    },
+    {
+      "t": 27,
+      "distance": 6.738511376458955
+    },
+    {
+      "t": 27.5,
+      "distance": 7.197407300556352
+    },
+    {
+      "t": 28,
+      "distance": 7.6563680973445045
+    },
+    {
+      "t": 28.5,
+      "distance": 7.490417166076501
+    },
+    {
+      "t": 29,
+      "distance": 6.806357376200903
+    },
+    {
+      "t": 29.5,
+      "distance": 6.190587048977973
+    },
+    {
+      "t": 30,
+      "distance": 5.6606901807933045
+    },
+    {
+      "t": 30.5,
+      "distance": 5.225426521311818
+    },
+    {
+      "t": 31,
+      "distance": 4.8844836827632125
+    },
+    {
+      "t": 31.5,
+      "distance": 4.632063366871848
+    },
+    {
+      "t": 32,
+      "distance": 4.46105163347953
+    },
+    {
+      "t": 32.5,
+      "distance": 4.368754472894681
+    },
+    {
+      "t": 33,
+      "distance": 4.357855492271697
+    },
+    {
+      "t": 33.5,
+      "distance": 4.355095648296856
+    },
+    {
+      "t": 34,
+      "distance": 4.519963009668482
+    },
+    {
+      "t": 34.5,
+      "distance": 4.839966175819537
+    },
+    {
+      "t": 35,
+      "distance": 5.274823246743443
+    },
+    {
+      "t": 35.5,
+      "distance": 5.771968991179962
+    },
+    {
+      "t": 36,
+      "distance": 6.2792655166688
+    }
+  ]
+}

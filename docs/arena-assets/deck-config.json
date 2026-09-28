@@ -1,0 +1,129 @@
+{
+  "demoUrl": "https://dingyucanada.github.io/courtlens/",
+  "repoUrl": "https://github.com/dingyucanada/courtlens",
+  "tests": [
+    {
+      "scope": "Arena 前端",
+      "passed": 274,
+      "note": "独立反例与时刻边界"
+    },
+    {
+      "scope": "Studio / Site",
+      "passed": 78,
+      "note": "保留功能逻辑"
+    },
+    {
+      "scope": "旧入口 CJS",
+      "passed": 59,
+      "note": "Node 合计 411 项"
+    },
+    {
+      "scope": "Python 后端",
+      "passed": 196,
+      "note": "原环境带捕获文件\n清包195过、1跳过"
+    },
+    {
+      "scope": "静态站验收",
+      "passed": 12,
+      "note": "公开素材与构建检查"
+    }
+  ],
+  "export": {
+    "renderer": "browser-mediarecorder-local-tts-http-artifact",
+    "browserRecording": true,
+    "browserDownloadVerified": true,
+    "downloadSha256Matched": true,
+    "durationSeconds": 12.008333,
+    "plannedDurationSeconds": 12,
+    "bytes": 736735,
+    "resolution": "1280x720",
+    "format": "MP4 / H.264 + AAC",
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "hasAudio": true,
+    "averageFrameRate": "4500/181",
+    "constant25Fps": false,
+    "frames": 300,
+    "sha256": "7587b302d1cfdef6e0ee530d56d78499ad935a7b453b51f367bf5e9c405a0e2f",
+    "voiceReport": {
+      "provider": "macos-say-local",
+      "voice": "Tingting",
+      "cueCount": 5,
+      "durationSeconds": 12.008333,
+      "plannedDurationSeconds": 12,
+      "inputDurationSeconds": 12.008,
+      "timingDriftSeconds": 0.008,
+      "timingScale": 1.000666667,
+      "alignment": "small-uniform-duration-adjustment-approximate",
+      "originalAudio": "omitted",
+      "sourceAuthenticated": false,
+      "cueFrameAlignmentVerified": false,
+      "browserRecording": true
+    },
+    "recordingAudit": [
+      {
+        "playId": "p03",
+        "outputStart": 0,
+        "outputEnd": 12,
+        "requestedStart": 24,
+        "requestedEnd": 36,
+        "firstFrameTime": 24,
+        "lastFrameTime": 35.96,
+        "frameCount": 300,
+        "maxObservedFrameGap": 0.04000000000000625
+      }
+    ],
+    "sourceAuthenticated": false,
+    "cueFrameAlignmentVerified": false,
+    "origin": "actual Arena IAB recording + evidence-linked manually shortened synthetic cues + local Tingting TTS + persistent HTTP artifact + verified native browser download",
+    "warnings": [
+      "实际录制为可变编码帧间隔，不能标记恒定25fps。",
+      "原片声音未写入；仅本机中文配音。",
+      "语音计划时钟作小幅统一时长校正，不等于逐句画面语义认证。"
+    ],
+    "sourceFiles": [
+      "media/arena-browser-story.mp4",
+      "docs/arena-assets/browser-export-validation.json"
+    ]
+  },
+  "testDetails": {
+    "nodeTotal": 411,
+    "arena": 274,
+    "studioSite": 78,
+    "legacyCjs": 59,
+    "pythonTotal": 196,
+    "pythonSkipped": 0,
+    "publicSite": 12,
+    "arenaAgentWithinPython": 23,
+    "arenaVoiceWithinPython": 23,
+    "arenaArtifactsWithinPython": 32,
+    "actualHttpWithinArtifacts": 6,
+    "independentAttackWithinArena": 16,
+    "cancelWithinArena": 11,
+    "liveBedrockValidated": false,
+    "liveOllamaValidated": false,
+    "nodeSkipped": 0,
+    "shotTimeBoundarySuiteWithinArena": 25,
+    "newShotTimeBoundaryTestsWithinArena": 17,
+    "releaseRegressionWithinArena": 36,
+    "eventSemanticsWithinArena": 10,
+    "shotMarkersWithinArena": 5,
+    "labDefinitionWithinArena": 21,
+    "releaseRegressionCounting": "Included in Arena274, not additional tests",
+    "packagedPythonPassed": 195,
+    "packagedPythonSkipped": 1,
+    "originalCaptureBundled": false
+  },
+  "assets": {
+    "decision": "decision-final.png",
+    "export-frame": "browser-export-frame.png"
+  },
+  "crops": {
+    "decision": {
+      "left": 0.11735330836454431,
+      "top": 0.13466042154566746,
+      "right": 0.11610486891385768,
+      "bottom": 0.08548009367681499
+    }
+  }
+}
