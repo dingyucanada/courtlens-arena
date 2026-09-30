@@ -93,6 +93,77 @@ class StepFunTest(unittest.TestCase):
         self.assertEqual(run["observations"], [])
         self.assertTrue(any(item["reason"] == "evidence_clip_failed" for item in run["candidateRevisions"]))
 
+    def test_evidence_clip_retries_transient_failure_without_publishing_raw_guess(self):
+        initial = json.dumps({"observations": [{"type": "result", "start": 1, "end": 2,
+            "description": "未经取证的得分猜测"}]}, ensure_ascii=False)
+        verified = json.dumps({"observations": [{"type": "other", "start": 1, "end": 2,
+            "description": "白衣球员与红衣球员接近，结果看不清", "playerIds": [],
+            "unknownActors": ["白衣球员"], "frameIds": ["1".zfill(32)],
+            "confidence": .4}]}, ensure_ascii=False)
+        transient = BroadcastError("provider_failed", "StepFun 请求失败；请检查账户和网络。", 502, True)
+        with patch.object(stepfun, "_video_bytes", return_value=b"MP4"), patch.object(
+                stepfun, "_chat", side_effect=[(initial, {}, "step-3.7-flash"), transient,
+                                               (verified, {}, "step-3.7-flash")]) as chat:
+            run = stepfun.execute_vision(self.service, project(), {},
+                {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 4}})
+        self.assertEqual(chat.call_count, 3)
+        self.assertEqual(run["evidenceAttempts"][0]["attempts"], 2)
+        self.assertEqual(run["observations"][0]["type"], "other")
+        self.assertNotIn("得分", run["observations"][0]["description"])
+
+    def test_initial_video_retries_transient_failure_with_identical_input(self):
+        initial = json.dumps({"observations": []})
+        transient = BroadcastError("provider_failed", "StepFun 请求失败；请检查账户和网络。", 502, True)
+        with patch.object(stepfun, "_video_bytes", return_value=b"MP4"), patch.object(
+                stepfun, "_chat", side_effect=[transient, (initial, {}, "step-3.7-flash")]) as chat:
+            run = stepfun.execute_vision(self.service, project(), {},
+                {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 4}})
+        self.assertEqual(chat.call_count, 2)
+        self.assertEqual(chat.call_args_list[0].args[1], chat.call_args_list[1].args[1])
+        self.assertEqual(run["videoAttempts"], 2)
+        self.assertEqual(run["observations"], [])
+
+    def test_edit_boundary_rejects_candidate_that_spans_two_plays(self):
+        initial = json.dumps({"observations": [{"type": "result", "start": 1, "end": 2,
+            "description": "跨镜头的虚假得分"}]}, ensure_ascii=False)
+        with patch.object(stepfun, "_video_bytes", return_value=b"MP4"), patch.object(
+                stepfun, "_scene_cuts", return_value=[1.5]), patch.object(
+                stepfun, "_chat", return_value=(initial, {}, "step-3.7-flash")) as chat:
+            run = stepfun.execute_vision(self.service, project(), {},
+                {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 4}})
+        self.assertEqual(chat.call_count, 1)
+        self.assertEqual(run["observations"], [])
+        self.assertEqual(run["candidateRevisions"][0]["reason"], "crosses_scene_cut")
+
+    def test_evidence_frames_and_clip_stop_before_neighboring_edit(self):
+        initial = json.dumps({"observations": [{"type": "shot", "start": 1, "end": 2,
+            "description": "出手候选"}]}, ensure_ascii=False)
+        seen_scopes = []
+        def video_bytes(path, scope):
+            seen_scopes.append(dict(scope))
+            return b"MP4"
+        with patch.object(stepfun, "_video_bytes", side_effect=video_bytes), patch.object(
+                stepfun, "_scene_cuts", return_value=[2.4]), patch.object(
+                stepfun, "_chat", side_effect=[(initial, {}, "step-3.7-flash"),
+                                               ('{"observations":[]}', {}, "step-3.7-flash")]):
+            run = stepfun.execute_vision(self.service, project(), {},
+                {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 4}})
+        self.assertLess(seen_scopes[1]["end"], 2.4)
+        self.assertTrue(all(time < 2.4 for time in self.service.calls[0][2]))
+        self.assertEqual(run["observations"], [])
+
+    def test_evidence_clip_does_not_retry_nontransient_failure(self):
+        initial = json.dumps({"observations": [{"type": "shot", "start": 1, "end": 2}]})
+        denied = BroadcastError("provider_failed", "StepFun HTTP 400；请检查模型权限或请求格式。", 502, False)
+        with patch.object(stepfun, "_video_bytes", return_value=b"MP4"), patch.object(
+                stepfun, "_chat", side_effect=[(initial, {}, "step-3.7-flash"), denied]) as chat:
+            run = stepfun.execute_vision(self.service, project(), {},
+                {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 4}})
+        self.assertEqual(chat.call_count, 2)
+        self.assertEqual(run["observations"], [])
+        self.assertEqual(run["evidenceAttempts"][0]["class"], "upstream_http")
+        self.assertEqual(run["candidateRevisions"][0]["retryable"], False)
+
     def test_sourced_play_by_play_is_same_game_background_not_source_pts(self):
         pbp = {"source": {"provider": "ESPN", "url": "https://example.org/summary", "retrievedAt": "2026-09-30T00:00:00Z", "gameId": "game-1"},
                "entries": [{"id": "play-1", "period": 1, "clock": "11:40", "text": "Player makes tip shot", "awayScore": 2, "homeScore": 0}]}

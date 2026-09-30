@@ -60,7 +60,8 @@ def _chat(kind, content, *, max_tokens=MAX_TOKENS, timeout=TIMEOUT_SECONDS):
             require(len(data) <= MAX_RESPONSE, "provider_failed", "StepFun 响应超出大小限制。", 502)
     except urllib.error.HTTPError as exc:
         # The provider's error body may echo request content; expose only status.
-        raise BroadcastError("provider_failed", f"StepFun HTTP {exc.code}；请检查模型权限或请求格式。", 502, True)
+        raise BroadcastError("provider_failed", f"StepFun HTTP {exc.code}；请检查模型权限或请求格式。", 502,
+                             exc.code in (408, 409, 425, 429, 500, 502, 503, 504))
     except (urllib.error.URLError, TimeoutError, OSError, ValueError):
         raise BroadcastError("provider_failed", "StepFun 请求失败；请检查账户和网络。", 502, True)
     try:
@@ -72,7 +73,8 @@ def _chat(kind, content, *, max_tokens=MAX_TOKENS, timeout=TIMEOUT_SECONDS):
             usage = answer.get("usage") if isinstance(answer.get("usage"), dict) else {}
             token_count = next((usage.get(key) for key in ("completion_tokens", "output_tokens") if type(usage.get(key)) is int), None)
             detail = f"finishReason={reason}, contentLength={len(raw) if isinstance(raw, str) else 0}, outputTokens={token_count if token_count is not None else 'unknown'}"
-            raise BroadcastError("provider_failed", "StepFun 生成未完成或返回空内容（" + detail + "）。", 502, True)
+            raise BroadcastError("provider_failed", "StepFun 生成未完成或返回空内容（" + detail + "）。", 502,
+                                 reason == "length")
         return raw, answer.get("usage", {}), model
     except (KeyError, IndexError, TypeError, ValueError):
         raise BroadcastError("provider_failed", "StepFun 响应结构无效。", 502)
@@ -140,6 +142,19 @@ def _video_bytes(path, scope):
             raise BroadcastError("unsupported_modality", "无法生成视频模型输入。", 422)
     require(len(data) <= MAX_VIDEO, "unsupported_modality", "视频派生片超过16MiB上限；请缩小分析范围。", 422)
     return data
+
+
+def _scene_cuts(path):
+    """Conservative edit boundaries in source PTS; a cut is not an event."""
+    try:
+        result = subprocess.run([FFMPEG, "-hide_banner", "-nostats", "-nostdin", "-i", str(path),
+                                 "-vf", "scdet=threshold=10", "-an", "-f", "null", "-"],
+                                capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode != 0:
+        return None
+    return sorted({float(value) for value in re.findall(r"lavfi\.scd\.time:\s*([0-9]+(?:\.[0-9]+)?)", result.stderr)})
 
 
 def _candidate_windows(result, scope, revisions):
@@ -283,9 +298,21 @@ def execute_vision(service, project, job, options):
               "只返回JSON {\"observations\":[{\"type\":\"pass|shot|catch|movement|screen|result|other\",\"start\":源PTS秒,\"end\":源PTS秒,\"anchorTime\":源PTS秒或null,\"description\":\"可见动作和不确定的战术影响\"}]}，最多6条，覆盖不同动作和结果。"
               "不要编造比分、命中、球员身份或官方高级指标。名单仅可作候选，不是视觉证明：" + json.dumps(roster, ensure_ascii=False, separators=(",", ":")))
     started = now()
-    raw_video, video_usage, actual_model = _chat("vision", [
+    video_content = [
         {"type": "video_url", "video_url": {"url": "data:video/mp4;base64," + base64.b64encode(video).decode("ascii")}},
-        {"type": "text", "text": prompt}], max_tokens=6000, timeout=60)
+        {"type": "text", "text": prompt}]
+    for video_attempt in (1, 2):
+        try:
+            raw_video, video_usage, actual_model = _chat("vision", video_content, max_tokens=6000,
+                                                          timeout=min(60, max(10, int(deadline - time.monotonic()))))
+            break
+        except BroadcastError as exc:
+            if video_attempt == 2 or not exc.retryable or time.monotonic() >= deadline - 75:
+                raise
+            if hasattr(service.store, "project_dir") and hasattr(service.store, "atomic") and isinstance(job.get("id"), str):
+                service.store.atomic(service.store.project_dir(project["id"]) / "jobs" / job["id"] / "video-retry.json",
+                                     {"attempt": video_attempt, "code": exc.code, "retryable": True,
+                                      "videoSha256": video_input["sha256"]})
     if hasattr(service.store, "project_dir") and hasattr(service.store, "atomic") and isinstance(job.get("id"), str):
         service.store.atomic(service.store.project_dir(project["id"]) / "jobs" / job["id"] / "video-proposal.json",
                              {"rawProposal": raw_video, "promptHash": hash_json(prompt), "videoInput": video_input,
@@ -339,16 +366,39 @@ def execute_vision(service, project, job, options):
                                  "description": description[:800], "playerIds": player_ids, "unknownActors": [],
                                  "frameIds": [first_frame["id"], last_frame["id"]], "confidence": .65})
             corroborated_ids.append(matched["id"])
+    scene_cuts = _scene_cuts(service.media_path(project))
+    if scene_cuts is not None:
+        continuous = []
+        for row in candidates:
+            crossing = [cut for cut in scene_cuts if row["start"] + .04 < cut < row["end"] - .04]
+            if crossing:
+                candidate_revisions.append({"reason": "crosses_scene_cut", "cutTimes": crossing, "candidate": row})
+            else:
+                continuous.append(row)
+        candidates = continuous
     priority = {"result": 0, "shot": 1, "pass": 2, "screen": 3, "catch": 4, "movement": 5, "other": 6}
     candidates = [row for row in sorted(candidates, key=lambda row: (priority.get(row.get("type"), 7), row["start"]))
                   if not any(row["start"] < confirmed["end"] and confirmed["start"] < row["end"] for confirmed in corroborated)]
     candidates = candidates[:min(3, max(0, 6 - len(corroborated)))]
+    def safe_window(row):
+        lower, upper = scope["start"], scope["end"]
+        if scene_cuts is not None:
+            before = [cut for cut in scene_cuts if cut <= row["start"] + .04]
+            after = [cut for cut in scene_cuts if cut >= row["end"] - .04]
+            if before:
+                lower = max(lower, before[-1] + .04)
+            if after:
+                upper = min(upper, after[0] - .04)
+        return lower, upper
+
+    candidates = [row for row in candidates if safe_window(row)[0] < row["end"] and
+                  safe_window(row)[1] > row["start"]]
     frames = []
     if candidates:
         times = []
         for row in candidates:
-            times.extend([max(scope["start"], row["start"] - .8),
-                          min(scope["end"] - .04, row["end"] + .8)])
+            lower, upper = safe_window(row)
+            times.extend([max(lower, row["start"] - .8), min(upper, row["end"] + .8)])
         times = [round(t, 3) for t in times]
         frames = service.frames(project["id"], project["revision"], times)["frames"]
     available.update({frame["id"]: frame for frame in frames})
@@ -357,14 +407,16 @@ def execute_vision(service, project, job, options):
     evidence_usage = []
     evidence_prompt_hashes = []
     evidence_clips = []
+    evidence_attempts = []
     if frames:
         for index, candidate in enumerate(candidates):
             if time.monotonic() >= deadline - 20:
                 candidate_revisions.append({"reason": "deadline_before_evidence_clip", "candidate": candidate})
                 break
             pair = frames[index * 2:index * 2 + 2]
-            clip_scope = {"start": max(scope["start"], candidate["start"] - 1),
-                          "end": min(scope["end"], candidate["end"] + 1)}
+            lower, upper = safe_window(candidate)
+            clip_scope = {"start": max(lower, candidate["start"] - 1),
+                          "end": min(upper, candidate["end"] + 1)}
             if clip_scope["end"] - clip_scope["start"] > 12:
                 middle = (candidate["start"] + candidate["end"]) / 2
                 clip_scope = {"start": max(scope["start"], middle - 6), "end": min(scope["end"], middle + 6)}
@@ -386,7 +438,15 @@ def execute_vision(service, project, job, options):
                 content.append({"type": "text", "text": f"frameId={frame['id']}，源PTS={frame['actualTime']:.6f}秒，PNG源hash={frame['sha256']}。"})
                 content.append({"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + base64.b64encode(_jpeg(service.store.find("frames", frame["id"]) / "frame.png")).decode("ascii")}})
             try:
-                raw, usage, _ = _chat("vision", content, max_tokens=2500, timeout=min(35, max(10, int(deadline - time.monotonic()))))
+                for attempt in (1, 2):
+                    try:
+                        raw, usage, _ = _chat("vision", content, max_tokens=4000 if attempt == 1 else 6000,
+                                              timeout=min(45, max(10, int(deadline - time.monotonic()))))
+                        evidence_attempts.append({"clipSha256": evidence_clips[-1]["sha256"], "attempts": attempt, "outcome": "completed"})
+                        break
+                    except BroadcastError as exc:
+                        if attempt == 2 or not exc.retryable or time.monotonic() >= deadline - 30:
+                            raise
                 parsed, _ = _extract_json({"output": {"message": {"content": [{"text": raw}]}}})
                 require(len(parsed["observations"]) <= 1, "schema_invalid", "短片复核最多返回1条观察。", 422)
                 require(all(set(item.get("frameIds", [])) <= {f["id"] for f in pair} for item in parsed["observations"]),
@@ -395,7 +455,14 @@ def execute_vision(service, project, job, options):
                 evidence_raw.append(raw)
                 evidence_usage.append(usage)
             except BroadcastError as exc:
-                candidate_revisions.append({"reason": "evidence_clip_failed", "code": exc.code, "candidate": candidate})
+                message = str(exc)
+                classification = ("output_limit" if "finishReason=length" in message else
+                                  "network_or_timeout" if "请求失败" in message else
+                                  "upstream_http" if message.startswith("StepFun HTTP ") else "response_or_validation")
+                evidence_attempts.append({"clipSha256": evidence_clips[-1]["sha256"], "attempts": attempt,
+                                          "outcome": "failed", "code": exc.code, "class": classification})
+                candidate_revisions.append({"reason": "evidence_clip_failed", "code": exc.code,
+                                            "retryable": exc.retryable, "class": classification, "candidate": candidate})
     grounded_rows = []
     for item in final_rows:
         refs = item.get("frameIds", [])
@@ -434,7 +501,9 @@ def execute_vision(service, project, job, options):
                             "responseHash": hashlib.sha256((raw_video + ''.join(evidence_raw) + json.dumps(scoreboard_evidence, ensure_ascii=False, separators=(",", ":"))).encode()).hexdigest(), "startedAt": started, "completedAt": now()},
             "observations": rows, "rawProposal": normalized_raw, "rawVideoProposal": raw_video,
             "rawEvidenceProposals": evidence_raw, "videoPromptHash": hash_json(prompt), "evidencePromptHashes": evidence_prompt_hashes,
-            "videoInput": video_input, "evidenceClips": evidence_clips, "background": background_audit, "frameFingerprints": fingerprint,
+            "videoInput": video_input, "videoAttempts": video_attempt, "sceneCuts": scene_cuts,
+            "evidenceClips": evidence_clips, "evidenceAttempts": evidence_attempts,
+            "background": background_audit, "frameFingerprints": fingerprint,
             "scoreboardEvidence": scoreboard_evidence, "matchedPlayIds": corroborated_ids, "candidateRevisions": candidate_revisions,
             "usage": [video_usage, *(item.get("usage", {}) for item in scoreboard_evidence), *evidence_usage],
             "strategy": "video-first", "scope": scope, "proposalOnly": True}
