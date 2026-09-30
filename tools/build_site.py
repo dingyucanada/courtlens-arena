@@ -57,7 +57,7 @@ def build(output, presentation=None, repo='dingyucanada/courtlens-arena'):
     # Fail closed rather than deleting or accidentally deploying unrelated files.
     allowed_files = {'index.html','demo.html','styles.css','app.js','logic.mjs','favicon.svg',
         'data/analysis.json','data/demo.json','media/demo.mp4','media/broadcast-rehearsal.mp4',
-        'presentation.pptx','.nojekyll','manifest.json','broadcast/index.html','broadcast/preview.mjs'}
+        'presentation.pptx','.nojekyll','manifest.json','broadcast/index.html','broadcast/preview.mjs','broadcast/preview-data.json'}
     legacy_files = {'arena.html','studio.html','data/metrics-v2-example.json','media/narrated-demo.mp4',
         'media/annotated-demo.vtt','media/arena-story.mp4','media/arena-story.mp4.voice.json',
         'media/arena-browser-story.mp4','media/arena-local-4.1.mp4','media/arena-local-4.1.vtt',
@@ -103,6 +103,10 @@ def build(output, presentation=None, repo='dingyucanada/courtlens-arena'):
     analyses = {mode: analyze(dataset, mode) for mode in ('fan','analyst')}
     if any(sum(len(p['cues']) for p in analysis['possessions']) != 12 for analysis in analyses.values()):
         raise ValueError('Public demo copy expects 12 timed commentary cues')
+    preview_cues=sorted(({'start':cue['start'],'end':cue['end'],'text':cue['text'],'possession':possession['id'],
+                          'evidence':cue['evidence_ids'],'metric':any(':metric:' in item for item in cue['evidence_ids'])}
+                         for possession in analyses['fan']['possessions'] for cue in possession['cues']),key=lambda cue:cue['start'])
+    (output/'broadcast/preview-data.json').write_text(json.dumps({'schema':'courtlens-public-preview/1','provenance':'synthetic','cues':preview_cues},ensure_ascii=False,separators=(',',':'))+'\n')
     answers = {mode: {p['id']: {key: ask(dataset, q, p['id'], mode) for key,q in QUESTIONS.items()} for p in dataset['possessions']} for mode in analyses}
     # Relative URL is essential for project Pages under /<repository>/.
     dataset['video']['url'] = 'media/demo.mp4'

@@ -31,14 +31,11 @@ function sync() {
 
 async function loadTimeline() {
   try {
-    const response = await fetch('../data/analysis.json', { cache: 'no-store' });
+    const response = await fetch('./preview-data.json');
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const packet = await response.json();
-    if (packet.dataset?.provenance?.kind !== 'synthetic') throw new Error('Only synthetic rehearsal data is accepted');
-    timeline = packet.analyses.fan.possessions.flatMap((possession) => possession.cues.map((cue) => ({
-      start: cue.start, end: cue.end, text: cue.text, possession: possession.id,
-      evidence: cue.evidence_ids || [], metric: (cue.evidence_ids || []).some((id) => id.includes(':metric:')),
-    }))).sort((a, b) => a.start - b.start);
+    if (packet.schema !== 'courtlens-public-preview/1' || packet.provenance !== 'synthetic') throw new Error('Only synthetic rehearsal data is accepted');
+    timeline = packet.cues;
     if (timeline.length !== 12) throw new Error('Unexpected rehearsal cue count');
     sync();
   } catch {
