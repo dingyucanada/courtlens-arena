@@ -35,7 +35,7 @@ const OUT = path.resolve(process.env.BROADCAST_TEST_OUTPUT || path.join(ROOT, 'w
   try {
     await page.goto(BASE,{waitUntil:'domcontentloaded'});
     await page.waitForSelector('[data-action="new-project"]',{timeout:20000});
-    await page.getByRole('button',{name:/开始一个新回合/}).click();
+    await page.getByRole('button',{name:/新建项目/}).click();
     await page.locator('[data-form="create-project"] [name="title"]').fill('合成演练｜一次进攻的选择');
     await page.locator('[data-form="create-project"] button[type="submit"]').click();
     await page.waitForSelector('[data-form="upload"]');
@@ -57,7 +57,7 @@ const OUT = path.resolve(process.env.BROADCAST_TEST_OUTPUT || path.join(ROOT, 'w
       await page.locator(`.step-nav [data-step="${step}"]`).click();
       const retained=await page.evaluate(()=>({same:window.retainedVideo===document.querySelector('#broadcast-video'),connected:window.retainedVideo.isConnected,time:window.retainedVideo.currentTime,paused:window.retainedVideo.paused,loads:window.mediaLoads}));
       assert.ok(retained.same&&retained.connected&&retained.paused&&Math.abs(retained.time-5)<.1&&retained.loads===0,JSON.stringify(retained));
-      assert.equal(await page.locator('.panel-head h2').innerText(),['选片','看懂','讲清','出片'][Number(step)]);
+      assert.equal(await page.locator('.panel-head h2').innerText(),['素材','分析','解说','导出'][Number(step)]);
     }
     pass('panels-preserve-connected-video-and-paused-time',{loads:0});
     await page.locator('#broadcast-video').evaluate(video=>video.play());
@@ -87,6 +87,7 @@ const OUT = path.resolve(process.env.BROADCAST_TEST_OUTPUT || path.join(ROOT, 'w
     await page.locator('.frame-drawer summary').click();
     await page.waitForSelector('.frame-thumb',{timeout:20000});
     pass('actual-frame',await page.locator('.frame-thumb span').first().innerText());
+    await page.locator('.manual-tools > summary').first().click();
     const observe=page.locator('[data-form="observation"]');
     await observe.locator('[name="type"]').selectOption('movement');
     await observe.locator('[name="start"]').fill('4.50');
@@ -98,7 +99,7 @@ const OUT = path.resolve(process.env.BROADCAST_TEST_OUTPUT || path.join(ROOT, 'w
     await observe.locator('button[type="submit"]').click();
     await page.waitForSelector('[data-action="accept-observation"]');
     await page.locator('[data-form="observation"] [name="actor"]').fill('浏览器验收员');
-    await page.locator('[data-action="accept-observation"]').click();
+    await observe.locator('[data-action="accept-observation"]').click();
     await page.waitForFunction(()=>document.querySelector('.record.selected .tag')?.textContent.includes('已接受'));
     pass('human-observation-accepted',{});
     await page.screenshot({path:path.join(OUT,'observe-desktop.png'),fullPage:true});

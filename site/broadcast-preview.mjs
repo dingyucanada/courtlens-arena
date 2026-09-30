@@ -17,14 +17,14 @@ function sync() {
   if (cue === lastCue) return;
   lastCue = cue;
   if (!cue) {
-    statusNode.textContent = now >= video.duration && video.duration ? 'END / 演练结束' : 'READY / 合成演练';
-    titleNode.textContent = now >= video.duration && video.duration ? '一段进攻，三次选择' : '等待关键回合';
-    copyNode.textContent = '播放视频，随画面查看当前解说和数据依据。';
+    statusNode.textContent = now >= video.duration && video.duration ? '播放结束' : '演示';
+    titleNode.textContent = now >= video.duration && video.duration ? '播放结束' : '当前回合';
+    copyNode.textContent = '播放视频查看解说。';
     evidenceNode.textContent = '演练数据独立于正式 NBA 指标';
     return;
   }
-  statusNode.textContent = `REPLAY / ${cue.possession.toUpperCase()}`;
-  titleNode.textContent = cue.metric ? '数字解释这一刻' : '这一刻发生了什么';
+  statusNode.textContent = '演示';
+  titleNode.textContent = `回合 ${cue.possession.slice(1)}`;
   copyNode.textContent = cue.text;
   evidenceNode.textContent = `依据：${cue.evidence.join(' · ')} · 合成数据`;
 }
@@ -39,10 +39,10 @@ async function loadTimeline() {
     if (timeline.length !== 12) throw new Error('Unexpected rehearsal cue count');
     sync();
   } catch {
-    statusNode.textContent = 'OFFLINE / 数据不可用';
+    statusNode.textContent = '数据未加载';
     titleNode.textContent = '视频仍可播放';
     copyNode.textContent = '同步数据暂时未加载，请稍后刷新。';
-    evidenceNode.textContent = '没有数据时不显示推断或数字';
+    evidenceNode.textContent = '合成数据暂不可用';
   }
 }
 
