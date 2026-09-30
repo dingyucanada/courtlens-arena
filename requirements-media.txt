@@ -1,3 +1,4 @@
-# Only needed to rebuild the synthetic videos and render overlays.
+# Broadcast runtime contract validation and media overlays.
 Pillow==12.3.0
+jsonschema==4.23.0
 # FFmpeg and FFprobe are external command-line dependencies; tested version in handoff.

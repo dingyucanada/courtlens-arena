@@ -1,0 +1,26 @@
+[
+  {
+    "name": "real-mandarin-tts-measured-without-tail-truncation",
+    "passed": true,
+    "detail": {
+      "mode": "stepfun",
+      "provider": "stepfun",
+      "voiceId": "elegantgentle-female",
+      "audioSha256": "50fdd994a9a78be8e308bcad877a7df3e21ad673a4d1a99a2832a2bc58655320",
+      "cues": [
+        {
+          "beatId": "root-beat",
+          "outputStart": 2,
+          "speechDuration": 3.133208333333333,
+          "tempo": 1.0,
+          "tailTruncated": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "eight-second-h264-aac-export",
+    "passed": true,
+    "detail": null
+  }
+]

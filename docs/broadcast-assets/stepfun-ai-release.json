@@ -1,0 +1,213 @@
+{
+  "summary": {
+    "id": "0900c5ca5526469e9d8e6cdfa6c80ef6",
+    "projectRevision": 6,
+    "contentHash": "527aae77e5d7d95a90f6568e949e5a0fb82382f4195e8cdf6995171eafe4674e",
+    "createdAt": "2026-09-30T03:25:51.322576Z",
+    "videoUrl": "/api/broadcast/v1/releases/0900c5ca5526469e9d8e6cdfa6c80ef6/film.mp4",
+    "captionsUrl": "/api/broadcast/v1/releases/0900c5ca5526469e9d8e6cdfa6c80ef6/captions.vtt",
+    "manifestUrl": "/api/broadcast/v1/releases/0900c5ca5526469e9d8e6cdfa6c80ef6/manifest.json",
+    "watchUrl": "/broadcast/?release=0900c5ca5526469e9d8e6cdfa6c80ef6",
+    "duration": 8.0,
+    "videoSha256": "a84f298e79be50be145d9727e76cc00f497a869938e4e213819fe138b7f614a8",
+    "voice": {
+      "mode": "stepfun",
+      "provider": "stepfun",
+      "voiceId": "elegantgentle-female",
+      "audioSha256": "0de8c2b248b1725b511b152f89bce2d65738f1fadd3166ef1399667b41a10239"
+    },
+    "understanding": {
+      "mode": "manual",
+      "providerRunIds": [],
+      "humanReviewed": true
+    }
+  },
+  "manifest": {
+    "schema": "courtlens-broadcast-release/1",
+    "createdAt": "2026-09-30T03:25:51.320300Z",
+    "source": {
+      "mediaSha256": "c5234a92a078aee3c5675d6cc242b846ad64c3fdfd63e53d3fc5f292712d1101",
+      "mediaId": "6dea039b46df4315a6cdde4e2b24fc33",
+      "mediaUrl": "/api/broadcast/v1/media/6dea039b46df4315a6cdde4e2b24fc33",
+      "startPts": 0,
+      "firstFramePts": 0,
+      "timeBase": "1/12800",
+      "label": "本项目合成演练，不是真实 NBA 比赛",
+      "kind": "synthetic",
+      "rightsNote": "自制虚拟篮球场，测试真实模型接口与软件流程。",
+      "verified": false
+    },
+    "story": {
+      "schema": "courtlens-broadcast-story/1",
+      "title": "合成画面球员站位事实",
+      "audience": "fan",
+      "sourceRange": {
+        "start": 0,
+        "end": 8.0
+      },
+      "beats": [
+        {
+          "id": "b161d5926e7c4d0da984c08c4a75cf43",
+          "label": "画面站位事实",
+          "sourceStart": 3.0,
+          "sourceEnd": 8.0,
+          "anchorTime": 3.0,
+          "observationIds": [
+            "reviewed-standing-fact"
+          ],
+          "bindingIds": [],
+          "text": "合成画面下方，橙色与蓝色球员标记保持相邻站位。",
+          "explanationKind": "visible-fact",
+          "metricRecordId": null,
+          "secondaryLabel": null,
+          "annotation": null
+        }
+      ]
+    },
+    "compiledBeats": [
+      {
+        "beatId": "b161d5926e7c4d0da984c08c4a75cf43",
+        "compiledText": "合成画面下方，橙色与蓝色球员标记保持相邻站位。",
+        "metric": null,
+        "sourceStart": 3.0,
+        "sourceEnd": 8.0,
+        "outputStart": 3.0,
+        "outputEnd": 8.0,
+        "observationIds": [
+          "reviewed-standing-fact"
+        ],
+        "bindingIds": []
+      }
+    ],
+    "evidence": {
+      "observations": [
+        {
+          "id": "reviewed-standing-fact",
+          "type": "other",
+          "start": 1,
+          "end": 3,
+          "anchorTime": 3,
+          "segmentId": "synthetic-fixed-camera",
+          "description": "合成画面下方的一组橙色与蓝色球员标记保持相邻位置。仅描述取证帧中可见的站位，不推断投篮或战术动机。",
+          "playerIds": [],
+          "unknownActors": [
+            "下方橙色标记",
+            "相邻蓝色标记"
+          ],
+          "frameIds": [
+            "314afc2fdb7d4efc90f5fa9328305175",
+            "26e9ecd7ae614fbcbb1adb278af3cfdf"
+          ],
+          "source": {
+            "kind": "manual",
+            "runId": null,
+            "recordId": null
+          },
+          "confidence": null,
+          "review": {
+            "status": "accepted",
+            "actor": "Codex 合成验收（非真人赛事审核）",
+            "reason": "核对1秒与3秒原始帧；没有足够证据确认投篮，故仅保留可见站位。正式赛事仍需人工复核。",
+            "at": "2026-09-30T03:08:00Z"
+          },
+          "geometry": null
+        }
+      ],
+      "bindings": [],
+      "metrics": null
+    },
+    "review": {
+      "contentHash": "527aae77e5d7d95a90f6568e949e5a0fb82382f4195e8cdf6995171eafe4674e",
+      "projectRevision": 6,
+      "actor": "Codex 合成验收（非真人赛事审核）",
+      "at": "2026-09-30T03:25:48.483320Z",
+      "checks": {
+        "identity": true,
+        "timing": true,
+        "metrics": true,
+        "wording": true,
+        "geometry": true
+      },
+      "result": "approved",
+      "note": "仅描述已查看的合成帧相邻站位，无真实球员身份、官方数值或战术因果。真实NBA须真人赛事审核。"
+    },
+    "timing": {
+      "sourceRange": {
+        "start": 0,
+        "end": 8.0
+      },
+      "outputDuration": 8.0,
+      "fps": 25,
+      "beats": [
+        {
+          "beatId": "b161d5926e7c4d0da984c08c4a75cf43",
+          "compiledText": "合成画面下方，橙色与蓝色球员标记保持相邻站位。",
+          "metric": null,
+          "sourceStart": 3.0,
+          "sourceEnd": 8.0,
+          "outputStart": 3.0,
+          "outputEnd": 8.0,
+          "observationIds": [
+            "reviewed-standing-fact"
+          ],
+          "bindingIds": []
+        }
+      ],
+      "mapping": "outputTime=sourceTime-sourceRange.start; decoded source PTS normalized from first frame"
+    },
+    "outputs": [
+      {
+        "name": "film.mp4",
+        "bytes": 262087,
+        "sha256": "a84f298e79be50be145d9727e76cc00f497a869938e4e213819fe138b7f614a8"
+      },
+      {
+        "name": "captions.vtt",
+        "bytes": 108,
+        "sha256": "a9f7bb74b99aa44e25fedd64db44276d2b7977447c5e5f519c5e7ff8dad5ffad"
+      },
+      {
+        "name": "narration.wav",
+        "bytes": 384044,
+        "sha256": "0de8c2b248b1725b511b152f89bce2d65738f1fadd3166ef1399667b41a10239"
+      }
+    ],
+    "understanding": {
+      "mode": "manual",
+      "providerRunIds": [],
+      "humanReviewed": true
+    },
+    "voice": {
+      "mode": "stepfun",
+      "provider": "stepfun",
+      "voiceId": "elegantgentle-female",
+      "audioSha256": "0de8c2b248b1725b511b152f89bce2d65738f1fadd3166ef1399667b41a10239"
+    },
+    "voiceReport": {
+      "mode": "stepfun",
+      "provider": "stepfun",
+      "voiceId": "elegantgentle-female",
+      "audioSha256": "0de8c2b248b1725b511b152f89bce2d65738f1fadd3166ef1399667b41a10239",
+      "cues": [
+        {
+          "beatId": "b161d5926e7c4d0da984c08c4a75cf43",
+          "outputStart": 3.0,
+          "speechDuration": 4.9325833333333335,
+          "tempo": 1.1268292682926828,
+          "tailTruncated": false
+        }
+      ]
+    },
+    "validation": {
+      "videoCodec": "h264",
+      "pixelFormat": "yuv420p",
+      "durationVerified": true,
+      "sourceHashVerified": true,
+      "contentHash": "527aae77e5d7d95a90f6568e949e5a0fb82382f4195e8cdf6995171eafe4674e"
+    },
+    "limitations": [
+      "Final prose and geometry were reviewed by a human; provider observations remain proposals until accepted."
+    ],
+    "manifestHash": "4288a93eca44debd5978d407f93bcaf5b0aaf28b64ed41ddc3f024c375feadc6"
+  }
+}

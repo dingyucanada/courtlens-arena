@@ -12,3 +12,5 @@ workspace/
 
 site-dist/
 dist/
+node_modules/
+.pytest_cache/

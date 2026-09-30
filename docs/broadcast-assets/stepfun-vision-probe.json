@@ -1,0 +1,19 @@
+{
+  "status": 200,
+  "model": "step-3.7-flash",
+  "content": "```json\n{\n  \"visible\": \"俯视篮球场，左侧分布橙色球衣球员于左翼、左侧高位及罚球线，右侧分布蓝色球衣球员于左高位、右高位、右翼、罚球线及右底角，球场中央有篮球；顶部有比赛信息文字，底部有场景说明文字。\",\n  \"uncertainty\": \"球员具体身份、真实球队归属、比赛实际进程。\"\n}\n```",
+  "finishReason": "stop",
+  "usage": {
+    "cached_tokens": 384,
+    "prompt_tokens": 410,
+    "completion_tokens": 1724,
+    "total_tokens": 2134,
+    "prompt_tokens_details": {
+      "cached_tokens": 384
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "elapsedSeconds": 21.24
+}

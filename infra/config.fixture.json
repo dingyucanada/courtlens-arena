@@ -1,0 +1,13 @@
+{
+  "teamAccountId": "111111111111",
+  "allowedRegion": "us-west-2",
+  "portalConfirmedAgentService": "bedrock-agentcore",
+  "portalConfirmedModelId": "local-fixture-model",
+  "portalEvidence": "LOCAL_SYNTH_FIXTURE_ONLY",
+  "contestConfigConfirmed": false,
+  "modelResourceArn": "arn:aws:bedrock:us-west-2::foundation-model/local-fixture-model",
+  "operatorEmail": "fixture@example.invalid",
+  "siteAssetDirectory": "../site-dist",
+  "fixtureOnly": true,
+  "voiceProviders": []
+}

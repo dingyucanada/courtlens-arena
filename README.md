@@ -1,126 +1,75 @@
-# CourtLens Arena 4.1 · 本地产品版
+# CourtLens Broadcast · 深度赛场解说工作室
 
-> **2026-09-28 本地升级已实施。** 本版新增多粒度指标 Adapter v2、动态镜头人工校准、已审 StoryPlan、观众首屏、关键帧证据包和独立 MP4 渲染。优先阅读 [4.1 升级与验收](docs/Arena-4.1-本地升级与验收.md)、[10 页图文演示](docs/CourtLens-Arena-4.1-本地产品验收.pptx)。默认数据与视频是合成演练，真实模型及官方 NBA 素材尚未验收。
->
-> 培训后的正式提交需要指定 AWS 环境、CDK、CloudFront 与私有仓库。本地闭环已推进；云资源、正式数据和赛事 Portal 待接入。[新版策略](docs/参赛策略与产品方案.md) · [AWS 迁移](docs/培训后AWS架构与迁移方案.md) · [任务状态](docs/培训后开发任务与验收.md)。本版未推送到历史公开站点，以下公开链接属于早期 v4 演练。
+**把一次进攻看懂，再把它讲回比赛画面。**
 
-**把篮球深度数据带回比赛画面，让一次出手背后的选择被看见。**
+面向 BroadcastCode「深度赛场」黑客松，重新设计的视频解说制作系统。输入单个比赛片段，建立视频证据、核对官方指标、编排少量解释节点，导出带战术箭头、中文字幕和可选中文配音的真实 MP4，并生成可独立观看的成片页面。
 
-![CourtLens Arena 智能观赛](docs/arena-assets/fan.png)
+当前主产品是 **Broadcast**。历史 Arena 的可靠指标验证能力部分复用，旧工作流不再是新版使用前提。历史说明见 [Arena 4.1 存档](docs/Archive-Arena-4.1-README.md)。
 
-[打开 Arena](https://dingyucanada.github.io/courtlens/) · [18 页产品与参赛方案](docs/CourtLens-Arena-产品与参赛方案.pptx) · [浏览器真实有声成片](media/arena-browser-story.mp4) · [使用与验收](docs/Arena-使用与验收.md) · [下载产品](https://github.com/dingyucanada/courtlens/releases/latest)
+![制作工作台，合成流程演练](docs/broadcast-assets/story-desktop.png)
 
-Arena 面向篮球观众、分析员和内容创作者，串起视频与数据接入、时间与镜头校准、关键回合分析、逐句证据复核、片单制作和成片交付。采用 NBA 海军蓝、蓝、红、白配色。CourtLens 是独立参赛作品，未获得 NBA 产品认证。
-
-本项目对齐 [CSDN NBA 黑客松赛题](https://builderx.csdn.net/bcast-code#challenge)：读取比赛视频及投篮难度、球员引力、关键度等深度数据，识别关键变化，以箭头、色块和球员标注叠加到原视频，生成对应画面的篮球解说，并交付可运行作品、仓库、文档与演示视频。
-
-**当前随包数据和原始演练视频全部合成。** 官方历史比赛素材与最终字段说明尚待接入；已公布的培训规则见新版策略，具体媒体格式等细则仍待确认；功能测试不代表真实 NBA 分析准确率。默认本地证据引擎实际执行分析与叙事编排，它不是语言模型。可选 Bedrock / Ollama 工具调用接口已实现，真实模型调用与真实 NBA 素材尚未验收。
-
-## 四个工作区
-
-| 工作区 | 可以实际完成的工作 |
-| --- | --- |
-| **智能观赛** | 逐回合播放、图层开关、普通球迷／专业双视角、指标解释、回看排序与覆盖率、可追溯问答；在“结果揭晓前”冻结时刻，先作选择，再查看后续证据。 |
-| **战术实验室** | 同屏比较两个回合、检查近防距离与采样空间窗、查看球场轨迹和证据。不同回合按相对进度比较，不假设它们处于相同战术阶段。 |
-| **故事导演** | 将回合加入片单，调整顺序和入出点，编辑逐句解说，添加人工箭头／区域／标签，逐回合复核，连续预览并录制真实视频。 |
-| **素材与校准** | 创建独立比赛项目，导入 CSV / JSON 与本地视频，读取视频指纹，映射字段，校正时间，按镜头完成球场平面 4 点标定，保存修订与备份。 |
-
-所有解释都保留来源、时间与证据 ID。缺少指标显示“未提供”，不会用零代替；几何距离与空间窗不冒充官方 Gravity。决策冻结需要有效的出手时刻，缺失或矛盾时不开放，不以回合尾部代替。镜头切换、轨迹缺口、身份不完整和未标定区间会限制对应分析或叠加。
+[观看带中文配音的实际导出样片](docs/broadcast-assets/voiced-rehearsal.mp4)（合成演练素材，不是真实 NBA 比赛）。
 
 ## 开始使用
 
-体验当前 4.1 请在本机启动；[公开 Arena](https://dingyucanada.github.io/courtlens/) 保留早期 v4。首次进入自动载入明确标记的合成演练；已有项目会从当前浏览器恢复。通过“比赛项目”创建自己的比赛，再进入“素材与校准”导入材料。
-
-需要本机成片保存、中文配音或模型接口，在项目根目录运行：
+需要 Python 3.12、Node.js 24、FFmpeg / FFprobe 和中文字体。安装媒体依赖后启动：
 
 ```sh
-python3 tools/launch.py --port 8765
+python3 -m pip install -r requirements-media.txt -r requirements-cloud.txt
+python3 tools/launch.py --port 8769
 ```
 
-打开 [本机 Arena](http://127.0.0.1:8765/arena/)。启动器先构建静态文件，再启动仅绑定 `127.0.0.1` 的服务；日常浏览器工作流无需 Node、npm 安装或前端编译。停止服务按 Ctrl+C。
+打开 [本机 Broadcast](http://127.0.0.1:8769/broadcast/)。默认项目文件保存在 `workspace/`，视频不会因本地使用而自动上传。只有明确运行已配置的模型提供者时，才按界面选择的范围发送素材。
 
-`python3 tools/launch.py --help` 可查看 `--port` 与 `--workspace`。默认本机工作目录为 `workspace/`；原工作台的渲染解释器可用 `COURTLENS_RENDER_PYTHON` 配置。`启动工作台.command` 与 `启动工作台.bat` 也可启动；平台与外部工具的实测范围见 [使用与验收](docs/Arena-使用与验收.md)。
+## 制作流程
 
-## 从素材到成片
+| 阶段 | 可以完成的实际工作 |
+| --- | --- |
+| 选片 | 上传视频，读取实际时长、帧时间与文件指纹，确认比赛背景和素材来源。 |
+| 看懂 | 提取真实关键帧；接受、修正或拒绝观察；配置模型时运行视频理解。没有模型时可人工完成。 |
+| 讲清 | 编辑 1–3 个解释节点，把官方事件指标绑定到正确球员、回合和时间，在目标帧绘制人工箭头。 |
+| 出片 | 对当前内容复核，生成 MP4、WebVTT 与证据清单；通过独立成片页面查看引用证据；本地可切换原片和解说版，公开云端成片默认不公开私有原片。 |
 
-1. **导入并确认来源。** 在“素材与校准”导入最多 16 MiB 的 CSV / JSON、最多 2,000 个回合；绑定浏览器能够解码且不超过 512 MiB 的视频。核对视频与数据是否来自同一原片。SHA-256 证明字节是否一致，不认证 NBA 来源。
-2. **核对字段和时间。** 保留指标定义、单位、版本与可用时间。全部工作时间映射为视频秒数；单锚点用于人工确认的固定偏移，多锚点只在已校准范围内分段插值。已在视频时间轴的数据无需重复转换。
-3. **按镜头校准。** 画面坐标轨迹可以直接叠加；球场坐标须有有效的镜头标定。在固定镜头按四个地面点顺序建立平面投影，核对坐标轴与实际场地尺寸。切镜头后重新标定，四个拟合点本身不是精度验证。
-4. **观看与复核。** 查看逐句证据、回看排序、空间窗与双视角解说；可先冻结出手前时刻作判断。未知值保留未知，人工修改解说和标注会注明来源。
-5. **编排和导出。** 在“故事导演”保存片段入出点，检查每句解说与图层，完成当前模式下所有片段的复核，再录制成片。修改内容、绑定不同视频或改变解说模式／图层后需重新复核。
-6. **保留交付和原件。** 下载成片、WebVTT、分镜 JSON、可打印 HTML 与项目备份；原视频另行备份。完整字段约定见 [Arena 数据合同](docs/Arena-data-contract.md)。
+当前媒体边界：最长 180 秒、256 MiB，导出使用恒定帧率源片。带旋转元数据、非方形像素或非零起始时间的素材会明确拒绝，需先转换为标准 MP4，以免标注错位。
 
-## 三条成片链路
+修改解释、来源或证据会撤销当前复核，已生成的历史成片保留。未配置的模型不会伪装在线，人工制作不会标成 AI 自动识别。
 
-| 链路 | 输出与条件 | 已验证的范围 |
-| --- | --- | --- |
-| 浏览器录制 | 真实 WebM，烧录叠加和字幕，默认无原片声音；最多 180 秒，1280 × 720，保持页面前台。 | 实际浏览器录制已接入本机配音、保存和下载；下载文件指纹核对通过。自动测试另覆盖时钟、取消与边界。 |
-| 本机配音与保存 | 本机 `say` 的 Tingting + FFmpeg / FFprobe 可选生成 H.264 / AAC MP4；成片可经受控 HTTP 接口保存到本机库。 | 完整实机链路产出 [736,735 字节 MP4](media/arena-browser-story.mp4)：12.008333 秒、300 帧、1280 × 720、H.264 + AAC；非恒定 25 fps。 |
-| 可复现离线演示 | Node Canvas 使用与网页相同的 Arena 叠加内核，FFmpeg 生成 MP4，再本机配音。 | 随包 [12 秒有声 MP4](media/arena-story.mp4) 已实际生成并检查：300 帧、25 fps、1280 × 720、H.264 + AAC。这是离线共享内核成片，`browserRecording=false`。 |
+## 数据与模型边界
 
-随包有声成片使用合成原片和有证据引用的人工精简文句；不代表模型已成功推理。原片音轨未写入；语音按字幕窗编排并适度调速，未声称语音与逐帧画面已经独立精确验证。[浏览器成片校验](docs/arena-assets/browser-export-validation.json) 记录实机录制、配音、保存及下载的完整证据；[离线成片校验](docs/arena-assets/export-validation.json) 独立记录共享内核的离线链路。
+- Portal 下发的字典和指标记录是正式接入依据。数据缺失就保持缺失，不用防守距离近似替代官方 Gravity。
+- 赛季指标不能作为这一次出手的数据。指标必须匹配比赛、球员、事件和完整显示时间窗。
+- 观察区分可见事实与战术解释；球员身份不明时保留未知，不按当前球队名单猜历史身份。
+- 模型、CV 与人工来源分开记录。RF-DETR / SAM2 可通过视觉提供者适配，但尚未用官方视频验证权重、吞吐与准确率。
+- 随包演练视频及指标是合成素材。流程测试不等于真实 NBA 战术识别准确率。
 
-离线演示复现需要已安装的 Node、FFmpeg / FFprobe 和中文字体。仅此链路需要 Node Canvas 依赖：
+## AWS 与继续开发
 
-```sh
-npm install
-node tools/export_arena.mjs --output workspace/arena-silent.mp4
-python3 tools/narrate_arena.py --video workspace/arena-silent.mp4 --report workspace/arena-silent.mp4.json --output workspace/arena-voiced.mp4
-```
+`infra/` 提供 AWS CDK 工程；`cloud/` 连接托管 API、私有素材、异步媒体任务与 Agent 服务。比赛最终入口必须是 CloudFront，代码仓库必须保持私有并在 Team Portal 绑定。
 
-最后一步仅在具有 Tingting 的 macOS 本机可用。自有素材使用导出器的 `--project`、`--video` 与可选 `--font` 参数，运行 `node tools/export_arena.mjs --help` 可查看用法。字幕过密、媒体无效或工具缺失时明确报错。
+**AWS 比赛账户尚未分配，当前没有已验收的 CloudFront 部署。** CDK 本地合成和合同测试不能替代云上验收；区域、模型权限、Agent 服务名称、官方素材与字典须按 Portal 最终配置。语音供应商保留 MiniMax / StepFun 选择；StepFun 已完成本机真实配音成片，MiniMax 与 AWS 云端配音仍待实测。
 
-## 数据保存与运行边界
+本地标准源码、依赖与 CDK 可由 Kiro 继续开发；无需改写成专用 IDE 格式。
 
-Arena 的项目、修订和视频 Blob 保存在当前浏览器的 IndexedDB。GitHub Pages 只提供静态应用，不运行 Python、模型或配音服务；导入的视频不会因使用 Pages 而上传。项目在同一浏览器、同一来源地址下延续，线上与 localhost、不同端口、不同浏览器互不共享。
+## 设计与证据
 
-这是一套单用户本机工具，当前没有账号、团队权限、云同步或自动备份。项目 JSON 不含视频字节；更换浏览器、清除网站数据、隐私模式及存储配额可能影响恢复。跨标签页版本冲突会拒绝覆盖；修订恢复形成新版本并撤销复核。
+- [AWS 部署与验收](docs/Broadcast-AWS部署.md)
+- [Kiro 接续开发](docs/Kiro接续开发与部署.md)
+- [新版使用指南](docs/Broadcast使用指南.md)
+- [架构设计](docs/Broadcast-架构设计.md)
+- [设计裁决与科学边界](docs/Broadcast-设计裁决.md)
+- [研究与事实核验](docs/Broadcast-研究与事实核验.md)
+- 合同：`contracts/broadcast-v1.json`
+- 核心服务：`core/broadcast/`
+- 界面与播放器：`broadcast/`
 
-本机 Arena 成片库位于 `workspace/arena_artifacts/`，保存上限为 20 个成片、总计 256 MiB，单次媒体请求不超过 64 MiB；它不保存 Arena 的浏览器项目。静态 Pages 生成的成片只保留在当前页面，下载后再关闭。保存失败会提示下载当前成片，不会伪装已经持久保存。
+最终测试结果与 AWS 接入状态以本版验收报告为准。CourtLens 是独立参赛项目，不代表 NBA 或 AWS 官方产品。
 
-保留的 [Studio v3](https://dingyucanada.github.io/courtlens/studio.html)、[旧证据演示](https://dingyucanada.github.io/courtlens/demo.html) 和本机 [SQLite / FFmpeg 工作台](http://127.0.0.1:8765/projects.html) 有独立数据合同与存储。它们和 Arena 不自动同步；旧工作台的操作见 [产品使用手册](docs/产品使用手册.md) 与 [产品架构与运维](docs/产品架构与运维.md)。
+### 最新实测交付
 
-## 可选模型 Agent
+- [StepFun 写稿＋配音真实成片](docs/broadcast-assets/stepfun-ai-story.mp4)：已核对的合成站位事实，经模型拟稿、复核和真实配音，8 秒成片。
+- [StepFun 中文配音演练成片](docs/broadcast-assets/stepfun-rehearsal.mp4)：合成画面，真实语音接口，8 秒 H.264/AAC。
+- [8 页产品与技术演示](docs/broadcast-assets/CourtLens-Broadcast.pptx)：真实界面、时间轴、可编辑图表与部署架构。
+- [StepFun 真实成片记录](docs/broadcast-assets/stepfun-ai-verification.json)。
+- [本版验收与剩余边界](docs/Broadcast-验收报告.md)。
 
-“素材与校准 → Agent 连接与执行”可选择本地证据引擎、本机 Ollama 或 AWS Bedrock。模型模式仅通过本机服务启用；Ollama 固定访问 `127.0.0.1:11434`，需已有支持工具调用的模型。Bedrock 使用已配置 AWS 账户的模型权限与 Python SDK，网页不保存密钥；启用前明确确认结构化证据的发送范围。原视频不随模型请求发送。
-
-模型实际协议是 `search_plays → read_evidence → publish_story`。它只能选择已读取、属于正确回合且在对应时刻可用的声明 ID；本地编译器生成文字与数值，拒绝自由编造答案。输入最多 100,000 字节、问题 1,200 字符，最多 4 轮、8 条声明、12 次工具调用，45 秒截止。
-
-服务端检查结构、有限数值、单位、引用和时序，**不重新测量原视频，也不认证客户端证据真实性**。当前模型协议测试使用模拟提供者，真实 Bedrock / Ollama 调用尚未验收。未配置、超时或非法引用会明确报错，没有用合成回答冒充模型成功的静默降级。
-
-## 验证与发布
-
-2026-09-28 本版实测：Arena 新版 Node 367/367、历史 JavaScript 137/137；Python 198 项中 197 通过、1 跳过（缺随包捕获 WebM 的外部素材项）。启用实际媒体集成测试并生成完整 12 秒 H.264 MP4。浏览器实际导入、解码、编辑、复核、录制、指纹和手机布局另有独立流程记录。详情见 [4.1 升级与验收](docs/Arena-4.1-本地升级与验收.md)；测试数量不代表 NBA 战术识别准确率。原 v4 公开发布与有声链路的历史验收记录仍保留，不充当本版云或官方数据验收。
-
-在项目根目录复现逻辑检查：
-
-```sh
-node --test tests/test-pro-*.mjs
-node --test site/logic.test.mjs studio/domain.test.mjs studio/export.test.mjs studio/ui-boundaries.test.mjs
-node --test tests/*.test.cjs
-python3 -m unittest discover -s tests -p 'test_*.py' -v
-python3 tests/independent_core.py
-python3 tests/independent_media.py
-python3 tests/media_export_checks.py
-python3 tools/test_site.py
-```
-
-媒体和工作台集成检查需要 FFmpeg / FFprobe、Pillow；语音检查另需 macOS `say`。缺失依赖的跳过不算验收通过。Arena 日常浏览器运行无需这些测试工具。
-
-静态发布构建：
-
-```sh
-python3 tools/build_site.py --output site-dist --presentation docs/CourtLens-Arena-4.1-本地产品验收.pptx
-```
-
-构建根页是 Arena，`studio.html` 保留 Studio，`demo.html` 保留旧证据演示；`pro/` 存放模块，没有独立入口页。发布目录不包含用户视频、数据库、凭据或本机工作区。GitHub Actions 配置了源码及媒体检查；历史 Pages 发布改为手动触发，配置见 [GitHub 发布说明](docs/GitHub发布说明.md)。
-
-## 交付文档
-
-- [Arena 使用与验收](docs/Arena-使用与验收.md)：四工作区、接入校准、复核剪辑、成片、备份和实测边界。
-- [Arena 数据合同](docs/Arena-data-contract.md)：字段、指标口径、轨迹、镜头、时间与缺失值处理。
-- [科技研究与产品边界](docs/Arena-科技研究与边界.md)：NBA / AWS、Hawk-Eye、Second Spectrum、训练与其他球类的一手资料。
-- [18 页产品与参赛方案](docs/CourtLens-Arena-产品与参赛方案.pptx)：真实产品截图、可编辑图表和来源说明。
-- [PPT 校验记录](docs/arena-assets/deck-validation.json)、[合成演练统计](docs/arena-assets/deck-demo-statistics.json)、[浏览器有声成片校验](docs/arena-assets/browser-export-validation.json)、[离线成片校验](docs/arena-assets/export-validation.json)。
-
-比赛现场接入时须再核对实际素材许可、指标字典、提交格式、截止时间与允许复用范围。当前实现以可运行、可审计的观看和制作链路为交付边界；不从任意转播自动恢复 NBA 专有追踪和统计模型。
+StepFun 用于本机演练与可选配音；正式提交仍需赛方认可的 AWS Agent 服务、CDK 部署与 CloudFront URL。
