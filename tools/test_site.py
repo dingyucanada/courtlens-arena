@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 sys.path.insert(0,str(ROOT/'tools'))
-from build_site import build, QUESTIONS
+from build_site import build, build_cloud, QUESTIONS
 from core.engine import analyze, ask
 class PublicSiteTest(unittest.TestCase):
     @classmethod
@@ -34,18 +34,32 @@ class PublicSiteTest(unittest.TestCase):
                     self.assertTrue(set(answer['evidence_ids']).issubset(refs))
     def test_media_digest_remains_bound(self):
         self.assertEqual(hashlib.sha256((self.out/'media/demo.mp4').read_bytes()).hexdigest(),self.bundle['dataset']['video']['sha256'])
-    def test_root_enters_broadcast_and_archives_arena(self):
+    def test_root_enters_broadcast_without_publishing_archived_apps(self):
         root=(self.out/'index.html').read_text()
         self.assertIn('url=broadcast/',root)
         self.assertIn('CourtLens Broadcast',root)
         self.assertTrue((self.out/'broadcast/index.html').is_file())
-        self.assertTrue((self.out/'arena.html').is_file())
+        self.assertFalse((self.out/'arena.html').exists())
+        self.assertFalse((self.out/'studio.html').exists())
+        self.assertFalse((self.out/'broadcast/app.mjs').exists())
     def test_public_entry_is_usable_without_unpublished_api(self):
         preview=(self.out/'broadcast/index.html').read_text()
         self.assertIn('href="../demo.html"',preview)
         self.assertIn('自制合成',preview)
+        self.assertIn('真实 48 秒版本',preview)
+        self.assertIn('src="../media/broadcast-rehearsal.mp4"',preview)
+        self.assertTrue((self.out/'media/broadcast-rehearsal.mp4').is_file())
         self.assertNotIn('src="./app.mjs"',preview)
         self.assertNotIn('正在连接制作台',preview)
+    def test_cloud_package_is_the_real_editor_not_the_pages_preview(self):
+        cloud=Path(self.tmp.name)/'cloud-dist'
+        build_cloud(cloud)
+        app=(cloud/'broadcast/index.html').read_text()
+        self.assertIn('src="./app.mjs"',app)
+        self.assertIn('正在连接制作台',app)
+        self.assertNotIn('合成演练',app)
+        self.assertFalse((cloud/'demo.html').exists())
+        self.assertFalse((cloud/'media').exists())
     def test_project_pages_asset_paths_are_relative_and_exist(self):
         for page in ('index.html','broadcast/index.html'):
             html=(self.out/page).read_text()

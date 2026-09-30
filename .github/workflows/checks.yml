@@ -36,7 +36,7 @@ jobs:
       - name: Install Broadcast cloud contract dependencies
         run: npm ci --prefix infra --ignore-scripts
       - name: Build site assets for CDK synthesis
-        run: python tools/build_site.py --output site-dist
+        run: python tools/build_site.py --mode cloud --output dist
       - name: Broadcast cloud contract tests
         run: npm --prefix infra test
       - name: Public artifact and evidence tests

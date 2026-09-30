@@ -4,13 +4,13 @@
 
 面向 BroadcastCode「深度赛场」黑客松，重新设计的视频解说制作系统。输入单个比赛片段，建立视频证据、核对官方指标、编排少量解释节点，导出带战术箭头、中文字幕和可选中文配音的真实 MP4，并生成可独立观看的成片页面。
 
-[打开公开演练网页](https://dingyucanada.github.io/courtlens-arena/) · 使用自制合成视频和数据，可进入交互回合演练。完整制作台需要按下文启动本地服务；比赛正式部署仍以 CloudFront 为准。
+[打开 Broadcast 公开展示](https://dingyucanada.github.io/courtlens-arena/broadcast/) · [操作 36 秒合成回合演练](https://dingyucanada.github.io/courtlens-arena/demo.html?play=p01&view=fan)。两页用途不同，截图中的真实 48 秒测试项目在本地完整制作台；[版本、入口与接口说明](docs/版本与入口.md)列明了每种访问方式。比赛正式部署仍以 CloudFront 为准。
 
 当前主产品是 **Broadcast**。历史 Arena 的可靠指标验证能力部分复用，旧工作流不再是新版使用前提。历史说明见 [Arena 4.1 存档](docs/Archive-Arena-4.1-README.md)。
 
-![制作工作台，合成流程演练](docs/broadcast-assets/story-desktop.png)
+公开站统一使用 CourtLens C↗ 标记与 NBA 海军蓝、球场蓝、关键红。Arena/Studio 历史原型已退出 Pages 交付包，仅在源码留档。Pages 构建是无 API 的展示包；真正用于 CloudFront 的 Broadcast 应用必须使用 `python3 tools/build_site.py --mode cloud --output dist` 单独打包，不能拿展示包部署比赛。
 
-[观看带中文配音的实际导出样片](docs/broadcast-assets/voiced-rehearsal.mp4)（合成演练素材，不是真实 NBA 比赛）。
+[观看统一红蓝视觉的 36 秒解说演练](media/broadcast-rehearsal.mp4)（合成素材，不是真实 NBA 比赛）。历史截图与历史发布成片保留在 `docs/broadcast-assets/`，不作为当前产品外观。
 
 ## 本次真实比赛迭代
 

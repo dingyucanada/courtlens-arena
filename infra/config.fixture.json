@@ -7,7 +7,7 @@
   "contestConfigConfirmed": false,
   "modelResourceArn": "arn:aws:bedrock:us-west-2::foundation-model/local-fixture-model",
   "operatorEmail": "fixture@example.invalid",
-  "siteAssetDirectory": "../site-dist",
+  "siteAssetDirectory": "../dist",
   "fixtureOnly": true,
   "voiceProviders": []
 }

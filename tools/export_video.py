@@ -45,28 +45,28 @@ def overlay(im,ds,analysis,t):
    pts=[(x*w,y*h) for x,y in a['points']]
    if a['kind']=='zone':
     if len(pts)==2:pts=[pts[0],(pts[1][0],pts[0][1]),pts[1],(pts[0][0],pts[1][1])]
-    d.polygon(pts,fill=(214,242,79,36));d.line(pts+[pts[0]],fill=(214,242,79,230),width=3)
+    d.polygon(pts,fill=(96,165,250,36));d.line(pts+[pts[0]],fill=(96,165,250,230),width=3)
    elif a['kind']=='arrow':
-    d.line(pts,fill=(214,242,79,255),width=4)
+    d.line(pts,fill=(96,165,250,255),width=4)
     x,y=pts[-1];px,py=pts[-2];ang=math.atan2(y-py,x-px)
-    d.polygon([(x,y),(x-15*math.cos(ang-.45),y-15*math.sin(ang-.45)),(x-15*math.cos(ang+.45),y-15*math.sin(ang+.45))],fill=(214,242,79,255))
+    d.polygon([(x,y),(x-15*math.cos(ang-.45),y-15*math.sin(ang-.45)),(x-15*math.cos(ang+.45),y-15*math.sin(ang+.45))],fill=(96,165,250,255))
    x,y=pts[0];label=('人工 · ' if a.get('origin')=='manual' else '')+a['label'];tw=d.textlength(label,font=small)
    x=min(max(x,8),w-tw-20);y=max(110*scale,y-35*scale)
-   d.rectangle((x-7,y-3,x+tw+7,y+24*scale),fill=(15,26,28,235));d.text((x,y),label,font=small,fill=(224,246,140,255))
+   d.rectangle((x-7,y-3,x+tw+7,y+24*scale),fill=(15,26,28,235));d.text((x,y),label,font=small,fill=(214,234,255,255))
   if fr:
    for player in fr['players']:
     if player['id']!=p['shooter']:continue
     x,y=player['x']*w,player['y']*h
-    d.ellipse((x-24*scale,y-9*scale,x+24*scale,y+11*scale),outline=(219,245,96,250),width=3)
-    d.text((x+26*scale,y-10*scale),player['id'],font=small,fill=(222,247,114,255))
+    d.ellipse((x-24*scale,y-9*scale,x+24*scale,y+11*scale),outline=(96,165,250,250),width=3)
+    d.text((x+26*scale,y-10*scale),player['id'],font=small,fill=(196,224,255,255))
  else:
-  d.text((30*scale,120*scale),'无有效轨迹或镜头未校准 · 空间标注暂停',font=f,fill=(255,210,120,255))
+  d.text((30*scale,120*scale),'无有效轨迹或镜头未校准 · 空间标注暂停',font=f,fill=(255,154,175,255))
  # Compact xFG panel avoids the players. Values come from the validated source.
  left,top=28*scale,145*scale
  d.rounded_rectangle((left,top,left+225*scale,top+125*scale),radius=8*scale,fill=(13,24,28,238))
  d.text((left+16*scale,top+12*scale),'出手前预期 / xFG',font=small,fill=(175,190,194,255))
  val=p['metrics']['xfg_pct'];value='缺失' if val is None else f'{val*100:.1f}%'
- d.text((left+16*scale,top+43*scale),value,font=large,fill=(221,244,108,255))
+ d.text((left+16*scale,top+43*scale),value,font=large,fill=(255,126,151,255))
  d.text((left+16*scale,top+86*scale),'预测概率 ≠ 实际结果',font=small,fill=(176,188,191,255))
  cue=next((c for c in ap['cues'] if c['start']<=t<c['end']),None)
  d.rectangle((0,h-96*scale,w,h),fill=(11,18,22,255))
@@ -74,7 +74,7 @@ def overlay(im,ds,analysis,t):
   lines=wrap(cue['text'],d,f,w-80*scale)
   for i,line in enumerate(lines[:2]):d.text((40*scale,h-82*scale+i*27*scale),line,font=f,fill=(243,242,224,255))
   d.text((40*scale,h-28*scale),'证据 '+', '.join(cue['evidence_ids']),font=small,fill=(143,161,167,255))
- label=ds['provenance']['label'];d.rectangle((w-390*scale,0,w,42*scale),fill=(15,25,29,255));d.text((w-377*scale,12*scale),label,font=small,fill=(215,239,98,255))
+ label=ds['provenance']['label'];d.rectangle((w-390*scale,0,w,42*scale),fill=(15,25,29,255));d.text((w-377*scale,12*scale),label,font=small,fill=(255,150,174,255))
  return im
 
 def main():

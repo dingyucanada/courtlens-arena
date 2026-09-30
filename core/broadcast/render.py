@@ -135,12 +135,12 @@ def _overlay_arrow(path, pts, media):
     content_width, content_height = media["width"] * scale, media["height"] * scale
     left, top = (1280 - content_width) / 2, (720 - content_height) / 2
     xy = [(round(left + p["x"] * content_width), round(top + p["y"] * content_height)) for p in pts]
-    draw.line(xy, fill=(255, 153, 0, 245), width=7, joint="curve")
+    draw.line(xy, fill=(96, 165, 250, 245), width=7, joint="curve")
     p, q = xy[-2], xy[-1]
     angle = math.atan2(q[1] - p[1], q[0] - p[0])
     left = (q[0] - 23 * math.cos(angle - .5), q[1] - 23 * math.sin(angle - .5))
     right = (q[0] - 23 * math.cos(angle + .5), q[1] - 23 * math.sin(angle + .5))
-    draw.polygon([q, left, right], fill=(255, 153, 0, 245))
+    draw.polygon([q, left, right], fill=(96, 165, 250, 245))
     image.save(path)
 
 

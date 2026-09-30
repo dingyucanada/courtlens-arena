@@ -16,14 +16,14 @@
 需要 Node.js 24、npm、Python 3.12、Docker daemon、AWS CLI，以及有权在目标账号创建 CDK bootstrap 和本栈资源的凭证。工程不依赖 Codex 专属命令。先在仓库根目录构建站点，然后在 `infra` 安装锁定依赖：
 
 ```sh
-python3 tools/build_site.py --output site-dist
+python3 tools/build_site.py --mode cloud --output dist
 cd infra
 npm ci
 npm test
 npm run synth
 ```
 
-`npm run synth` 固定读取 `config.fixture.json`，生成 `infra/cdk.out`；`config.fixture.json` 中的账号、区域和模型只是测试数据。该命令不访问 AWS，也不会构建 Docker 镜像。要单独检查语法可运行 `npx tsc --noEmit` 与 `PYTHONPYCACHEPREFIX=/tmp/courtlens-pycache python3 -m compileall -q ../cloud`。API 使用含 Python 3.12 和固定 Node 24.11.1 的 Lambda 容器，保证同步指标验证器随镜像打包；renderer 与 AgentCore 也需 Docker 构建。
+`dist` 必须是干净目录，`--mode cloud` 输出真实 Broadcast 编辑器。GitHub Pages 所用 `--mode pages` 会将同一路径替换为无需 API 的展示页，**不可作为比赛部署包**。`npm run synth` 固定读取 `config.fixture.json`，生成 `infra/cdk.out`；`config.fixture.json` 中的账号、区域和模型只是测试数据。该命令不访问 AWS，也不会构建 Docker 镜像。要单独检查语法可运行 `npx tsc --noEmit` 与 `PYTHONPYCACHEPREFIX=/tmp/courtlens-pycache python3 -m compileall -q ../cloud`。API 使用含 Python 3.12 和固定 Node 24.11.1 的 Lambda 容器，保证同步指标验证器随镜像打包；renderer 与 AgentCore 也需 Docker 构建。
 
 本轮容器构建记录：`docker info --format '{{.ServerVersion}}'` 返回 `28.5.1`，但 `docker build --platform linux/amd64 -f cloud/api/Dockerfile -t courtlens-api-local .` 在拉取 `node:24.11.1-bookworm-slim` / `python:3.12.12-slim-bookworm` 时失败，Docker daemon 报 `auth.docker.io/token ... i/o timeout`。另试 `docker pull public.ecr.aws/docker/library/node:24.11.1-bookworm-slim`，镜像层下载报 `cloudfront.net ... TLS handshake timeout`。因此 API、renderer、AgentCore 三个镜像均**未构建验证**，真实部署前须在可联网环境完成镜像构建和容器启动测试；CDK synth 不能代替这一步。
 
