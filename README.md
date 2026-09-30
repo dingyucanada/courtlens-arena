@@ -4,6 +4,8 @@
 
 面向 BroadcastCode「深度赛场」黑客松，重新设计的视频解说制作系统。输入单个比赛片段，建立视频证据、核对官方指标、编排少量解释节点，导出带战术箭头、中文字幕和可选中文配音的真实 MP4，并生成可独立观看的成片页面。
 
+[打开公开演练网页](https://dingyucanada.github.io/courtlens-arena/) · 使用自制合成视频和数据，可进入交互回合演练。完整制作台需要按下文启动本地服务；比赛正式部署仍以 CloudFront 为准。
+
 当前主产品是 **Broadcast**。历史 Arena 的可靠指标验证能力部分复用，旧工作流不再是新版使用前提。历史说明见 [Arena 4.1 存档](docs/Archive-Arena-4.1-README.md)。
 
 ![制作工作台，合成流程演练](docs/broadcast-assets/story-desktop.png)

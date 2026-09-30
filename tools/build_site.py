@@ -25,7 +25,7 @@ def copy_file(source,target):
         os.replace(temp,target)
     finally:
         temp.unlink(missing_ok=True)
-def build(output, presentation=None, repo='dingyucanada/courtlens'):
+def build(output, presentation=None, repo='dingyucanada/courtlens-arena'):
     if Path(output).is_symlink():
         raise ValueError('Publication output must not be a symbolic link')
     output = Path(output).resolve()
@@ -64,6 +64,9 @@ def build(output, presentation=None, repo='dingyucanada/courtlens'):
     (output/'broadcast').mkdir(exist_ok=True)
     for name in broadcast_files:
         copy_file(ROOT/'broadcast'/name, output/'broadcast'/name)
+    # Pages has no /api/broadcast/v1 backend. Serve an honest, working preview
+    # while keeping the production editor source intact for local/CloudFront use.
+    copy_file(ROOT/'site/broadcast-preview.html', output/'broadcast/index.html')
     data_dir, media_dir = output/'data', output/'media'
     data_dir.mkdir(exist_ok=True); media_dir.mkdir(exist_ok=True)
     dataset = validate_dataset(json.loads((ROOT/'data/demo.json').read_text()))
@@ -104,6 +107,6 @@ def build(output, presentation=None, repo='dingyucanada/courtlens'):
     (output/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
     return bundle
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(); parser.add_argument('--output',default=str(ROOT/'site-dist')); parser.add_argument('--presentation'); parser.add_argument('--repo',default='dingyucanada/courtlens')
+    parser=argparse.ArgumentParser(); parser.add_argument('--output',default=str(ROOT/'site-dist')); parser.add_argument('--presentation'); parser.add_argument('--repo',default='dingyucanada/courtlens-arena')
     args=parser.parse_args(); result=build(args.output,args.presentation,args.repo)
     print(json.dumps({'output':str(Path(args.output).resolve()),'possessions':len(result['dataset']['possessions']),'modes':list(result['analyses']),'questions_per_possession':len(QUESTIONS),'media_sha256':result['publication']['media_sha256']},ensure_ascii=False))

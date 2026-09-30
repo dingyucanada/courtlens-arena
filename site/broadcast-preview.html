@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071329">
+  <meta name="description" content="CourtLens Broadcast：把篮球回合的视频、证据、深度指标与解说对齐。这里展示可运行的合成演练，完整制作系统见源码。">
+  <title>CourtLens Broadcast · 让赛场自己解释自己</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <style>
+    :root{color-scheme:dark;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",sans-serif;background:#071329;color:#eff5ff}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 74% 6%,#174389 0,transparent 33%),radial-gradient(circle at 15% 70%,#112b54 0,transparent 35%),#071329}
+    a{color:inherit;text-decoration:none}button,a{outline-offset:4px}.shell{max-width:1440px;margin:auto;padding:0 clamp(20px,4vw,68px)}
+    header{height:88px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff27;gap:20px}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.12em}.brand-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:#ffad2d;color:#071329;font-size:28px;transform:rotate(-8deg)}
+    .brand small{display:block;color:#9cb3d0;font-size:10px;letter-spacing:.22em;margin-top:3px}header nav{display:flex;gap:22px;color:#b9cce7;font-size:13px}header nav a:hover{color:#ffb94f}
+    main{padding:72px 0 100px}.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(420px,1.05fr);gap:clamp(30px,5vw,84px);align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;color:#ffbb57;font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}.eyebrow:before{content:"";height:8px;width:8px;border-radius:50%;background:#ffab2b;box-shadow:0 0 14px #ffab2b}
+    h1{font-size:clamp(46px,5.5vw,85px);letter-spacing:-.055em;line-height:1.08;margin:24px 0 18px}h1 em{font-style:normal;color:#ffad2d}.lead{max-width:600px;color:#bdcee7;font-size:clamp(17px,1.5vw,21px);line-height:1.8}
+    .state{display:inline-block;margin:18px 0 25px;padding:9px 13px;border:1px solid #ffad2d66;background:#ffad2d1c;color:#ffd99f;border-radius:8px;font-size:12px;line-height:1.6}
+    .actions{display:flex;flex-wrap:wrap;gap:12px}.btn{display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 22px;border-radius:9px;font-weight:800;font-size:14px;transition:transform .18s,background .18s}.btn:hover{transform:translateY(-2px)}.primary{background:#ffad2d;color:#071329}.primary:hover{background:#ffca70}.secondary{border:1px solid #6e8bb1;background:#112645}.secondary:hover{background:#1b3a66}
+    .stage{border:1px solid #698bb255;border-radius:22px;padding:13px;background:linear-gradient(145deg,#173863,#0a1931 58%);box-shadow:0 30px 100px #0007;position:relative;overflow:hidden}.stage-head{display:flex;justify-content:space-between;gap:10px;color:#bcd0e8;font-size:11px;letter-spacing:.13em;padding:8px 9px 14px}.live{color:#ffb04c}.stage video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px;background:#071329}.stage-foot{display:flex;justify-content:space-between;gap:12px;color:#9bb1ce;font-size:12px;padding:15px 9px 6px}.stage-foot strong{color:#ffbd63}.frame{position:absolute;right:24px;bottom:70px;padding:8px 11px;background:#071329d9;border:1px solid #ffad2d78;border-radius:7px;font-size:11px;color:#ffd59b;pointer-events:none}
+    .numbers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:72px 0}.number,.panel{border:1px solid #ffffff26;background:#ffffff09;border-radius:16px}.number{padding:20px}.number strong{display:block;color:#ffb546;font-size:29px;line-height:1}.number span{display:block;margin-top:8px;color:#a8bedb;font-size:12px;line-height:1.5}
+    .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin:80px 0 24px}.section-head h2{font-size:clamp(28px,3vw,42px);margin:7px 0 0;letter-spacing:-.035em}.section-head p{color:#a8bedb;margin:0;font-size:13px;max-width:360px;line-height:1.7}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.panel{padding:25px;min-height:220px}.panel .n{color:#ffb546;font-size:12px;letter-spacing:.15em;font-weight:800}.panel h3{font-size:21px;margin:20px 0 12px}.panel p{margin:0;color:#b2c5df;font-size:14px;line-height:1.8}.panel a{display:inline-block;margin-top:19px;color:#ffbc58;font-size:13px;font-weight:700}.panel a:hover{text-decoration:underline}
+    .note{margin-top:58px;padding:20px 23px;border-left:3px solid #ffad2d;background:#ffffff0b;color:#b7c9df;font-size:13px;line-height:1.8}.note strong{color:#fff}footer{border-top:1px solid #ffffff27;padding:28px 0 38px;display:flex;justify-content:space-between;gap:18px;color:#8fa8c8;font-size:12px}
+    @media(max-width:900px){header nav{display:none}.hero{grid-template-columns:1fr}.stage{max-width:760px}.numbers{margin:48px 0}.section-head{display:block}.section-head p{margin-top:12px}}
+    @media(max-width:650px){header{height:70px}.shell{padding:0 18px}main{padding-top:42px}.grid{grid-template-columns:1fr}.numbers{gap:8px}.number{padding:14px}.number strong{font-size:24px}.stage-foot{flex-direction:column}.frame{display:none}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header><a class="brand" href="./" aria-label="CourtLens Broadcast 首页"><span class="brand-icon">↗</span><span>COURTLENS<small>BROADCAST / AI STORYTELLING</small></span></a><nav aria-label="页面导航"><a href="#how">分析流程</a><a href="../demo.html">交互演练</a><a href="https://github.com/dingyucanada/courtlens-arena">查看源码</a></nav></header>
+    <main>
+      <section class="hero" aria-labelledby="title">
+        <div><span class="eyebrow">Possession intelligence</span><h1 id="title">让赛场<br><em>自己解释自己。</em></h1><p class="lead">从比赛画面提取可核验的动作线索，绑定有来源的深度指标，把关键选择写回视频，生成与画面同一时刻的解说。</p><p class="state">公开版：36 秒自制合成演练。完整制作台需要本地服务；正式 NBA 视频与 AWS 云端尚待赛方授权和部署。</p><div class="actions"><a class="btn primary" href="../demo.html">进入可交互回合演练 ↗</a><a class="btn secondary" href="https://github.com/dingyucanada/courtlens-arena#readme">获取完整制作系统</a></div></div>
+        <div class="stage"><div class="stage-head"><span>COURTLENS / OUTPUT PREVIEW</span><span class="live">● SYNTHETIC REHEARSAL</span></div><video controls playsinline preload="metadata" src="../media/arena-local-4.1.mp4" aria-label="CourtLens 自制合成视频分析演练"></video><div class="frame">回合 · 指标 · 解说 / 同步成片</div><div class="stage-foot"><span>自制合成素材，不代表 NBA 比赛</span><strong>实际导出 MP4 ↗</strong></div></div>
+      </section>
+      <div class="numbers" aria-label="公开演练范围"><div class="number"><strong>36 s</strong><span>可播放的合成赛场视频</span></div><div class="number"><strong>03</strong><span>可核验的进攻回合</span></div><div class="number"><strong>12</strong><span>与画面同步的解说段</span></div></div>
+      <section id="how" aria-labelledby="how-title"><div class="section-head"><div><span class="eyebrow">From footage to evidence</span><h2 id="how-title">一条能跑通的制作链</h2></div><p>公开站点提供可操作的固定数据演练；源代码包含上传、取帧、证据审核、指标绑定、配音与导出的完整服务流程。</p></div><div class="grid"><article class="panel"><span class="n">01 / SEE</span><h3>画面取证</h3><p>逐帧记录动作与时间锚，校验镜头边界；人名、球队与战术判断都要有依据。</p><a href="../demo.html">查看轨迹叠加 ↗</a></article><article class="panel"><span class="n">02 / EXPLAIN</span><h3>数字回到赛场</h3><p>预期命中率、球员引力、胜负影响数据只在相应事件呈现；缺失值保持缺失。</p><a href="../demo.html#comparison">比较回合指标 ↗</a></article><article class="panel"><span class="n">03 / PUBLISH</span><h3>解说和成片</h3><p>解说草稿经事实复核后与画面同步，输出可播放视频与可追溯的数据清单。</p><a href="../media/narrated-demo.mp4">播放解说样片 ↗</a></article></div></section>
+      <div class="note"><strong>能力边界：</strong>这里的公开演练验证产品交互与媒体输出，不是对真实 NBA 战术识别准确率的证明。比赛官方视频、三项深度数据与 AWS Agent 服务仍待赛方下发和云端验收。</div>
+    </main>
+    <footer><span>COURTLENS BROADCAST · 独立参赛作品</span><span>画面、数字与判断，都有出处。</span></footer>
+  </div>
+</body>
+</html>

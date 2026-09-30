@@ -3,6 +3,7 @@
 from pathlib import Path
 import hashlib, json, re, sys, tempfile, unittest
 from unittest.mock import patch, Mock
+from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 sys.path.insert(0,str(ROOT/'tools'))
@@ -39,14 +40,21 @@ class PublicSiteTest(unittest.TestCase):
         self.assertIn('CourtLens Broadcast',root)
         self.assertTrue((self.out/'broadcast/index.html').is_file())
         self.assertTrue((self.out/'arena.html').is_file())
+    def test_public_entry_is_usable_without_unpublished_api(self):
+        preview=(self.out/'broadcast/index.html').read_text()
+        self.assertIn('href="../demo.html"',preview)
+        self.assertIn('自制合成',preview)
+        self.assertNotIn('src="./app.mjs"',preview)
+        self.assertNotIn('正在连接制作台',preview)
     def test_project_pages_asset_paths_are_relative_and_exist(self):
         for page in ('index.html','broadcast/index.html'):
             html=(self.out/page).read_text()
             parent=(self.out/page).parent
             for url in re.findall(r'(?:href|src)="([^"]+)"',html):
                 if url.startswith(('https://','#','data:')): continue
-                if page=='index.html': self.assertFalse(url.startswith('/'),url)
-                target=(self.out/url.lstrip('/')) if url.startswith('/') else (parent/url)
+                path=urlsplit(url).path
+                if page=='index.html': self.assertFalse(path.startswith('/'),url)
+                target=(self.out/path.lstrip('/')) if path.startswith('/') else (parent/path)
                 self.assertTrue(target.is_file() or (target.is_dir() and (target/'index.html').is_file()),url)
     def test_manifest_covers_deployed_files(self):
         manifest=json.loads((self.out/'manifest.json').read_text())
