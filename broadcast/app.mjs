@@ -329,9 +329,9 @@ function renderDeliverPanel() {
   return panel('出片', '审核当前故事，再生成一版可以播放、下载与复核的影片。', `${reviewForm}${renderForm}<section class="panel-section"><h3>历史成片</h3><div class="release-list">${releaseList || '<p class="empty-copy">第一版生成后，会出现在这里。后续修改不会覆盖之前发布的影片。</p>'}</div></section>`);
 }
 function renderNowStripContent(live) {
-  if(!live.beat) return `<strong>此刻 · 暂无解说</strong><span>${live.phase==='after'?'片段已结束。':'当前画面没有已发布的解说节点。'}</span>`;
+  if(!live.beat) return `<span class="signal-idle-icon" aria-hidden="true">◌</span><strong>等待关键选择</strong><span>${live.phase==='after'?'片段已结束，选择下方章节可以重看。':'解说只在有已审核证据的时刻出现。继续播放或选择下方章节。'}</span>`;
   const beat=live.beat;
-  return `<strong>此刻 · ${esc(beatLabel(beat.label))}</strong><span>${esc(live.compiledText||'当前指标尚未到可展示时刻。')}</span>${live.metric?`<small>${esc(live.metric.label)} · ${esc(live.metric.value)}</small>`:''}${live.annotation?'<small>已确认短窗标注</small>':''}`;
+  return `<span class="signal-live-mark">ON AIR · 0${live.beatIndex+1}</span><strong>${esc(beatLabel(beat.label))}</strong><span class="signal-explanation">${esc(live.compiledText||'这项指标尚未到可展示时刻。')}</span>${live.metric?`<div class="signal-metric"><span>${esc(live.metric.label)}</span><strong>${esc(live.metric.value)}</strong><small>已确认事件绑定</small></div>`:'<div class="signal-metric signal-metric-empty"><span>此刻数据</span><strong>以画面为准</strong><small>未绑定的数字不会上屏</small></div>'}${live.annotation?'<small class="signal-geometry">已确认短时标注</small>':''}`;
 }
 function renderWatch() {
   const r = state.release, range = videoRange(), original = cloudEnabled() ? null : originalUrl(), originalMode = state.watchOriginal && original;
@@ -343,9 +343,9 @@ function renderWatch() {
   const sourceLabel = sourceKind === 'synthetic' ? '合成演练素材' : sourceKind === 'official-provided' ? '赛事方提供素材 · 待核验' : sourceKind === 'user-provided' ? '用户提供素材' : '来源未在发布记录中说明';
   const title = state.manifest?.story?.title || state.manifest?.title || '一个回合的关键选择';
   const caption = !originalMode && r?.captionsUrl ? `<track kind="subtitles" srclang="zh" label="中文字幕" src="${esc(r.captionsUrl)}" default>` : '';
-  const chapterButtons = chapters.slice(0,3).map((b,index) => `<button type="button" class="chapter ${live.beatIndex === index ? 'active' : ''}" data-action="watch-chapter" data-index="${index}"><span class="index">CHAPTER 0${index+1} · ${time(b.sourceStart)}</span><strong>${esc(beatLabel(b.label))}</strong><small>${esc(compiledBeatText(b))}</small></button>`).join('');
+  const chapterButtons = chapters.slice(0,3).map((b,index) => `<button type="button" class="chapter ${live.beatIndex === index ? 'active' : ''}" data-action="watch-chapter" data-index="${index}"><span class="index">CHAPTER 0${index+1} · ${time(b.sourceStart)}</span><strong>${esc(beatLabel(b.label))}</strong><small>点击回看，随画面揭示判断与数据</small></button>`).join('');
   const evidence = state.evidenceOpen ? renderEvidence() : '';
-  return `<div class="watch"><div class="watch-head"><div><span class="eyebrow">COURTLENS / FINAL CUT</span><h1>${esc(title)}</h1><p>${esc(provenance)} · ${esc(sourceLabel)} · ${time(r?.duration)}</p></div><span class="status-pill good">已发布成片</span></div><div class="watch-stage"><div class="stage"><video id="broadcast-video" controls playsinline preload="metadata" src="${esc(src)}" aria-label="${originalMode ? '原片' : '解说成片'}">${caption}你的浏览器不支持视频播放。</video>${originalMode ? '<div class="stage-badge">ORIGINAL / 原片</div>' : ''}</div><div class="watch-controls"><div class="toggle" role="group" aria-label="视频版本"><button type="button" class="${!originalMode ? 'active' : ''}" data-action="watch-mode" data-mode="enhanced">解说版</button><button type="button" class="${originalMode ? 'active' : ''}" data-action="watch-mode" data-mode="original" ${original ? '' : 'disabled'}>原片</button></div><p>${original ? `切换版本会停在同一源片时刻 ${time(state.currentTime)}。` : cloudEnabled() ? '原片仅制作端可看。' : '该成片未附可访问的原片。'}</p></div><div id="now-strip" class="now-strip" role="status" aria-live="off">${renderNowStripContent(live)}</div>${chapterButtons ? `<nav class="chapter-section" aria-label="故事章节">${chapterButtons}</nav>` : ''}<div class="watch-end"><div><span class="eyebrow">SOURCE BEFORE STORY</span><p class="source-note">复核方式见制作记录。数据若有引用，以来源记录和有效时刻为准。</p></div><div class="button-row"><button class="button secondary" data-action="open-evidence" type="button">这一刻的依据</button><a class="button quiet" href="${esc(r?.videoUrl)}" download>下载 MP4</a></div></div></div></div>${evidence}`;
+  return `<div class="watch"><div class="watch-head"><div><span class="eyebrow">COURTLENS / DECISION THEATER</span><h1>${esc(title)}</h1><p>${esc(provenance)} · ${esc(sourceLabel)} · ${time(r?.duration)}</p></div><span class="status-pill good">已发布成片</span></div><div class="watch-theater"><div class="watch-stage"><div class="stage"><video id="broadcast-video" controls playsinline preload="metadata" src="${esc(src)}" aria-label="${originalMode ? '原片' : '解说成片'}">${caption}你的浏览器不支持视频播放。</video>${originalMode ? '<div class="stage-badge">ORIGINAL / 原片</div>' : ''}</div><div class="watch-controls"><div class="toggle" role="group" aria-label="视频版本"><button type="button" class="${!originalMode ? 'active' : ''}" data-action="watch-mode" data-mode="enhanced">解说版</button><button type="button" class="${originalMode ? 'active' : ''}" data-action="watch-mode" data-mode="original" ${original ? '' : 'disabled'}>原片</button></div><p>${original ? `切换版本会停在同一源片时刻 ${time(state.currentTime)}。` : cloudEnabled() ? '原片仅制作端可看。' : '该成片未附可访问的原片。'}</p></div></div><aside class="signal-desk" aria-label="随视频变化的解读席"><div class="signal-desk-head"><span>LIVE SIGNAL</span><span id="signal-time">${time(state.currentTime)}</span></div><div id="now-strip" class="now-strip" role="status" aria-live="off">${renderNowStripContent(live)}</div><div class="signal-actions"><button type="button" class="button secondary" data-action="replay-current" ${live.beat?'':'disabled'}>↶ 重看这一刻</button><button type="button" class="button quiet" data-action="open-evidence">查看依据 ↗</button></div><div class="signal-desk-foot"><span class="signal-pulse" aria-hidden="true"></span> 源片时钟同步 · 先有证据，后有判断</div></aside></div>${chapterButtons ? `<div class="chapter-heading"><span>THE DECISION / CHAPTERS</span><small>点击章节定位到源片时刻</small></div><nav class="chapter-section" aria-label="故事章节">${chapterButtons}</nav>` : ''}<div class="watch-end"><div><span class="eyebrow">SOURCE BEFORE STORY</span><p class="source-note">复核方式见制作记录。数据若有引用，以来源记录和有效时刻为准。</p></div><div class="button-row"><a class="button quiet" href="${esc(r?.videoUrl)}" download>下载 MP4</a></div></div></div>${evidence}`;
 }
 function renderEvidence() {
   const live=playbackState(state.manifest,state.currentTime), beat=live.beat, r=state.release;
@@ -370,6 +370,8 @@ function updateTimeUI() {
   if (state.view === 'watch') {
     const live=playbackState(state.manifest,state.currentTime);
     state.activeChapter=live.beatIndex;
+    const signalTime=$('#signal-time');if(signalTime)signalTime.textContent=time(state.currentTime);
+    const replay=$('[data-action="replay-current"]');if(replay)replay.disabled=!live.beat;
     document.querySelectorAll('.chapter').forEach((node,index) => node.classList.toggle('active',index===live.beatIndex));
     const key=[live.phase,live.beat?.id||'',live.metric?.recordId||'',!!live.annotation].join(':');
     const strip=$('#now-strip');
@@ -783,6 +785,13 @@ async function onAction(event) {
   }
   if(action==='watch-chapter') {
     state.activeChapter=num(target.dataset.index);const beat=chapterBeats()[state.activeChapter];if(beat)seek(beat.sourceStart);render();return;
+  }
+  if(action==='replay-current') {
+    const beat=playbackState(state.manifest,state.currentTime).beat;
+    if(!beat)return;
+    seek(Math.max(num(videoRange().start),beat.sourceStart-1.25));
+    $('#broadcast-video')?.play().catch(()=>{});
+    return;
   }
   if(action==='probe-provider') {
     await run(async()=>{

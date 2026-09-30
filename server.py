@@ -137,7 +137,9 @@ class Handler(BaseHTTPRequestHandler):
         elif decoded.startswith("/arena/"):
             directory, relative = ROOT / "site-dist", decoded[len("/arena/"):] or "arena.html"
         elif decoded.startswith("/broadcast/"):
-            directory, relative = ROOT / "site-dist" / "broadcast", decoded[len("/broadcast/"):] or "index.html"
+            # Local production workbench always serves the actual application.
+            # site-dist/broadcast is the intentionally static GitHub Pages exhibit.
+            directory, relative = ROOT / "broadcast", decoded[len("/broadcast/"):] or "index.html"
         elif decoded in ("", "/"):
             directory, relative = ROOT / "site-dist", "index.html"
         elif decoded.startswith("/pro/"):

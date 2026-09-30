@@ -120,4 +120,39 @@ body{background:radial-gradient(ellipse 72vw 46vw at 50% -24vw,#173d66 0%,#0b254
 .tactics-research{border:1px solid #456486;border-radius:10px;padding:13px;margin-top:4px}.tactics-content{padding:13px 2px 0}.tactics-content h3{margin:17px 0 8px}.tactic-card,.tactic-context,.tactic-concept{background:#0a1b34;border:1px solid #34516f;border-radius:7px;padding:11px;margin:8px 0}.tactic-card p,.tactic-context p,.tactic-concept p{font-size:12px;line-height:1.55;color:#d5e3f2;margin:8px 0}.tactic-card small{color:#90accb}.tactic-card .tactic-caution{color:#b1c3d8}.tactic-source{font-size:11px;line-height:1.5;overflow-wrap:anywhere}.tactic-source a{color:#84bbff;text-decoration:underline}.tactic-concept summary{cursor:pointer;color:#e0edfc;font-size:12px;font-weight:800}.tactic-context strong{font-size:12px}
 .now-strip{display:flex;align-items:baseline;flex-wrap:wrap;gap:7px 14px;border-left:3px solid var(--accent);background:#102b49;padding:11px 14px;border-radius:0 7px 7px 0;margin:7px 0 10px;min-height:46px}.now-strip strong{color:#fff;font-size:13px}.now-strip span{color:#d9e7f6;font-size:12px;line-height:1.45;flex:1;min-width:180px}.now-strip small{font-size:11px;color:#9ac7ff}
 
+/* The released film is a video-first decision theater. The signal desk is
+   derived from source PTS; unavailable metrics are never previewed early. */
+.watch-theater{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,320px);gap:18px;align-items:start}
+.watch-theater .watch-stage{min-width:0;max-width:none}
+.watch-theater .watch-stage .stage{max-height:none}
+.watch-theater .watch-controls{align-items:flex-start}
+.signal-desk{min-height:100%;display:flex;flex-direction:column;border:1px solid #385d82;border-radius:10px;background:linear-gradient(160deg,#112d50,#091a31 67%);box-shadow:0 22px 60px #0007, inset 0 1px #6faeff30;overflow:hidden}
+.signal-desk-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 17px;border-bottom:1px solid #3b60835c;color:#9fccff;font-size:11px;font-weight:900;letter-spacing:.16em}
+.signal-desk-head span:last-child{font-variant-numeric:tabular-nums;color:#e9f4ff}
+.signal-desk .now-strip{display:flex;flex-direction:column;align-items:flex-start;gap:13px;flex:1;min-height:265px;margin:0;padding:24px 20px 16px;border:0;border-radius:0;background:transparent}
+.signal-desk .now-strip>strong{font-size:clamp(24px,2.2vw,34px);line-height:1.05;letter-spacing:-.05em}
+.signal-desk .now-strip>span{flex:initial;min-width:0;color:#bed4eb;font-size:13px;line-height:1.6}
+.signal-desk .now-strip .signal-live-mark{display:inline-block;padding:5px 8px;border:1px solid #fc6b7b91;border-radius:3px;background:#a3193845;color:#ff94a2;font-size:10px;font-weight:900;letter-spacing:.17em}
+.signal-desk .now-strip .signal-explanation{color:#fff;font-size:15px;line-height:1.55;font-weight:650}
+.signal-idle-icon{font-size:42px!important;color:#4a9dff!important;line-height:1!important}
+.signal-metric{width:100%;margin-top:auto;padding:13px 14px;border:1px solid #4e91d8;border-radius:8px;background:linear-gradient(110deg,#1b4c7d,#0c294b)}
+.signal-metric>span,.signal-metric>small{display:block;color:#badbfb;font-size:11px;letter-spacing:.03em}
+.signal-metric>strong{display:block;margin:6px 0;font-size:clamp(22px,2vw,30px);line-height:1.1;letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.signal-metric-empty{border-color:#48607a;background:#112740}
+.signal-metric-empty>strong{font-size:20px}
+.signal-geometry{color:#a8d4ff!important}
+.signal-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 15px 15px}
+.signal-actions .button{min-width:0;font-size:11px;padding:9px 6px}
+.signal-desk-foot{padding:12px 16px;border-top:1px solid #3b60835c;color:#8aaeca;font-size:10px;letter-spacing:.03em}
+.signal-pulse{display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:50%;background:#ef526c;box-shadow:0 0 9px #ff6688}
+.chapter-heading{display:flex;justify-content:space-between;gap:15px;align-items:baseline;margin-top:25px;color:#a3cafa;font-size:11px;font-weight:900;letter-spacing:.16em}
+.chapter-heading small{color:#829fbb;font-size:10px;font-weight:600;letter-spacing:0}
+.watch .chapter-section{margin-top:9px}
+.watch .chapter{position:relative;min-height:112px;overflow:hidden;border-radius:8px;border-top:2px solid #426ea0;background:linear-gradient(135deg,#123052,#091c34)}
+.watch .chapter:before{content:"";position:absolute;right:-27px;top:-47px;width:105px;height:105px;border:1px solid #619beb4f;border-radius:50%}
+.watch .chapter.active{border-color:#fa5d78;background:linear-gradient(135deg,#233f69,#0b213d);box-shadow:0 0 0 1px #fa5d7840,0 12px 30px #0006}
+.watch .chapter small{display:block;line-height:1.45}
+@media(max-width:1050px){.watch-theater{grid-template-columns:minmax(0,1fr)}.signal-desk{min-height:0}.signal-desk .now-strip{min-height:0}.signal-metric{max-width:390px}}
+@media(max-width:600px){.watch-controls{flex-wrap:wrap}.watch-controls p{width:100%}.signal-actions{grid-template-columns:1fr 1fr}.chapter-heading{flex-wrap:wrap}.watch .chapter{min-width:72vw}.watch-head{align-items:flex-start}.watch-head .status-pill{display:none}}
+
 .brand img.brand-mark{display:block;width:41px;height:41px;border:0;border-radius:10px}@media(max-width:480px){.brand img.brand-mark{width:35px;height:35px}}

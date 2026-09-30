@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
 """Offline macOS TTS for verified timed cues. Does not truncate unannotated tails."""
 import argparse,json,math,re,shutil,subprocess,tempfile
+from fractions import Fraction
 from pathlib import Path
 
 def media_duration(path):
- value=float(subprocess.check_output(['ffprobe','-v','error','-protocol_whitelist','file,pipe','-show_entries','format=duration','-of','default=nw=1:nk=1',str(path)]))
- if not math.isfinite(value) or value<=0:raise ValueError('Invalid media duration')
- return value
+ probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-protocol_whitelist','file,pipe','-show_streams','-show_format','-of','json',str(path)]))
+ values=[probe.get('format',{}).get('duration')]
+ for stream in probe.get('streams',[]):
+  values.append(stream.get('duration'))
+  try:values.append(float(Fraction(stream['duration_ts'])*Fraction(stream['time_base'])))
+  except (KeyError,ValueError,ZeroDivisionError):pass
+ for candidate in values:
+  try:value=float(candidate)
+  except (TypeError,ValueError):continue
+  if math.isfinite(value) and value>0:return value
+ raise ValueError('Invalid media duration')
 
 def main():
  p=argparse.ArgumentParser();p.add_argument('--video',required=True);p.add_argument('--analysis',required=True);p.add_argument('--output',required=True);p.add_argument('--voice',default='Tingting');a=p.parse_args()

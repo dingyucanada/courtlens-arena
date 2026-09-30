@@ -31,6 +31,8 @@ python3 tools/launch.py --port 8769
 
 打开 [本机 Broadcast](http://127.0.0.1:8769/broadcast/)。默认项目文件保存在 `workspace/`，视频不会因本地使用而自动上传。只有明确运行已配置的模型提供者时，才按界面选择的范围发送素材。
 
+本机 `/broadcast/` 直接加载真实制作台，不受 `site-dist/broadcast/` 的静态 Pages 展示包影响；`?release=<成片 ID>` 打开源 PTS 同步的观赛剧场。
+
 ## 制作流程
 
 | 阶段 | 可以完成的实际工作 |
@@ -47,6 +49,8 @@ python3 tools/launch.py --port 8769
 [当前深度数据接入状态](docs/Broadcast-深度数据接入状态.md)：真实NBA项目有22名球员与25条逐回合背景，**官方xFG/Gravity/LVG为0条**。通用导入流程已实现，Portal实际格式仍待样例适配。
 
 [陌生片段盲测与下一阶段](docs/Broadcast-盲测与下一阶段.md)：第二段未预标注48秒集锦独立执行，记录自动候选、匿名轨迹和取证失败，明确赛前优先级。
+
+[盲测评测协议与工具](docs/Broadcast-盲测评测协议.md)：已冻结源视频哈希、事件定位、动作与实名的可复算评分方式。尚需独立逐帧真值；现阶段不报告真实片识别准确率。
 
 ## 数据与模型边界
 
@@ -66,6 +70,8 @@ python3 tools/launch.py --port 8769
 
 ## 设计与证据
 
+- [参赛产品蓝图：架构、交互与视觉验收](docs/Broadcast-参赛产品蓝图.md)
+- [2026-09-30 阶段验收：真实浏览器与回归结果](docs/Broadcast-阶段验收-20260930.md)
 - [AWS 部署与验收](docs/Broadcast-AWS部署.md)
 - [Kiro 接续开发](docs/Kiro接续开发与部署.md)
 - [新版使用指南](docs/Broadcast使用指南.md)

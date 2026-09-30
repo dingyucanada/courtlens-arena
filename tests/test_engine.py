@@ -493,6 +493,14 @@ class LocalHttpTests(unittest.TestCase):
         self.assertEqual(self.request("GET", "/data/%2e%2e/server.py")[0], 404)
         self.assertEqual(self.request("GET", "/server.py")[0], 404)
 
+    def test_local_broadcast_route_serves_the_editor_not_the_pages_exhibit(self):
+        status, _, html = self.request("GET", "/broadcast/")
+        self.assertEqual(status, 200)
+        self.assertIn(b'<script type="module" src="./app.mjs"></script>', html)
+        status, _, js = self.request("GET", "/broadcast/app.mjs")
+        self.assertEqual(status, 200)
+        self.assertIn(b"function renderWatch()", js)
+
 
 if __name__ == "__main__":
     unittest.main()
