@@ -1,4 +1,2 @@
-# Cloud runtime dependencies; Bedrock imports boto3 only when invoked.
+# Optional cloud integration; local app uses Python standard library only.
 boto3==1.43.98
-jsonschema==4.23.0
-Pillow==12.3.0

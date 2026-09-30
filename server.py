@@ -82,18 +82,6 @@ class Handler(BaseHTTPRequestHandler):
         if not self.valid_host():
             return self.send_json({"error": "仅允许使用本机地址访问。"}, 403)
         route = urlsplit(self.path).path
-        if route.startswith("/api/broadcast/v1/"):
-            from core.broadcast.common import BroadcastError
-            try:
-                file = self.server.broadcast_routes.file(route)
-                if file is not None:
-                    return self.serve_file(*file, immutable=route.startswith("/api/broadcast/v1/releases/"))
-                result = self.server.broadcast_routes.dispatch_json("GET", self.path)
-                return self.send_json({"data": result[1]}, result[0])
-            except BroadcastError as exc:
-                return self.send_json({"error": exc.body()}, exc.status)
-            except Exception:
-                return self.send_json({"error": BroadcastError("schema_invalid", "广播资源读取失败。", 500).body()}, 500)
         if route == "/api/health":
             return self.send_json({"ok": True, "version": VERSION})
         if route == "/api/arena/capabilities":
@@ -125,7 +113,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def serve_static(self, route):
         decoded = unquote(route)
-        if decoded in ("/studio", "/arena", "/broadcast"):
+        if decoded in ("/studio", "/arena"):
             self.send_response(302)
             self.send_header("Location", decoded+"/")
             self.send_header("Content-Length", "0")
@@ -135,9 +123,7 @@ class Handler(BaseHTTPRequestHandler):
         if decoded.startswith("/studio/"):
             directory, relative = ROOT / "site-dist", decoded[len("/studio/"):] or "studio.html"
         elif decoded.startswith("/arena/"):
-            directory, relative = ROOT / "site-dist", decoded[len("/arena/"):] or "arena.html"
-        elif decoded.startswith("/broadcast/"):
-            directory, relative = ROOT / "site-dist" / "broadcast", decoded[len("/broadcast/"):] or "index.html"
+            directory, relative = ROOT / "site-dist", decoded[len("/arena/"):] or "index.html"
         elif decoded in ("", "/"):
             directory, relative = ROOT / "site-dist", "index.html"
         elif decoded.startswith("/pro/"):
@@ -233,25 +219,6 @@ class Handler(BaseHTTPRequestHandler):
         if origin and origin not in allowed_origins:
             return self.send_json({"error": "拒绝跨站请求；请从本机 CourtLens 页面操作。"}, 403)
         route = urlsplit(self.path).path
-        broadcast_media = re.fullmatch(r"/api/broadcast/v1/projects/([A-Za-z0-9_-]{1,80})/media", route)
-        if broadcast_media:
-            from core.broadcast.common import BroadcastError
-            if self.headers.get("Transfer-Encoding"):
-                return self.send_json({"error": BroadcastError("invalid_request", "上传需要准确 Content-Length。").body()}, 400)
-            try:
-                length = int(self.headers.get("Content-Length", "0"))
-                expected = int(self.headers.get("If-Match", ""))
-                self.connection.settimeout(120)
-                result = self.server.broadcast_routes.service.upload(broadcast_media.group(1), expected, self.rfile, length, self.headers.get("X-Filename", "video.mp4"), self.headers.get_content_type())
-                return self.send_json({"data": result}, 201)
-            except (TypeError, ValueError):
-                return self.send_json({"error": BroadcastError("invalid_request", "If-Match 或 Content-Length 无效。").body()}, 400)
-            except BroadcastError as exc:
-                return self.send_json({"error": exc.body()}, exc.status)
-            except (OSError, TimeoutError):
-                return self.send_json({"error": BroadcastError("media_unreadable", "上传读取失败。", 422).body()}, 422)
-            except Exception:
-                return self.send_json({"error": BroadcastError("media_unreadable", "上传失败。", 500).body()}, 500)
         if re.fullmatch(r'/api/projects/[a-f0-9]{32}/media',route):
             if self.headers.get("Transfer-Encoding"):
                 return self.send_json({"error":"媒体导入需要确定的文件长度。"},400)
@@ -283,27 +250,9 @@ class Handler(BaseHTTPRequestHandler):
             raw = self.rfile.read(length)
             if len(raw) != length:
                 return self.send_json({"error": "请求体不完整。"}, 400)
-            try:
-                body = parse_json(raw)
-            except (ValueError, UnicodeDecodeError, RecursionError):
-                if route.startswith("/api/broadcast/v1/"):
-                    from core.broadcast.common import BroadcastError
-                    return self.send_json({"error": BroadcastError("invalid_request", "JSON 无效。", 400).body()}, 400)
-                raise
+            body = parse_json(raw)
             if not isinstance(body, dict):
-                if route.startswith("/api/broadcast/v1/"):
-                    from core.broadcast.common import BroadcastError
-                    return self.send_json({"error": BroadcastError("invalid_request", "请求必须是 JSON 对象。", 400).body()}, 400)
                 raise ValidationError("request", "请求必须是对象")
-            if route.startswith("/api/broadcast/v1/"):
-                from core.broadcast.common import BroadcastError
-                try:
-                    result = self.server.broadcast_routes.dispatch_json("POST", route, body, dict(self.headers))
-                    return self.send_json({"data": result[1]}, result[0])
-                except BroadcastError as exc:
-                    return self.send_json({"error": exc.body()}, exc.status)
-                except Exception:
-                    return self.send_json({"error": BroadcastError("schema_invalid", "广播请求处理失败。", 500).body()}, 500)
             if route == "/api/arena/export-video":
                 try:
                     return self.send_json(self.server.arena_artifacts.save(body), 201)
@@ -371,8 +320,6 @@ def create_server(port=8765,workspace_root=None,render_python=None):
         workspace = Workspace(workspace_root or ROOT/"workspace",app_root=ROOT,render_python=render_python)
         server.arena_artifacts = ArenaArtifacts(workspace.root, ffprobe=workspace.ffprobe)
         server.workspace_routes = WorkspaceRoutes(workspace)
-        from core.broadcast.routes import BroadcastRoutes
-        server.broadcast_routes = BroadcastRoutes(workspace.root)
     except BaseException:
         server.server_close()
         raise
@@ -391,7 +338,7 @@ def main():
     def shutdown_signal(signum,frame):
         raise KeyboardInterrupt
     signal.signal(signal.SIGTERM,shutdown_signal)
-    print(f"CourtLens ready: http://127.0.0.1:{server.server_port} (Broadcast video studio)", flush=True)
+    print(f"CourtLens ready: http://127.0.0.1:{server.server_port} (local deterministic evidence agent)", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

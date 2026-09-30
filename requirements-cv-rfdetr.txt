@@ -1,5 +1,0 @@
-# Optional local CV adapter. Keep out of the API/render containers.
-# General RF-DETR Nano COCO source/weights: Apache-2.0.
-# Community basketball checkpoint is separately pinned and attributed in docs/Broadcast-CV-实测.md.
-rfdetr==1.11.0
-opencv-python-headless==4.14.0.94

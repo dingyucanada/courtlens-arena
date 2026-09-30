@@ -1,5 +1,0 @@
-#!/bin/sh
-set -eu
-project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-export COURTLENS_CV_BACKEND=ssdlite
-exec "$project_dir/.venv/bin/python" "$project_dir/tools/cv_rfdetr.py" "$@"
