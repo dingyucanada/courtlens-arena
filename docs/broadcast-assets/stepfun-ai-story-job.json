@@ -1,0 +1,18 @@
+{
+  "id": "1ccfcbacdbb44aaeb7a8a50ccfb9bde1",
+  "projectId": "e03bad9011114cc2a05cd0772f7ff472",
+  "inputRevision": 4,
+  "type": "model-story",
+  "status": "succeeded",
+  "stage": "done",
+  "startedAt": "2026-09-30T03:24:38.623672Z",
+  "completedAt": "2026-09-30T03:24:43.951234Z",
+  "progress": null,
+  "resultId": "c6daf949865643bbb3808399cdfce242",
+  "error": null,
+  "cacheHit": false,
+  "result": {
+    "projectId": "e03bad9011114cc2a05cd0772f7ff472",
+    "projectRevision": 5
+  }
+}

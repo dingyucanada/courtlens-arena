@@ -1,0 +1,94 @@
+[
+  {
+    "name": "observations-null",
+    "status": 422,
+    "passed": true,
+    "response": {
+      "error": {
+        "code": "schema_invalid",
+        "message": "观察须为有限大小的对象数组。",
+        "retryable": false,
+        "fields": [],
+        "jobId": null
+      }
+    }
+  },
+  {
+    "name": "observations-string",
+    "status": 422,
+    "passed": true,
+    "response": {
+      "error": {
+        "code": "schema_invalid",
+        "message": "观察须为有限大小的对象数组。",
+        "retryable": false,
+        "fields": [],
+        "jobId": null
+      }
+    }
+  },
+  {
+    "name": "observations-item-number",
+    "status": 422,
+    "passed": true,
+    "response": {
+      "error": {
+        "code": "schema_invalid",
+        "message": "观察须为有限大小的对象数组。",
+        "retryable": false,
+        "fields": [],
+        "jobId": null
+      }
+    }
+  },
+  {
+    "name": "observations-dict",
+    "status": 422,
+    "passed": true,
+    "response": {
+      "error": {
+        "code": "schema_invalid",
+        "message": "观察须为有限大小的对象数组。",
+        "retryable": false,
+        "fields": [],
+        "jobId": null
+      }
+    }
+  },
+  {
+    "name": "truthy-string-review-bypass",
+    "status": 422,
+    "passed": true,
+    "response": {
+      "error": {
+        "code": "review_required",
+        "message": "五项人工复核均须为 true。",
+        "retryable": false,
+        "fields": [],
+        "jobId": null
+      }
+    }
+  },
+  {
+    "name": "cross-origin-write",
+    "status": 403,
+    "passed": true,
+    "response": {
+      "error": "拒绝跨站请求；请从本机 CourtLens 页面操作。"
+    }
+  },
+  {
+    "name": "boolean-time",
+    "status": 400,
+    "passed": true,
+    "response": {
+      "error": {
+        "code": "invalid_request",
+        "message": "抽帧时间超出源片。",
+        "retryable": false,
+        "fields": [],
+        "jobId": null
+      }
+    }
+  }
+]

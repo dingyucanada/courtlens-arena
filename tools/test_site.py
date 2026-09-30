@@ -33,12 +33,21 @@ class PublicSiteTest(unittest.TestCase):
                     self.assertTrue(set(answer['evidence_ids']).issubset(refs))
     def test_media_digest_remains_bound(self):
         self.assertEqual(hashlib.sha256((self.out/'media/demo.mp4').read_bytes()).hexdigest(),self.bundle['dataset']['video']['sha256'])
+    def test_root_enters_broadcast_and_archives_arena(self):
+        root=(self.out/'index.html').read_text()
+        self.assertIn('url=broadcast/',root)
+        self.assertIn('CourtLens Broadcast',root)
+        self.assertTrue((self.out/'broadcast/index.html').is_file())
+        self.assertTrue((self.out/'arena.html').is_file())
     def test_project_pages_asset_paths_are_relative_and_exist(self):
-        html=(self.out/'index.html').read_text()
-        for url in re.findall(r'(?:href|src)="([^"]+)"',html):
-            if url.startswith(('https://','#')): continue
-            self.assertFalse(url.startswith('/'),url)
-            self.assertTrue((self.out/url).is_file(),url)
+        for page in ('index.html','broadcast/index.html'):
+            html=(self.out/page).read_text()
+            parent=(self.out/page).parent
+            for url in re.findall(r'(?:href|src)="([^"]+)"',html):
+                if url.startswith(('https://','#','data:')): continue
+                if page=='index.html': self.assertFalse(url.startswith('/'),url)
+                target=(self.out/url.lstrip('/')) if url.startswith('/') else (parent/url)
+                self.assertTrue(target.is_file() or (target.is_dir() and (target/'index.html').is_file()),url)
     def test_manifest_covers_deployed_files(self):
         manifest=json.loads((self.out/'manifest.json').read_text())
         for name,digest in manifest.items():

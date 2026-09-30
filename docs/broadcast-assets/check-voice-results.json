@@ -1,0 +1,58 @@
+[
+  {
+    "name": "real-mandarin-tts-measured-without-tail-truncation",
+    "passed": true,
+    "detail": {
+      "mode": "local-tts",
+      "provider": "macos-say",
+      "voiceId": "Tingting",
+      "audioSha256": "8036e93e48075220065ba96c1d42c01af3392972cccc8e35ad5ce36745d77551",
+      "cues": [
+        {
+          "beatId": "root-beat",
+          "outputStart": 2,
+          "speechDuration": 2.3865416666666666,
+          "tempo": 1.0,
+          "tailTruncated": false
+        }
+      ]
+    }
+  },
+  {
+    "name": "eight-second-h264-aac-export",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "excessive-caption-or-voice-fails-no-fake-release",
+    "passed": true,
+    "detail": {
+      "code": "render_failed",
+      "message": "解说字幕超过三行，请缩短文字。",
+      "retryable": false,
+      "fields": [],
+      "jobId": "5e18022d28aa40eab2aae11859127670"
+    }
+  },
+  {
+    "name": "measured-voice-overflow-fails-without-truncation",
+    "passed": true,
+    "detail": {
+      "code": "voice_overflow",
+      "message": "第1句需要8.56倍语速；请缩短文字或延长窗口。",
+      "retryable": false,
+      "fields": [],
+      "jobId": "dd37caa7f83f4e8c9d888fe7a281f9ba"
+    }
+  },
+  {
+    "name": "cancelled-render-never-publishes",
+    "passed": true,
+    "detail": null
+  },
+  {
+    "name": "failed-and-cancelled-jobs-preserve-released-film",
+    "passed": true,
+    "detail": null
+  }
+]

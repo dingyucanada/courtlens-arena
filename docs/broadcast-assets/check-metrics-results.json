@@ -1,0 +1,46 @@
+[
+  {
+    "name": "same-game-player-shot-binding-accepted",
+    "passed": true
+  },
+  {
+    "name": "wrong-player-blocked",
+    "passed": true
+  },
+  {
+    "name": "wrong-game-blocked",
+    "passed": true
+  },
+  {
+    "name": "wrong-shot-blocked",
+    "passed": true
+  },
+  {
+    "name": "season-metric-not-event-overlay",
+    "passed": true
+  },
+  {
+    "name": "event-metric-timed-story-accepted",
+    "passed": true
+  },
+  {
+    "name": "percent-not-multiplied-twice",
+    "passed": true
+  },
+  {
+    "name": "probability-converted-exactly-once",
+    "passed": true
+  },
+  {
+    "name": "unbound-numeric-claim-blocked",
+    "passed": true
+  },
+  {
+    "name": "expired-gravity-display-blocked",
+    "passed": true
+  },
+  {
+    "name": "gravity-only-within-its-valid-window",
+    "passed": true
+  }
+]

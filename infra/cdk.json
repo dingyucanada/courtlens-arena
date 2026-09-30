@@ -1,0 +1,8 @@
+{
+  "app": "node --import tsx bin/app.ts",
+  "context": {
+    "availability-zones:account=111111111111:region=us-west-2": ["us-west-2a", "us-west-2b"],
+    "@aws-cdk/aws-s3:serverAccessLogsUseBucketPolicy": true,
+    "@aws-cdk/aws-cloudfront:defaultSecurityPolicyTLSv1.2_2021": true
+  }
+}

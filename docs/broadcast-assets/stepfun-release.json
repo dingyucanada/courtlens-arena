@@ -1,0 +1,226 @@
+{
+  "summary": {
+    "id": "be8b84c8edc84af9a4a8b4d29528b94d",
+    "projectRevision": 15,
+    "contentHash": "1afc1bd39a80306013f2d2eee3197235d8cb23acadddfb76aa8afeccbc009f46",
+    "createdAt": "2026-09-30T02:44:00.153057Z",
+    "videoUrl": "/api/broadcast/v1/releases/be8b84c8edc84af9a4a8b4d29528b94d/film.mp4",
+    "captionsUrl": "/api/broadcast/v1/releases/be8b84c8edc84af9a4a8b4d29528b94d/captions.vtt",
+    "manifestUrl": "/api/broadcast/v1/releases/be8b84c8edc84af9a4a8b4d29528b94d/manifest.json",
+    "watchUrl": "/broadcast/?release=be8b84c8edc84af9a4a8b4d29528b94d",
+    "duration": 8.0,
+    "videoSha256": "02e6d2f0c1037aea3c0cd3b52341eb4af783c1e6ee62c856abdc8863283f89bd",
+    "voice": {
+      "mode": "stepfun",
+      "provider": "stepfun",
+      "voiceId": "elegantgentle-female",
+      "audioSha256": "50fdd994a9a78be8e308bcad877a7df3e21ad673a4d1a99a2832a2bc58655320"
+    },
+    "understanding": {
+      "mode": "manual",
+      "providerRunIds": [],
+      "humanReviewed": true
+    }
+  },
+  "manifest": {
+    "schema": "courtlens-broadcast-release/1",
+    "createdAt": "2026-09-30T02:44:00.150160Z",
+    "source": {
+      "mediaSha256": "ee477fccadef5a27af33ab9e229f311715c70ddf570629b0ccf0fbb4d33926f8",
+      "mediaId": "50355705ced04df28d51e73007b2d694",
+      "mediaUrl": "/api/broadcast/v1/media/50355705ced04df28d51e73007b2d694",
+      "startPts": 0,
+      "firstFramePts": 0,
+      "timeBase": "1/12800",
+      "label": "CourtLens 合成流程演练",
+      "kind": "synthetic",
+      "rightsNote": "项目自制合成素材，无真实NBA识别准确率含义",
+      "verified": false
+    },
+    "story": {
+      "schema": "courtlens-broadcast-story/1",
+      "title": "合成流程：让传球方向看得见",
+      "audience": "fan",
+      "sourceRange": {
+        "start": 0,
+        "end": 8
+      },
+      "beats": [
+        {
+          "id": "root-beat",
+          "label": "读懂传球选择",
+          "sourceStart": 2,
+          "sourceEnd": 6,
+          "anchorTime": 2,
+          "observationIds": [
+            "root-observation"
+          ],
+          "bindingIds": [],
+          "text": "看这次传球，接应点就在右侧。",
+          "explanationKind": "visible-fact",
+          "metricRecordId": null,
+          "secondaryLabel": null,
+          "annotation": null
+        }
+      ]
+    },
+    "compiledBeats": [
+      {
+        "beatId": "root-beat",
+        "compiledText": "看这次传球，接应点就在右侧。",
+        "metric": null,
+        "sourceStart": 2,
+        "sourceEnd": 6,
+        "outputStart": 2,
+        "outputEnd": 6,
+        "observationIds": [
+          "root-observation"
+        ],
+        "bindingIds": []
+      }
+    ],
+    "evidence": {
+      "observations": [
+        {
+          "id": "root-observation",
+          "type": "pass",
+          "start": 1,
+          "end": 6,
+          "anchorTime": 2,
+          "segmentId": "root-segment",
+          "description": "合成演练中，观察传球方向与接应位置。",
+          "playerIds": [],
+          "unknownActors": [
+            "演练持球人"
+          ],
+          "frameIds": [
+            "3efe729023364c51b0f062828af4867f"
+          ],
+          "source": {
+            "kind": "manual",
+            "runId": null,
+            "recordId": null
+          },
+          "confidence": null,
+          "review": {
+            "status": "accepted",
+            "actor": "独立验收",
+            "reason": "仅合成流程检验",
+            "at": "2026-09-30T01:40:00Z"
+          },
+          "geometry": {
+            "space": "screen-normalized",
+            "points": [
+              {
+                "x": 0.3,
+                "y": 0.35
+              },
+              {
+                "x": 0.65,
+                "y": 0.45
+              }
+            ],
+            "validFrom": 2,
+            "validTo": 3,
+            "segmentId": "root-segment"
+          }
+        }
+      ],
+      "bindings": [],
+      "metrics": null
+    },
+    "review": {
+      "contentHash": "1afc1bd39a80306013f2d2eee3197235d8cb23acadddfb76aa8afeccbc009f46",
+      "projectRevision": 15,
+      "actor": "独立配音验收",
+      "at": "2026-09-30T02:43:57.456484Z",
+      "checks": {
+        "identity": true,
+        "timing": true,
+        "metrics": true,
+        "wording": true,
+        "geometry": true
+      },
+      "result": "approved",
+      "note": "合成流程"
+    },
+    "timing": {
+      "sourceRange": {
+        "start": 0,
+        "end": 8
+      },
+      "outputDuration": 8.0,
+      "fps": 25,
+      "beats": [
+        {
+          "beatId": "root-beat",
+          "compiledText": "看这次传球，接应点就在右侧。",
+          "metric": null,
+          "sourceStart": 2,
+          "sourceEnd": 6,
+          "outputStart": 2,
+          "outputEnd": 6,
+          "observationIds": [
+            "root-observation"
+          ],
+          "bindingIds": []
+        }
+      ],
+      "mapping": "outputTime=sourceTime-sourceRange.start; decoded source PTS normalized from first frame"
+    },
+    "outputs": [
+      {
+        "name": "film.mp4",
+        "bytes": 255782,
+        "sha256": "02e6d2f0c1037aea3c0cd3b52341eb4af783c1e6ee62c856abdc8863283f89bd"
+      },
+      {
+        "name": "captions.vtt",
+        "bytes": 81,
+        "sha256": "f05200b672c55afde057fa38e2fa80cca23cf482b146ebbe467e25be69079496"
+      },
+      {
+        "name": "narration.wav",
+        "bytes": 384044,
+        "sha256": "50fdd994a9a78be8e308bcad877a7df3e21ad673a4d1a99a2832a2bc58655320"
+      }
+    ],
+    "understanding": {
+      "mode": "manual",
+      "providerRunIds": [],
+      "humanReviewed": true
+    },
+    "voice": {
+      "mode": "stepfun",
+      "provider": "stepfun",
+      "voiceId": "elegantgentle-female",
+      "audioSha256": "50fdd994a9a78be8e308bcad877a7df3e21ad673a4d1a99a2832a2bc58655320"
+    },
+    "voiceReport": {
+      "mode": "stepfun",
+      "provider": "stepfun",
+      "voiceId": "elegantgentle-female",
+      "audioSha256": "50fdd994a9a78be8e308bcad877a7df3e21ad673a4d1a99a2832a2bc58655320",
+      "cues": [
+        {
+          "beatId": "root-beat",
+          "outputStart": 2,
+          "speechDuration": 3.133208333333333,
+          "tempo": 1.0,
+          "tailTruncated": false
+        }
+      ]
+    },
+    "validation": {
+      "videoCodec": "h264",
+      "pixelFormat": "yuv420p",
+      "durationVerified": true,
+      "sourceHashVerified": true,
+      "contentHash": "1afc1bd39a80306013f2d2eee3197235d8cb23acadddfb76aa8afeccbc009f46"
+    },
+    "limitations": [
+      "Final prose and geometry were reviewed by a human; provider observations remain proposals until accepted."
+    ],
+    "manifestHash": "19ca3fe281ddb288c0c3811567d4b0dde413c5cb88a07e0b360ab7698507b835"
+  }
+}

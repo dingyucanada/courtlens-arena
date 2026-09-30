@@ -1,0 +1,60 @@
+{
+  "date": "2026-09-30",
+  "source": {
+    "url": "https://www.youtube.com/watch?v=HjzSVTdTM8M",
+    "gameId": "0022400460",
+    "date": "2025-01-01",
+    "duration": 48,
+    "note": "NBA channel edited highlights, not organizer supplied footage or continuous possession",
+    "sha256": "10dc5a80343dc97890fc89111fb40997565be2fe48732f815cb4af6902f7f24d"
+  },
+  "projectId": "6c3687c163214e9899dba0687a0bea9a",
+  "releaseId": "9752829423b04928aaf8c4da0e55b24f",
+  "reviewerType": "ai",
+  "humanReviewed": false,
+  "automatedOnly": false,
+  "voice": {
+    "mode": "stepfun",
+    "provider": "stepfun",
+    "voiceId": "elegantgentle-female",
+    "audioSha256": "0f0b1226235c6262daf3b34e729846c5343f821a887f40c496842205979fc33f"
+  },
+  "cueTimings": [
+    {
+      "beatId": "355fd420aa4a4281a73d02b6c39f0c67",
+      "outputStart": 20.8,
+      "speechDuration": 3.2074583333333333,
+      "tempo": 1.0,
+      "tailTruncated": false
+    },
+    {
+      "beatId": "b86bc0ed08354325a5c5dbd15684bcc0",
+      "outputStart": 24.8,
+      "speechDuration": 3.6890416666666668,
+      "tempo": 1.0,
+      "tailTruncated": false
+    },
+    {
+      "beatId": "5c66591b1c154cd5b52f8b2a0429de6b",
+      "outputStart": 42.4,
+      "speechDuration": 3.1589583333333335,
+      "tempo": 1.0,
+      "tailTruncated": false
+    }
+  ],
+  "filmSha256": "4b6ce7761744870dceb688f47abf2bc3a93cce861fff4bd72b44331dba220288",
+  "cv": {
+    "frames": 240,
+    "sampleFPS": 5,
+    "singleRunSeconds": 34.9,
+    "accuracyMeasured": false
+  },
+  "officialDeepMetricsAvailable": false,
+  "awsDeployed": false,
+  "limitations": [
+    "Human-labeled identity and tactical accuracy benchmark not completed",
+    "Visual and model proposals required disclosed AI editorial correction",
+    "English and Cantonese voices not verified",
+    "No live streaming latency measurement"
+  ]
+}
