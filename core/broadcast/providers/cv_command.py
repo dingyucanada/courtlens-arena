@@ -37,7 +37,10 @@ def normalize(result, project, run_id, mode):
     rows = []
     for event in result["events"]:
         nearest = next((s for s in result["samples"] if event["start"] <= s["frameTime"] <= event["end"]), None)
-        row = {"id": uid(), "type": event["type"], "start": event["start"], "end": event["end"], "anchorTime": None, "segmentId": nearest["segmentId"] if nearest else "segment-unknown", "description": "CV 候选" + event["type"], "playerIds": [], "unknownActors": [str(x)[:80] for x in event["trackIds"][:20]], "frameIds": [], "source": {"kind": "cv", "runId": run_id, "recordId": None}, "confidence": event["confidence"], "review": {"status": "unreviewed", "actor": None, "reason": None, "at": None}, "geometry": None}
+        description = event.get("description")
+        if not isinstance(description, str) or not description or len(description) > 160:
+            description = "CV 候选" + event["type"]
+        row = {"id": uid(), "type": event["type"], "start": event["start"], "end": event["end"], "anchorTime": None, "segmentId": nearest["segmentId"] if nearest else "segment-unknown", "description": description, "playerIds": [], "unknownActors": [str(x)[:80] for x in event["trackIds"][:20]], "frameIds": [], "source": {"kind": "cv", "runId": run_id, "recordId": None}, "confidence": event["confidence"], "review": {"status": "unreviewed", "actor": None, "reason": None, "at": None}, "geometry": None}
         rows.append(row)
     validate_observations(rows, project["media"], project["context"]["roster"], set())
     return rows
@@ -52,6 +55,7 @@ def execute_cv(service, project, job, options):
     request = {"schema": "courtlens-cv-request/1", "jobId": job["id"], "media": {"localPath": str(service.media_path(project)), "sha256": project["media"]["sha256"]}, "scope": scope, "outputTimeBase": "video-pts-seconds", "limits": {"maxFrames": 300, "maxSeconds": 90}, "tasks": ["detect", "track", "jersey", "court-keypoints"]}
     req_path, out_path = directory / "cv-request.json", directory / "cv-result.json"
     service.store.atomic(req_path, request)
+    started_at = now()
     try:
         proc = subprocess.run([command, "--request", str(req_path), "--output", str(out_path)], capture_output=True, timeout=180)
     except (OSError, subprocess.TimeoutExpired):
@@ -65,5 +69,4 @@ def execute_cv(service, project, job, options):
         raise BroadcastError("schema_invalid", "CV 输出不是 JSON。", 422)
     validate_result(result, project, scope)
     run_id = uid()
-    stamp = now()
-    return {"schema": "courtlens-observations/1", "mediaSha256": project["media"]["sha256"], "providerRun": {"id": run_id, "provider": result["provider"]["id"], "modelId": None, "mode": "cv-executed", "requestHash": hash_json(request), "responseHash": hash_json(result), "startedAt": stamp, "completedAt": now()}, "observations": normalize(result, project, run_id, "cv-executed"), "cvResultHash": hash_json(result)}
+    return {"schema": "courtlens-observations/1", "mediaSha256": project["media"]["sha256"], "providerRun": {"id": run_id, "provider": result["provider"]["id"], "modelId": result["provider"]["id"], "mode": "cv-executed", "requestHash": hash_json(request), "responseHash": hash_json(result), "startedAt": started_at, "completedAt": now()}, "observations": normalize(result, project, run_id, "cv-executed"), "cvResultHash": hash_json(result), "cvEvidence": {"provider": result["provider"], "samples": result["samples"], "diagnostics": result.get("diagnostics")}}

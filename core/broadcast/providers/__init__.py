@@ -24,10 +24,13 @@ def _row(id, kind, configured, available, modalities, mode, reason, message, rec
 
 def voice_fingerprint(mode):
     """Identify the approved TTS configuration without storing or hashing a secret."""
-    require(mode in ("minimax", "stepfun"), "voice_unavailable", "语音配置无效。", 503)
+    require(mode in ("minimax", "stepfun", "polly"), "voice_unavailable", "语音配置无效。", 503)
     prefix = "COURTLENS_" + mode.upper() + "_"
-    variant = os.environ.get("COURTLENS_MINIMAX_REGION", "global") if mode == "minimax" else os.environ.get("COURTLENS_STEPFUN_API_VARIANT", "openapi")
-    settings = {"provider": mode, "model": os.environ.get(prefix + "MODEL"), "voiceId": os.environ.get(prefix + "VOICE_ID"), "variant": variant}
+    if mode == "polly":
+        settings = {"provider": mode, "region": os.environ.get(prefix + "REGION"), "engine": os.environ.get(prefix + "ENGINE"), "voiceId": os.environ.get(prefix + "VOICE_ID")}
+    else:
+        variant = os.environ.get("COURTLENS_MINIMAX_REGION", "global") if mode == "minimax" else os.environ.get("COURTLENS_STEPFUN_API_VARIANT", "openapi")
+        settings = {"provider": mode, "model": os.environ.get(prefix + "MODEL"), "voiceId": os.environ.get(prefix + "VOICE_ID"), "variant": variant}
     return hashlib.sha256(json.dumps(settings, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
@@ -48,7 +51,7 @@ def capabilities(root):
         reason = None if available else "provider_not_configured" if not configured else "provider_unverified"
         message = "已配置，尚未实测。" if available else "请配置区域、模型 ID 和 boto3。"
         rows.append(_row(pid, "semantic", configured, available, modal, "bedrock-converse", reason, message, _probe_file(root, pid)))
-    for pid, model_kind, modal, mode in (("stepfun-vision", "VISION", ["image", "text"], "stepfun-vision-frames"), ("stepfun-story", "STORY", ["text"], "stepfun-story-text")):
+    for pid, model_kind, modal, mode in (("stepfun-vision", "VISION", ["video", "image", "text"], "stepfun-video-evidence"), ("stepfun-story", "STORY", ["text"], "stepfun-story-text")):
         model = os.environ.get("COURTLENS_STEPFUN_" + model_kind + "_MODEL", "step-3.7-flash")
         configured = bool(os.environ.get("COURTLENS_STEPFUN_API_KEY") and isinstance(model, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,100}", model))
         record = _probe_file(root, pid)
@@ -89,7 +92,13 @@ def capabilities(root):
         if record and record.get("fingerprint") != voice_fingerprint(mode):
             record = None
         rows.append(_row(mode, "voice", bool(configured), bool(configured), ["text"], "https-tts", None if record and record.get("passed") else "provider_unverified" if configured else "voice_unavailable", "当前语音配置已通过真实成片。" if record and record.get("passed") else "配置完整，尚未进行独立健康探测。" if configured else "请配置语音密钥、模型、音色和允许的区域。", record if configured else None))
-    rows.append(_row("polly", "voice", bool(os.environ.get("COURTLENS_POLLY_REGION")), False, ["text"], "aws-polly", "provider_unverified", "Polly 需要显式配置与实测；当前没有生产发布。", None))
+    polly_region = os.environ.get("COURTLENS_POLLY_REGION")
+    allowed_region = os.environ.get("COURTLENS_ALLOWED_REGION") or os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")
+    polly_configured = bool(polly_region and allowed_region == polly_region and os.environ.get("COURTLENS_POLLY_ENGINE") == "neural" and os.environ.get("COURTLENS_POLLY_VOICE_ID") == "Zhiyu")
+    record = _probe_file(root, "voice-polly") if polly_configured else None
+    if record and record.get("fingerprint") != voice_fingerprint("polly"):
+        record = None
+    rows.append(_row("polly", "voice", polly_configured, polly_configured and sdk, ["text"], "aws-polly", None if record and record.get("passed") else "provider_unverified" if polly_configured and sdk else "voice_unavailable", "配置完整，仍需真实配音验证。" if polly_configured and sdk else "请显式配置同区域 Polly neural/Zhiyu 与 boto3。", record))
     return rows
 
 
@@ -104,7 +113,7 @@ def check_configured(kind, options):
     elif pid == "stepfun-vision":
         from .stepfun import model_for
         model_for("vision")
-        require(options.get("strategy") == "frames-first", "unsupported_modality", "StepFun 当前仅支持真实证据帧。", 422)
+        require(options.get("strategy", "video-first") in ("video-first", "frames-first"), "unsupported_modality", "StepFun 分析策略无效。", 422)
     else:
         model = os.environ.get("COURTLENS_SEMANTIC_MODEL_ID" if pid == "bedrock-video" else "COURTLENS_VISION_MODEL_ID")
         require(pid != "cv-command" and model and (os.environ.get("COURTLENS_BEDROCK_REGION") or os.environ.get("AWS_REGION")), "provider_not_configured", "Bedrock 区域或模型 ID 未配置。", 503)

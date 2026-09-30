@@ -11,6 +11,37 @@ ROOT = Path(__file__).resolve().parents[2]
 NODE = os.environ.get("COURTLENS_NODE") or shutil.which("node")
 
 
+def grounded_wording(text, evidence, roster):
+    """Conservative publication checks, not a substitute for semantic review.
+
+    Official numbers use metric placeholders. Jersey numbers may be quoted only
+    for players referenced by the accepted observations. Basketball vocabulary
+    such as 三分球 is not itself a measured quantity.
+    """
+    stripped = re.sub(r"\{\{metric:[A-Za-z0-9_-]+\}\}", "", text)
+    player_ids = {p for row in evidence for p in row["playerIds"]}
+    for player in roster:
+        jersey = player.get("jersey")
+        if player["id"] in player_ids and jersey is not None:
+            digit = re.escape(str(jersey))
+            stripped = re.sub(r"(?<!\d)(?:#\s*|No\.?\s*)?" + digit + r"\s*[号號](?!\d)|(?:#\s*|No\.?\s*)" + digit + r"\b", "", stripped, flags=re.I)
+    # A visible jersey can be known before the wearer's name is established.
+    for row in evidence:
+        visible_text = row["description"] + " " + " ".join(row.get("unknownActors", []))
+        for jersey in re.findall(r"(?<!\d)(\d{1,2})\s*[号號](?!\d)", visible_text):
+            stripped = re.sub(r"(?<!\d)(?:#\s*)?" + re.escape(jersey) + r"\s*[号號](?!\d)", "", stripped)
+    require(not re.search(r"[0-9０-９]", stripped), "schema_invalid", "数字须引用指标记录；球衣号须有已确认的球员依据。", 422)
+    chinese_number = r"[零〇一二两三四五六七八九十百千万亿点]+"
+    # “这一次进攻” is ordinary narration, not an asserted measurement.
+    quantitative = re.sub(r"三秒区|二次进攻|二次组织|二次传导", "篮球术语", stripped)
+    quantitative = re.sub(r"(?<![零〇一二两三四五六七八九十百千万亿点])一次", "本次", quantitative)
+    require(not re.search(r"(?:百分之|千分之)" + chinese_number + r"|" + chinese_number + r"\s*(?:百分点|厘米|米|秒|公里|次)", quantitative), "schema_invalid", "中文数量也须使用有来源的指标记录。", 422)
+    english_number = r"(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million)(?:[ -](?:one|two|three|four|five|six|seven|eight|nine|ten|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand))*"
+    require(not re.search(r"\b" + english_number + r"\s+(?:percent(?:age\s+points?)?|centimeters?|meters?|seconds?|minutes?|rebounds?|assists?|points)\b", quantitative, re.I), "schema_invalid", "英文数量须引用有来源的指标记录。", 422)
+    outcome = re.search(r"命中(?!率|概率)|投进|打进|得手|投篮不中|投失|未能命中|打铁|入网|(?:球)?[进進]了|入咗|入左|入籃|唔入|射入|射中|射失|中咗|中左|冇入|唔中|入波|得分|\b(?:made|missed|scores?|scored|drains?|buries|bucket)\b|\b(?:goes? in|goes? down|puts? it in|lays? it in|hits? (?:it|the shot)|(?:it|shot|basket) (?:is )?good|it['’]s good|no good|won't go|makes? (?:the|a|it))\b", stripped, re.I)
+    require(not outcome or any(row["type"] == "result" for row in evidence), "review_required", "进球或未进的断言需要已接受的结果观察。", 422)
+
+
 def metric_bundle(bundle):
     if NODE is None:
         raise BroadcastError("schema_invalid", "指标 v2 验证需要 Node.js；当前未安装。", 503)
@@ -43,7 +74,7 @@ def observations(rows, media, roster, frame_ids=None):
         source, review = o.get("source"), o.get("review")
         require(isinstance(source, dict) and source.get("kind") in ("manual", "model", "cv") and isinstance(review, dict) and review.get("status") in ("unreviewed", "accepted", "rejected"), "schema_invalid", "观察来源或审核无效。", 422)
         if review["status"] == "accepted":
-            require(bool(review.get("actor")) and bool(review.get("at")), "schema_invalid", "接受观察需要人工审核人和时间。", 422)
+            require(bool(review.get("actor")) and bool(review.get("at")), "schema_invalid", "接受观察需要复核署名和时间。", 422)
         c = o.get("confidence")
         require(c is None or finite(c) and 0 <= c <= 1, "schema_invalid", "置信度无效。", 422)
         g = o.get("geometry")
@@ -71,7 +102,7 @@ def bindings(rows, project):
         require(isinstance(mapping, dict) and mapping.get("source") in ("video", "game-clock") and finite(mapping.get("videoTime")) and obs[b["observationId"]]["start"] <= mapping["videoTime"] <= obs[b["observationId"]]["end"], "unresolved_binding", "绑定视频时间不在观察窗。", 422)
         require(isinstance(mapping.get("mappingEvidenceIds"), list) and len(mapping["mappingEvidenceIds"]) <= 20 and all(valid_id(x) for x in mapping["mappingEvidenceIds"]), "schema_invalid", "映射证据无效。", 422)
         if b["status"] == "confirmed":
-            require(bool(b.get("confirmedBy")) and bool(b.get("confirmedAt")) and obs[b["observationId"]]["review"]["status"] == "accepted", "unresolved_binding", "绑定确认须先人工接受观察。", 422)
+            require(bool(b.get("confirmedBy")) and bool(b.get("confirmedAt")) and obs[b["observationId"]]["review"]["status"] == "accepted", "unresolved_binding", "绑定确认须先接受已复核的观察。", 422)
             require(b.get("gameId") is None or b["gameId"] == project["context"]["gameId"], "unresolved_binding", "比赛 ID 冲突。", 422)
             require(b.get("playerId") is None or b["playerId"] in obs[b["observationId"]]["playerIds"], "unresolved_binding", "球员身份没有观察支持。", 422)
             for rid in b["metricRecordIds"]:
@@ -93,6 +124,7 @@ def bindings(rows, project):
 
 
 def story(project, frame_times=None):
+    from .commentary_style import resolve_style
     s = project.get("story")
     media = project.get("media")
     require(media is not None and isinstance(s, dict) and s.get("schema") == "courtlens-broadcast-story/1", "review_required", "先建立故事。", 422)
@@ -104,6 +136,7 @@ def story(project, frame_times=None):
     a, b = source_range.get("start"), source_range.get("end")
     require(finite(a) and finite(b) and 0 <= a < b <= media["duration"], "schema_invalid", "剪辑范围无效。", 422)
     require(s.get("audience") in ("fan", "pro"), "schema_invalid", "受众无效。", 422)
+    resolve_style(s.get("commentaryStyle"))
     obs = {o["id"]: o for o in project["observations"]}
     bind = {x["id"]: x for x in project["bindings"]}
     metric = {r["id"]: r for r in (project.get("metrics") or {}).get("records", [])}
@@ -137,8 +170,10 @@ def story(project, frame_times=None):
             require(placeholders == [mid], "schema_invalid", "指标文本只能使用当前唯一记录占位符。", 422)
         elif placeholders:
             raise BroadcastError("unresolved_binding", "正文有未绑定指标。", 422)
-        stripped = re.sub(r"\{\{metric:[A-Za-z0-9_-]+\}\}", "", text)
-        require(not re.search(r"(?<![A-Za-z])\d+(?:\.\d+)?\s*(?:%|％|米|分|百分点)", stripped), "schema_invalid", "正文新数字需要指标记录。", 422)
+        grounded_wording(text, [obs[r] for r in refs], project["context"]["roster"])
+        grounded_wording(beat["label"], [obs[r] for r in refs], project["context"]["roster"])
+        if beat.get("secondaryLabel"):
+            grounded_wording(beat["secondaryLabel"], [obs[r] for r in refs], project["context"]["roster"])
         annotation = beat.get("annotation")
         if annotation is not None:
             require(isinstance(annotation, dict) and annotation.get("sourceObservationId") in refs and bool(annotation.get("confirmedBy")) and bool(annotation.get("confirmedAt")), "review_required", "箭头须来自已确认观察。", 422)
@@ -146,7 +181,7 @@ def story(project, frame_times=None):
             g = obs[annotation["sourceObservationId"]].get("geometry")
             require(g is not None and g["segmentId"] == obs[annotation["sourceObservationId"]]["segmentId"], "review_required", "箭头缺少同镜头几何旁证。", 422)
             require(g["validFrom"] < y and g["validTo"] > x, "review_required", "箭头的已确认几何窗与节点没有交集。", 422)
-            require(annotation["points"] == g["points"], "review_required", "箭头点位与人工确认几何不一致。", 422)
+            require(annotation["points"] == g["points"], "review_required", "箭头点位与已确认几何不一致。", 422)
             if frame_times is not None:
                 ids = obs[annotation["sourceObservationId"]]["frameIds"]
                 require(any(fid in frame_times and g["validFrom"] <= frame_times[fid] <= g["validTo"] and x - .2 <= frame_times[fid] <= x + .04 for fid in ids), "review_required", "箭头需要解说开始附近的真实目标帧。", 422)

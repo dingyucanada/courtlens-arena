@@ -31,6 +31,42 @@ def font_available(path=FONT):
         return False
 
 
+def renderer_fingerprint(font):
+    """Capture actual renderer inputs rather than relying on a Git label."""
+    from PIL import __version__ as pillow_version
+    import platform
+    root = Path(__file__).resolve().parents[2]
+    files = ["core/broadcast/render.py", "core/broadcast/validation.py", "core/broadcast/providers/voice.py", "core/broadcast/common.py", "core/broadcast/media.py"]
+    sources = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in files}
+    versions = {}
+    for name, binary in (("ffmpeg", FFMPEG), ("ffprobe", FFPROBE)):
+        try:
+            proc = subprocess.run([binary, "-version"], capture_output=True, timeout=10, check=True)
+            versions[name] = proc.stdout.decode("utf-8", "replace").splitlines()[0]
+        except (OSError, subprocess.SubprocessError, IndexError):
+            versions[name] = "unavailable"
+    return {"sources": sources, "fontSha256": hashlib.sha256(Path(font).read_bytes()).hexdigest(), "fontName": Path(font).name, "python": platform.python_version(), "pillow": pillow_version, "tools": versions, "sourceFingerprint": hash_json(sources)}
+
+
+def background_evidence(project, used_observations):
+    """Retain the actual supporting context without treating all imported PBP as seen."""
+    context = project["context"]
+    rows = [o for o in project["observations"] if o["id"] in used_observations]
+    players = {pid for o in rows for pid in o.get("playerIds", [])}
+    record_ids = {o.get("source", {}).get("recordId") for o in rows}
+    result = {key: context.get(key) for key in ("gameId", "gameDate", "seasonId", "offenseTeamId", "defenseTeamId")}
+    result["roster"] = [p for p in context.get("roster", []) if p["id"] in players]
+    pbp = context.get("playByPlay")
+    if pbp:
+        result["playByPlay"] = {"source": pbp["source"], "importSha256": hash_json(pbp),
+            "entries": [e for e in pbp["entries"] if e["id"] in record_ids],
+            "timeBase": "game-clock; video alignment is recorded in observations",
+            "role": "Background corroboration, not official deep metrics or independent visual proof."}
+    else:
+        result["playByPlay"] = None
+    return result
+
+
 def _stamp(seconds):
     ms = round(seconds * 1000)
     return f"{ms // 3600000:02d}:{ms // 60000 % 60:02d}:{ms // 1000 % 60:02d}.{ms % 1000:03d}"
@@ -99,12 +135,12 @@ def _overlay_arrow(path, pts, media):
     content_width, content_height = media["width"] * scale, media["height"] * scale
     left, top = (1280 - content_width) / 2, (720 - content_height) / 2
     xy = [(round(left + p["x"] * content_width), round(top + p["y"] * content_height)) for p in pts]
-    draw.line(xy, fill=(255, 153, 43, 245), width=7, joint="curve")
+    draw.line(xy, fill=(255, 153, 0, 245), width=7, joint="curve")
     p, q = xy[-2], xy[-1]
     angle = math.atan2(q[1] - p[1], q[0] - p[0])
     left = (q[0] - 23 * math.cos(angle - .5), q[1] - 23 * math.sin(angle - .5))
     right = (q[0] - 23 * math.cos(angle + .5), q[1] - 23 * math.sin(angle + .5))
-    draw.polygon([q, left, right], fill=(255, 153, 43, 245))
+    draw.polygon([q, left, right], fill=(255, 153, 0, 245))
     image.save(path)
 
 
@@ -123,7 +159,7 @@ def _overlay_metric(path, metric, font_path):
 
 def render(project, source_path, destination, font=FONT, voice_mode="silent", voice_id=None, cancel_check=None, understanding=None, first_frame_pts=None, frame_times=None):
     story(project, frame_times)
-    require(voice_mode in ("silent", "local-tts", "minimax", "stepfun"), "voice_unavailable", "所选语音提供者尚未可用。", 503)
+    require(voice_mode in ("silent", "local-tts", "minimax", "stepfun", "polly"), "voice_unavailable", "所选语音提供者尚未可用。", 503)
     require(not project["media"]["variableFrameRate"], "unsupported_timebase", "变帧率视频需先建立源 PTS 映射，当前只能预览。", 422)
     s = project["story"]
     a, b = s["sourceRange"]["start"], s["sourceRange"]["end"]
@@ -163,7 +199,8 @@ def render(project, source_path, destination, font=FONT, voice_mode="silent", vo
                 arrow = overlay_dir / f"arrow-{i}.png"
                 _overlay_arrow(arrow, annotation["points"], project["media"])
                 overlays.append((arrow, visible_start - a, visible_end - a))
-    title = "人工辅助制作" if project["mode"] == "manual" else "人工复核故事"
+    ai_review = (project.get("review") or {}).get("reviewerType") == "ai"
+    title = "AI复核验证片" if ai_review else "人工辅助制作" if project["mode"] == "manual" else "人工复核故事"
     title_file = overlay_dir / "provenance.png"
     _overlay_text(title_file, title, font, label=True)
     overlays.append((title_file, 0, b - a))
@@ -190,7 +227,7 @@ def render(project, source_path, destination, font=FONT, voice_mode="silent", vo
         raise BroadcastError("cancelled", "任务已取消。", 409)
     voice = {"mode": "silent", "provider": None, "voiceId": None, "audioSha256": None}
     voice_report = None
-    if voice_mode in ("local-tts", "minimax", "stepfun"):
+    if voice_mode in ("local-tts", "minimax", "stepfun", "polly"):
         from .providers.voice import synthesize
         voice_report = synthesize(film, timing, overlay_dir, b - a, mode=voice_mode, voice_id=voice_id, has_source_audio=project["media"]["hasAudio"])
         voice = {key: voice_report[key] for key in ("mode", "provider", "voiceId", "audioSha256")}
@@ -211,8 +248,9 @@ def render(project, source_path, destination, font=FONT, voice_mode="silent", vo
     outputs = [{"name": name, "bytes": (Path(destination) / name).stat().st_size, "sha256": hashlib.sha256((Path(destination) / name).read_bytes()).hexdigest()} for name in names]
     used_obs = {oid for beat in s["beats"] for oid in beat["observationIds"]}
     used_bind = {bid for beat in s["beats"] for bid in beat["bindingIds"]}
-    understanding = understanding or {"mode": "manual", "providerRunIds": [], "humanReviewed": True}
-    manifest = {"schema": "courtlens-broadcast-release/1", "createdAt": now(), "source": {"mediaSha256": project["media"]["sha256"], "mediaId": project["media"]["id"], "mediaUrl": project["media"]["mediaUrl"], "startPts": project["media"]["startPts"], "firstFramePts": first_frame_pts, "timeBase": project["media"]["timeBase"], **project["media"]["source"]}, "story": s, "compiledBeats": timing, "evidence": {"observations": [o for o in project["observations"] if o["id"] in used_obs], "bindings": [x for x in project["bindings"] if x["id"] in used_bind], "metrics": project["metrics"]}, "review": project["review"], "timing": {"sourceRange": s["sourceRange"], "outputDuration": duration, "fps": fps, "beats": timing, "mapping": "outputTime=sourceTime-sourceRange.start; decoded source PTS normalized from first frame"}, "outputs": outputs, "understanding": understanding, "voice": voice, "voiceReport": voice_report, "validation": {"videoCodec": "h264", "pixelFormat": "yuv420p", "durationVerified": True, "sourceHashVerified": True, "contentHash": project["review"]["contentHash"]}, "limitations": ["Final prose and geometry were reviewed by a human; provider observations remain proposals until accepted."]}
+    understanding = understanding or {"mode": "manual", "providerRunIds": [], "humanReviewed": not ai_review}
+    manifest = {"schema": "courtlens-broadcast-release/1", "createdAt": now(), "source": {"mediaSha256": project["media"]["sha256"], "mediaId": project["media"]["id"], "mediaUrl": project["media"]["mediaUrl"], "startPts": project["media"]["startPts"], "firstFramePts": first_frame_pts, "timeBase": project["media"]["timeBase"], **project["media"]["source"]}, "story": s, "compiledBeats": timing, "evidence": {"observations": [o for o in project["observations"] if o["id"] in used_obs], "bindings": [x for x in project["bindings"] if x["id"] in used_bind], "metrics": project["metrics"], "background": background_evidence(project, used_obs)}, "review": project["review"], "timing": {"sourceRange": s["sourceRange"], "outputDuration": duration, "fps": fps, "beats": timing, "mapping": "outputTime=sourceTime-sourceRange.start; decoded source PTS normalized from first frame"}, "outputs": outputs, "understanding": understanding, "voice": voice, "voiceReport": voice_report, "validation": {"videoCodec": "h264", "pixelFormat": "yuv420p", "durationVerified": True, "sourceHashVerified": True, "contentHash": project["review"]["contentHash"]}, "limitations": ["Review actor and reviewerType are declared in review; AI review is not human verification. Provider observations remain proposals until accepted."]}
+    manifest["renderer"] = renderer_fingerprint(font)
     manifest["manifestHash"] = hash_json(manifest)
     (Path(destination) / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     shutil.rmtree(overlay_dir)

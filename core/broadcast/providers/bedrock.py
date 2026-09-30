@@ -57,11 +57,11 @@ def _tool(name, arguments, service, project, scope, job, drafts):
     raise BroadcastError("schema_invalid", "模型请求了未授权工具。", 422)
 
 
-def _normalize(result, project, scope, run_id, mode, available_frames=None):
+def _normalize(result, project, scope, run_id, mode, available_frames=None, max_rows=3):
     rows = []
     roster_ids = {p["id"] for p in project["context"]["roster"]}
     available_frames = available_frames or {}
-    require(len(result["observations"]) <= 3, "schema_invalid", "模型一次最多提出3个事件窗。", 422)
+    require(len(result["observations"]) <= max_rows, "schema_invalid", "模型候选事件窗过多。", 422)
     for original in result["observations"]:
         require(isinstance(original, dict), "schema_invalid", "观察项无效。", 422)
         a, b = original.get("start"), original.get("end")

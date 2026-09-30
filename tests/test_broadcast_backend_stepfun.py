@@ -13,6 +13,7 @@ from PIL import Image
 from core.broadcast.common import BroadcastError
 from core.broadcast.providers import capabilities, check_configured, voice_fingerprint
 from core.broadcast.providers import stepfun
+from core.broadcast.service import validate_play_by_play
 
 
 class FakeStore:
@@ -40,6 +41,9 @@ class FakeService:
             frames.append({"id": fid, "actualTime": actual, "sha256": "a" * 64})
         return {"frames": frames}
 
+    def media_path(self, project):
+        return Path(self.store.root) / "source.mp4"
+
 
 def project(duration=8):
     return {"id": "a" * 32, "revision": 1, "media": {"sha256": "b" * 64, "duration": duration},
@@ -54,6 +58,80 @@ class StepFunTest(unittest.TestCase):
         self.env = patch.dict(os.environ, {"COURTLENS_STEPFUN_API_KEY": "placeholder-test-only", "COURTLENS_STEPFUN_VISION_MODEL": "step-3.7-flash", "COURTLENS_STEPFUN_STORY_MODEL": "step-3.7-flash"})
         self.env.start()
         self.addCleanup(self.env.stop)
+
+    def test_video_first_sends_moving_mp4_then_targeted_source_frames(self):
+        calls = []
+
+        def fake_chat(kind, content, **kwargs):
+            calls.append(content)
+            if len(calls) == 1:
+                self.assertEqual(content[0]["type"], "video_url")
+                self.assertTrue(base64.b64decode(content[0]["video_url"]["url"].split(",", 1)[1]).startswith(b"\0\0\0"))
+                return json.dumps({"observations": [{"type": "pass", "start": 1, "end": 2, "anchorTime": 1.5,
+                   "description": "白色球衣传球"}]}, ensure_ascii=False), {}, "step-3.7-flash"
+            self.assertEqual(sum(item["type"] == "image_url" for item in content), 2)
+            self.assertEqual(content[0]["type"], "video_url")
+            self.assertIn("frameId=" + "1".zfill(32), content[2]["text"])
+            return json.dumps({"observations": [{"type": "pass", "start": 1, "end": 2, "anchorTime": 1.25,
+                "description": "白色球衣传球；号码未清楚可辨", "playerIds": [], "unknownActors": ["白色球衣持球者"],
+                "frameIds": ["1".zfill(32)], "confidence": .55}]}, ensure_ascii=False), {}, "step-3.7-flash"
+
+        with patch.object(stepfun, "_video_bytes", return_value=b"\0\0\0\x18ftypmp42"), patch.object(stepfun, "_chat", side_effect=fake_chat):
+            run = stepfun.execute_vision(self.service, project(), {"id": "c" * 32},
+                {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 4}})
+        self.assertEqual(run["providerRun"]["mode"], "video-model")
+        self.assertEqual(run["observations"][0]["frameIds"], ["1".zfill(32)])
+        self.assertEqual(run["observations"][0]["review"]["status"], "unreviewed")
+        self.assertEqual(run["videoInput"]["sourceSha256"], "b" * 64)
+        self.assertEqual(len(calls), 2)
+
+    def test_video_first_rejects_unverified_frame_reference(self):
+        raw1 = json.dumps({"observations": [{"type": "shot", "start": 1, "end": 2}]})
+        raw2 = json.dumps({"observations": [{"type": "shot", "start": 1, "end": 2, "description": "投篮", "frameIds": ["f" * 32]}]})
+        with patch.object(stepfun, "_video_bytes", return_value=b"MP4"), patch.object(stepfun, "_chat", side_effect=[(raw1, {}, "step-3.7-flash"), (raw2, {}, "step-3.7-flash")]):
+            run = stepfun.execute_vision(self.service, project(), {}, {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 4}})
+        self.assertEqual(run["observations"], [])
+        self.assertTrue(any(item["reason"] == "evidence_clip_failed" for item in run["candidateRevisions"]))
+
+    def test_sourced_play_by_play_is_same_game_background_not_source_pts(self):
+        pbp = {"source": {"provider": "ESPN", "url": "https://example.org/summary", "retrievedAt": "2026-09-30T00:00:00Z", "gameId": "game-1"},
+               "entries": [{"id": "play-1", "period": 1, "clock": "11:40", "text": "Player makes tip shot", "awayScore": 2, "homeScore": 0}]}
+        validate_play_by_play(pbp, "game-1")
+        p = project()
+        p["context"].update(gameId="game-1", playByPlay=pbp)
+        note, audit = stepfun._background(p)
+        self.assertIn("绝非源视频PTS", note)
+        self.assertEqual(audit["entryCount"], 1)
+        with self.assertRaises(BroadcastError):
+            validate_play_by_play(pbp, "other-game")
+        pbp["entries"][0]["clock"] = "11:60"
+        with self.assertRaises(BroadcastError):
+            validate_play_by_play(pbp, "game-1")
+
+    def test_scoreboard_transition_matches_only_same_clock_and_score(self):
+        p = project()
+        p["context"]["playByPlay"] = {"source": {"provider": "ESPN", "url": "https://example.org/summary", "retrievedAt": "2026-09-30", "gameId": "game-1", "awayTeamId": "DAL", "homeTeamId": "HOU"},
+            "entries": [{"id": "play-1", "period": 1, "clock": "11:40", "text": "Player makes tip shot", "awayScore": 2, "homeScore": 0},
+                        {"id": "play-2", "period": 1, "clock": "10:39", "text": "Player makes two point shot", "awayScore": 4, "homeScore": 0}]}
+        before = {"period": 1, "clock": "11:41", "leftTeam": "DAL", "rightTeam": "HOU", "leftScore": 0, "rightScore": 0}
+        after = {"period": 1, "clock": "11:35", "leftTeam": "DAL", "rightTeam": "HOU", "leftScore": 2, "rightScore": 0}
+        self.assertEqual(stepfun._matched_pbp(p, before, after)["id"], "play-1")
+        self.assertIsNone(stepfun._matched_pbp(p, before, {**after, "clock": "10:39", "leftScore": 4}))
+        self.assertIsNone(stepfun._matched_pbp(p, before, {**after, "leftScore": 0}))
+        self.assertIsNone(stepfun._matched_pbp(p, before, {**after, "leftTeam": "BOS"}))
+        swapped_before = {**before, "leftTeam": "HOU", "rightTeam": "DAL", "leftScore": 0, "rightScore": 0}
+        swapped_after = {**after, "leftTeam": "HOU", "rightTeam": "DAL", "leftScore": 0, "rightScore": 2}
+        self.assertEqual(stepfun._matched_pbp(p, swapped_before, swapped_after)["id"], "play-1")
+
+    def test_scoreboard_parser_accepts_observed_time_and_ordinal_aliases(self):
+        actual = '{"leftTeam":"DAL","rightTeam":"HOU","leftScore":0,"rightScore":0,"time":"11:40","period":"1st"}'
+        self.assertEqual(stepfun._parse_scoreboard(actual), {"period": 1, "clock": "11:40", "leftScore": 0,
+                                                          "rightScore": 0, "leftTeam": "DAL", "rightTeam": "HOU"})
+        self.assertIsNone(stepfun._parse_scoreboard(actual.replace('"11:40"', '"11:60"')))
+        self.assertEqual(stepfun._parse_scoreboard(actual.replace('"DAL"', '"独行侠"'))["leftTeam"], "DAL")
+        prose = "左边球队：独行侠\n左分：2\n右边球队：火箭\n右分：0\n节次：1st\n比赛时钟：11:36"
+        self.assertEqual(stepfun._parse_scoreboard(prose), {"period": 1, "clock": "11:36", "leftScore": 2,
+                                                         "rightScore": 0, "leftTeam": "DAL", "rightTeam": "HOU"})
 
     def test_vision_sends_bounded_real_jpegs_and_only_cited_candidate(self):
         seen = []
@@ -109,9 +187,9 @@ class StepFunTest(unittest.TestCase):
                 self_request = json.loads(request.data)
                 assert request.full_url == stepfun.URL
                 assert self_request["model"] == "step-3.7-flash"
-                assert self_request["max_tokens"] == 6000 and self_request["temperature"] == .1
+                assert self_request["max_tokens"] == 12000 and self_request["temperature"] == .1
                 assert self_request["reasoning_effort"] == "low"
-                assert timeout == 90
+                assert timeout == 150
                 return Reply(self.finish)
 
         with patch.object(stepfun.urllib.request, "build_opener", return_value=Opener("stop")) as factory:
@@ -161,10 +239,10 @@ class StepFunTest(unittest.TestCase):
 
     def test_capability_and_voice_variant_do_not_claim_unmatched_probe(self):
         check_configured("analyze", {"providerId": "stepfun-vision", "strategy": "frames-first"})
-        with self.assertRaises(BroadcastError):
-            check_configured("analyze", {"providerId": "stepfun-vision", "strategy": "video-first"})
+        check_configured("analyze", {"providerId": "stepfun-vision", "strategy": "video-first"})
         rows = {row["id"]: row for row in capabilities(self.temporary.name)}
         self.assertTrue(rows["stepfun-vision"]["available"])
+        self.assertIn("video", rows["stepfun-vision"]["modalities"])
         self.assertFalse(rows["stepfun-vision"]["verified"])
         with patch.dict(os.environ, {"COURTLENS_STEPFUN_MODEL": "tts-model", "COURTLENS_STEPFUN_VOICE_ID": "voice", "COURTLENS_STEPFUN_API_VARIANT": "invalid"}):
             rows = {row["id"]: row for row in capabilities(self.temporary.name)}

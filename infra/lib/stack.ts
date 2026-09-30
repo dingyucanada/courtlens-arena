@@ -42,9 +42,9 @@ export class BroadcastStack extends Stack {
 
     const apiFn = new lambda.DockerImageFunction(this, 'BroadcastApiHandler', {
       code:lambda.DockerImageCode.fromImageAsset(repo,{file:'cloud/api/Dockerfile',platform:ecrAssets.Platform.LINUX_AMD64,
-        exclude:['.git/**','.github/**','.venv/**','.env*','**/.env*','**/__pycache__/**','**/*.pyc','**/node_modules/**','node_modules/**','media/**','workspace/**','site-dist/**','infra/**','tests/**','web/**','studio/**','site/**','data/**','docs/**','templates/**']}),
+        exclude:['.git/**','.github/**','.venv/**','.env*','**/.env*','**/__pycache__/**','**/*.pyc','**/node_modules/**','node_modules/**','media/**','workspace/**','site-dist/**','infra/**','tests/**','web/**','studio/**','site/**','docs/**','templates/**']}),
       timeout:Duration.seconds(25),memorySize:1024,ephemeralStorageSize:Size.gibibytes(1),
-      environment:{TABLE_NAME:records.tableName,INPUT_BUCKET:input.bucketName,RELEASE_BUCKET:releases.bucketName,MAX_UPLOAD_BYTES:String(256*1024*1024),VOICE_PROVIDER_IDS:voiceProviders.map(v=>v.provider).join(',')},
+      environment:{TABLE_NAME:records.tableName,INPUT_BUCKET:input.bucketName,RELEASE_BUCKET:releases.bucketName,MAX_UPLOAD_BYTES:String(256*1024*1024),VOICE_PROVIDER_IDS:[...voiceProviders.map(v=>v.provider),...(cfg.polly ? ['polly'] : [])].join(',')},
       logRetention:logs.RetentionDays.TWO_WEEKS,
     });
     records.grantReadWriteData(apiFn);
@@ -103,7 +103,7 @@ export class BroadcastStack extends Stack {
     const agentImage = new ecrAssets.DockerImageAsset(this,'AgentImage',{
       directory:repo,file:'cloud/agent/Dockerfile',
       platform:ecrAssets.Platform.LINUX_ARM64,
-      exclude:['.git/**','.github/**','.venv/**','.env*','**/.env*','**/__pycache__/**','**/*.pyc','**/node_modules/**','node_modules/**','media/**','workspace/**','site-dist/**','infra/**','tests/**','web/**','studio/**','site/**','data/**','docs/**','templates/**'],
+      exclude:['.git/**','.github/**','.venv/**','.env*','**/.env*','**/__pycache__/**','**/*.pyc','**/node_modules/**','node_modules/**','media/**','workspace/**','site-dist/**','infra/**','tests/**','web/**','studio/**','site/**','docs/**','templates/**'],
     });
     const agentRole = new iam.Role(this,'AgentExecutionRole',{
       assumedBy:new iam.ServicePrincipal('bedrock-agentcore.amazonaws.com',{
@@ -127,7 +127,7 @@ export class BroadcastStack extends Stack {
     const cluster = new ecs.Cluster(this,'RenderCluster',{vpc,containerInsightsV2:ecs.ContainerInsights.ENABLED});
     const renderImage = new ecrAssets.DockerImageAsset(this,'RenderImage',{
       directory:repo,file:'cloud/render/Dockerfile',platform:ecrAssets.Platform.LINUX_AMD64,
-      exclude:['.git/**','.github/**','.venv/**','.env*','**/.env*','**/__pycache__/**','**/*.pyc','**/node_modules/**','node_modules/**','media/**','workspace/**','site-dist/**','infra/**','tests/**','web/**','studio/**','site/**','data/**','docs/**','templates/**'],
+      exclude:['.git/**','.github/**','.venv/**','.env*','**/.env*','**/__pycache__/**','**/*.pyc','**/node_modules/**','node_modules/**','media/**','workspace/**','site-dist/**','infra/**','tests/**','web/**','studio/**','site/**','docs/**','templates/**'],
     });
     const renderLogs = new logs.LogGroup(this,'RenderLogs',{retention:logs.RetentionDays.TWO_WEEKS,removalPolicy:RemovalPolicy.RETAIN});
     const task = new ecs.FargateTaskDefinition(this,'CpuRenderTask',{
@@ -145,6 +145,14 @@ export class BroadcastStack extends Stack {
       secret.grantRead(task.obtainExecutionRole());
       if (voice.provider === 'minimax') voiceEnvironment.COURTLENS_MINIMAX_REGION = voice.minimaxRegion ?? 'global';
       if (voice.provider === 'stepfun') voiceEnvironment.COURTLENS_STEPFUN_API_VARIANT = voice.stepfunApiVariant ?? 'openapi';
+    }
+    if (cfg.polly) {
+      voiceEnvironment.COURTLENS_ALLOWED_REGION = cfg.allowedRegion;
+      voiceEnvironment.COURTLENS_POLLY_REGION = cfg.polly.region;
+      voiceEnvironment.COURTLENS_POLLY_ENGINE = cfg.polly.engine;
+      voiceEnvironment.COURTLENS_POLLY_VOICE_ID = cfg.polly.voiceId;
+      // SynthesizeSpeech does not support resource-level IAM permissions.
+      task.taskRole.addToPrincipalPolicy(new iam.PolicyStatement({actions:['polly:SynthesizeSpeech'],resources:['*'],conditions:{StringEquals:{'aws:RequestedRegion':cfg.allowedRegion}}}));
     }
     const container = task.addContainer('worker',{
       image:ecs.ContainerImage.fromDockerImageAsset(renderImage),

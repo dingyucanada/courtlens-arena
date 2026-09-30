@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg ca-certi
 COPY cloud/agent/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY core ./core
+COPY data/commentary-styles.v1.json ./data/commentary-styles.v1.json
 COPY cloud/agent/main.py ./main.py
 EXPOSE 8080
 USER 10001:10001

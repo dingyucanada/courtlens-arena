@@ -12,6 +12,7 @@ export interface DeploymentConfig {
   operatorEmail: string;
   siteAssetDirectory: string;
   voiceProviders?: Array<{ provider: 'minimax' | 'stepfun'; modelId: string; voiceId: string; secretArn: string; minimaxRegion?: 'global' | 'china'; stepfunApiVariant?: 'openapi' | 'step-plan' }>;
+  polly?: { region: string; engine: 'neural'; voiceId: 'Zhiyu' };
   fixtureOnly?: boolean;
 }
 
@@ -43,6 +44,7 @@ export function validateConfig(config: DeploymentConfig, fixture: boolean): void
     if (voice.provider !== 'minimax' && voice.minimaxRegion !== undefined || voice.provider === 'minimax' && voice.minimaxRegion !== undefined && !['global','china'].includes(voice.minimaxRegion)) throw new Error('minimaxRegion must be global or china only for MiniMax');
     if (voice.provider !== 'stepfun' && voice.stepfunApiVariant !== undefined || voice.provider === 'stepfun' && voice.stepfunApiVariant !== undefined && !['openapi','step-plan'].includes(voice.stepfunApiVariant)) throw new Error('stepfunApiVariant must be openapi or step-plan only for StepFun');
   }
+  if (config.polly !== undefined && (!config.polly || config.polly.region !== config.allowedRegion || config.polly.engine !== 'neural' || config.polly.voiceId !== 'Zhiyu' || Object.keys(config.polly).some(key => !['region','engine','voiceId'].includes(key)))) throw new Error('polly must explicitly select the allowedRegion, neural engine and Zhiyu voice');
   if (fixture) {
     if (process.env.COURTLENS_SYNTH_FIXTURE !== '1' || !config.fixtureOnly || config.contestConfigConfirmed) throw new Error('Offline fixture requires an explicit fixture flag and cannot be formal-ready');
   } else {

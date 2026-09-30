@@ -34,10 +34,18 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 
 def configured_voice(mode, requested=None):
     """Resolve only a deployment-approved voice, never a client supplied endpoint."""
-    require(mode in ("local-tts", "minimax", "stepfun"), "invalid_request", "声音提供者无效。")
+    require(mode in ("local-tts", "minimax", "stepfun", "polly"), "invalid_request", "声音提供者无效。")
     if mode == "local-tts":
         require(requested in (None, "Tingting"), "invalid_request", "本地语音仅支持已安装的 Tingting。")
         return "Tingting"
+    if mode == "polly":
+        region = os.environ.get("COURTLENS_POLLY_REGION")
+        engine = os.environ.get("COURTLENS_POLLY_ENGINE")
+        voice = os.environ.get("COURTLENS_POLLY_VOICE_ID")
+        allowed = os.environ.get("COURTLENS_ALLOWED_REGION") or os.environ.get("AWS_REGION") or os.environ.get("AWS_DEFAULT_REGION")
+        require(bool(region and allowed and region == allowed and engine == "neural" and voice == "Zhiyu"), "voice_unavailable", "Polly 区域、引擎或中文音色未正确配置。", 503)
+        require(requested in (None, voice), "invalid_request", "所选音色与部署配置不一致。")
+        return voice
     prefix = "MINIMAX" if mode == "minimax" else "STEPFUN"
     key = os.environ.get("COURTLENS_" + prefix + "_API_KEY")
     model = os.environ.get("COURTLENS_" + prefix + "_MODEL")
@@ -65,6 +73,8 @@ def _post_audio(url, token, payload, limit):
 
 
 def _external_audio(mode, text, voice):
+    if mode == "polly":
+        return _polly_audio(text, voice)
     prefix = "MINIMAX" if mode == "minimax" else "STEPFUN"
     key = os.environ["COURTLENS_" + prefix + "_API_KEY"]
     model = os.environ["COURTLENS_" + prefix + "_MODEL"]
@@ -87,6 +97,30 @@ def _external_audio(mode, text, voice):
         content_type, audio = _post_audio(_stepfun_endpoint(), key, payload, MAX_AUDIO_BYTES)
         require("audio" in content_type or "octet-stream" in content_type, "voice_unavailable", "StepFun 未返回音频。", 503)
     require(0 < len(audio) <= MAX_AUDIO_BYTES and (audio[:3] == b"ID3" or audio[:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2")), "voice_unavailable", "语音字节不是受支持的 MP3。", 503)
+    return audio
+
+
+def _polly_audio(text, voice):
+    """Use the AWS credential chain; never accept credentials or an endpoint from a project."""
+    require(isinstance(text, str) and 0 < len(text) <= 3000, "voice_unavailable", "Polly 单句文字超过 3000 字符限制。", 503)
+    region = os.environ["COURTLENS_POLLY_REGION"]
+    try:
+        import boto3
+        from botocore.config import Config
+        from botocore.exceptions import BotoCoreError, ClientError
+    except ImportError:
+        raise BroadcastError("voice_unavailable", "Polly 需要 boto3。", 503)
+    try:
+        client = boto3.client("polly", region_name=region, config=Config(connect_timeout=5, read_timeout=20, retries={"max_attempts": 2}))
+        result = client.synthesize_speech(Engine="neural", VoiceId=voice, LanguageCode="cmn-CN", Text=text, TextType="text", OutputFormat="mp3", SampleRate=str(RATE))
+        stream = result["AudioStream"]
+        try:
+            audio = stream.read(MAX_AUDIO_BYTES + 1)
+        finally:
+            stream.close()
+    except (BotoCoreError, ClientError, OSError, KeyError, TypeError):
+        raise BroadcastError("voice_unavailable", "Polly 合成失败；请检查区域、权限和音色可用性。", 503)
+    require(isinstance(audio, bytes) and 0 < len(audio) <= MAX_AUDIO_BYTES and (audio[:3] == b"ID3" or audio[:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2")), "voice_unavailable", "Polly 未返回有效且限长的 MP3。", 503)
     return audio
 
 
@@ -154,4 +188,4 @@ def synthesize(film, beats, target_dir, duration, mode="local-tts", voice_id=Non
     command += ["-c:v", "copy", "-c:a", "aac", "-b:a", "128k", "-t", str(duration), "-movflags", "+faststart", "-y", str(mixed)]
     _run(command, 60)
     mixed.replace(film)
-    return {"mode": mode, "provider": {"local-tts": "macos-say", "minimax": "minimax", "stepfun": "stepfun"}[mode], "voiceId": voice, "audioSha256": hashlib.sha256(output.read_bytes()).hexdigest(), "cues": report}
+    return {"mode": mode, "provider": {"local-tts": "macos-say", "minimax": "minimax", "stepfun": "stepfun", "polly": "amazon-polly"}[mode], "voiceId": voice, "audioSha256": hashlib.sha256(output.read_bytes()).hexdigest(), "cues": report}

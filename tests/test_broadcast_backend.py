@@ -158,6 +158,33 @@ class BroadcastBackendTest(unittest.TestCase):
         self.assertEqual(invalid.exception.code, "schema_invalid")
         self.assertEqual(len(self.service.get(p["id"])["context"]["roster"]), 1)
 
+    def test_ai_review_never_claims_human_verification(self):
+        p = self.service.edit(self.project["id"], self.project["revision"], {"observations": [self._accepted()]})
+        p = self.service.edit(p["id"], p["revision"], {"story": self._story(p)})
+        checks = {key: True for key in ("identity", "timing", "metrics", "wording", "geometry")}
+        p = self.service.review(p["id"], p["revision"], "Codex AI visual review", checks, "Independent source-frame review", reviewer_type="ai")
+        self.assertEqual(p["review"]["reviewerType"], "ai")
+        self.assertFalse(self.service._understanding(p)["humanReviewed"])
+        with self.assertRaises(BroadcastError):
+            self.service.review(p["id"], p["revision"], "Agent", checks, "", reviewer_type="robot")
+
+    def test_release_background_keeps_only_referenced_pbp_and_roster(self):
+        from core.broadcast.render import background_evidence
+        p = copy.deepcopy(self.project)
+        p["context"].update({"gameId": "g1", "roster": [{"id": "p1", "name": "甲", "source": "same-game roster"}, {"id": "p2", "name": "乙"}],
+            "playByPlay": {"source": {"provider": "fixture", "gameId": "g1", "url": "https://example.org/g1"},
+                "entries": [{"id": "e1", "period": 1, "clock": "11:40", "text": "甲得分"}, {"id": "e2", "text": "later event"}]}})
+        o = self._accepted()
+        o["playerIds"] = ["p1"]
+        o["source"].update({"kind": "model", "recordId": "e1"})
+        p["observations"] = [o]
+        result = background_evidence(p, {o["id"]})
+        self.assertEqual([r["id"] for r in result["roster"]], ["p1"])
+        self.assertEqual([r["id"] for r in result["playByPlay"]["entries"]], ["e1"])
+        self.assertEqual(result["playByPlay"]["source"]["url"], "https://example.org/g1")
+        self.assertEqual(len(result["playByPlay"]["importSha256"]), 64)
+        self.assertEqual(background_evidence(p, set())["playByPlay"]["entries"], [])
+
     def test_real_mp4_frame_hash_restart_review_and_old_release(self):
         p = self.project
         self.assertEqual(p["media"]["sha256"], __import__("hashlib").sha256(self.video.read_bytes()).hexdigest())
@@ -177,6 +204,8 @@ class BroadcastBackendTest(unittest.TestCase):
         self.assertEqual(j["status"], "succeeded", j["error"])
         release = self.service.release(j["resultId"])
         self.assertEqual(release["manifest"]["source"]["kind"], "user-provided")
+        self.assertIn("background", release["manifest"]["evidence"])
+        self.assertEqual(len(release["manifest"]["renderer"]["sourceFingerprint"]), 64)
         self.assertEqual(release["manifest"]["compiledBeats"][0]["compiledText"], s["beats"][0]["text"])
         self.assertEqual(release["summary"]["understanding"]["mode"], "manual")
         restarted = BroadcastService(self.temp.name)
@@ -195,6 +224,43 @@ class BroadcastBackendTest(unittest.TestCase):
         with self.assertRaises(BroadcastError) as caught:
             self.service.review(p["id"], p["revision"], "审核人", {key: "false" for key in ("identity", "timing", "metrics", "wording", "geometry")}, "")
         self.assertEqual(caught.exception.code, "review_required")
+
+    def test_unsupported_numeric_and_outcome_claims_cannot_be_reviewed(self):
+        p = self.service.edit(self.project["id"], self.project["revision"], {"observations": [self._accepted()]})
+        for text in ("持球人移动了99次", "命中概率百分之九十九", "Gravity 99.9，显著拉开空间", "防守人距离九米", "这次投篮命中", "球员打铁"):
+            with self.subTest(text=text), self.assertRaises(BroadcastError):
+                s = self._story(p)
+                s["beats"][0]["text"] = text
+                self.service.edit(p["id"], p["revision"], {"story": s})
+        for field in ("label", "secondaryLabel"):
+            with self.subTest(field=field), self.assertRaises(BroadcastError):
+                s = self._story(p)
+                s["beats"][0][field] = "GRAV 9.9"
+                self.service.edit(p["id"], p["revision"], {"story": s})
+
+    def test_result_evidence_and_referenced_jersey_are_distinct_from_metrics(self):
+        row = self._accepted(kind="result")
+        row["description"] = "球员投篮命中"
+        row["playerIds"] = ["player23"]
+        player = {"id": "player23", "name": "测试球员", "teamId": "t1", "jersey": "23", "source": "测试名单", "validOn": None}
+        p = self.service.edit(self.project["id"], self.project["revision"], {"context": {"roster": [player]}, "observations": [row]})
+        s = self._story(p)
+        s["beats"][0]["text"] = "23号球员投篮命中"
+        p = self.service.edit(p["id"], p["revision"], {"story": s})
+        self.assertEqual(p["story"]["beats"][0]["text"], "23号球员投篮命中")
+        s["beats"][0]["text"] = "24号球员投篮命中"
+        with self.assertRaises(BroadcastError):
+            self.service.edit(p["id"], p["revision"], {"story": s})
+
+    def test_ordinary_narration_is_not_a_measured_count(self):
+        from core.broadcast.validation import grounded_wording
+        grounded_wording("这一次进攻，持球人沿边线移动", [self._accepted()], [])
+        grounded_wording("持球人切入三秒区，为二次进攻做好准备", [self._accepted()], [])
+        row = self._accepted()
+        row["description"] = "白色23号球员沿边线运球"
+        grounded_wording("白色23号球员沿边线运球", [row], [])
+        with self.assertRaises(BroadcastError):
+            grounded_wording("球员连续移动十一次", [self._accepted()], [])
 
     def test_nested_contract_shapes_and_duplicate_roster_rejected(self):
         p = self.project

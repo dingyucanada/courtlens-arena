@@ -34,14 +34,15 @@ class FramesContract(unittest.TestCase):
         voices = {row["id"]: row for row in capabilities["providers"] if row["kind"] == "voice"}
         self.assertFalse(voices["minimax"]["available"])
         self.assertFalse(voices["stepfun"]["available"])
+        self.assertFalse(voices["polly"]["available"])
 
     def test_configured_voice_capability_is_not_claimed_verified(self):
         event = {"httpMethod": "GET", "path": "/api/broadcast/v1/capabilities",
                  "requestContext": {"authorizer": {"claims": {"sub": "owner"}}}}
-        with patch.object(api, "VOICE_PROVIDERS", frozenset({"minimax", "stepfun"})):
+        with patch.object(api, "VOICE_PROVIDERS", frozenset({"minimax", "stepfun", "polly"})):
             response = api.handler(event, None)
         voices = [row for row in json.loads(response["body"])["data"]["providers"] if row["kind"] == "voice"]
-        self.assertEqual({row["id"] for row in voices}, {"minimax", "stepfun"})
+        self.assertEqual({row["id"] for row in voices}, {"minimax", "stepfun", "polly"})
         self.assertTrue(all(row["configured"] and row["available"] and not row["verified"] for row in voices))
 
     def test_mutation_response_renews_private_media_url_after_cas(self):
@@ -108,7 +109,7 @@ class FramesContract(unittest.TestCase):
         with patch.object(api, "start_job", return_value={"id": "b" * 32, "type": "model-story", "status": "queued"}) as start:
             response = api.handler(event, None)
         self.assertEqual(response["statusCode"], 202)
-        start.assert_called_once_with("owner", pid, 7, "model-story", {"audience": "fan", "providerId": "agentcore-story"}, "story-12345")
+        start.assert_called_once_with("owner", pid, 7, "model-story", {"audience": "fan", "providerId": "agentcore-story", "commentaryStyle": "zh-analysis"}, "story-12345")
 
     def test_model_story_poll_reports_committed_revision(self):
         pid, jid, audit = "a" * 32, "c" * 32, "d" * 32

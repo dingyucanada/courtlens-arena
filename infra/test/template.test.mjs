@@ -33,6 +33,7 @@ test('offline synth contains private origin, AgentCore and bounded CPU workflow'
   assert.equal(ecs.Properties.RuntimePlatform.CpuArchitecture, 'X86_64');
   assert.equal(ecs.Properties.RequiresCompatibilities[0], 'FARGATE');
   assert.ok(!ecs.Properties.ContainerDefinitions[0].Secrets?.length, 'voice secrets are absent by default');
+  assert.ok(!JSON.stringify(template).includes('polly:SynthesizeSpeech'), 'Polly IAM permission is absent by default');
   const sm = byType('AWS::StepFunctions::StateMachine')[0];
   assert.equal(sm.Properties.StateMachineType, 'STANDARD');
   assert.ok(resources.some(item => item.Type === 'AWS::ApiGateway::Authorizer'));
@@ -44,6 +45,39 @@ test('offline synth contains private origin, AgentCore and bounded CPU workflow'
     const staged = path.join(root,'cdk.out',image.source.directory);
     const entries = readdirSync(staged,{recursive:true}).map(String);
     assert.ok(!entries.some(item => /(^|\/)(\.env[^/]*|\.venv|node_modules)(\/|$)/.test(item)), 'container context contains secret or local dependency directory');
+  }
+});
+
+test('optional Polly is region-scoped and has no third-party secret', () => {
+  const temp = mkdtempSync(path.join(tmpdir(),'courtlens-polly-test-'));
+  try {
+    const cfg = JSON.parse(readFileSync(path.join(root,'config.fixture.json')));
+    cfg.polly = {region:cfg.allowedRegion,engine:'neural',voiceId:'Zhiyu'};
+    const configPath = path.join(temp,'fixture.json');
+    writeFileSync(configPath,JSON.stringify(cfg));
+    const run = spawnSync(process.execPath,[path.join(root,'node_modules','aws-cdk','bin','cdk'),'synth','--output',path.join(temp,'cdk.out')],
+      {cwd:root,encoding:'utf8',env:{...process.env,COURTLENS_CONFIG_FILE:configPath,COURTLENS_SYNTH_FIXTURE:'1',AWS_REGION:'us-west-2',AWS_DEFAULT_REGION:'us-west-2'}});
+    assert.equal(run.status,0,run.stderr.slice(-2000));
+    const template = JSON.parse(readFileSync(path.join(temp,'cdk.out','CourtLensBroadcast.template.json')));
+    const task = Object.values(template.Resources).find(item => item.Type === 'AWS::ECS::TaskDefinition');
+    const env = Object.fromEntries(task.Properties.ContainerDefinitions[0].Environment.map(item => [item.Name,item.Value]));
+    assert.equal(env.COURTLENS_POLLY_REGION,'us-west-2');
+    assert.equal(env.COURTLENS_POLLY_ENGINE,'neural');
+    assert.equal(env.COURTLENS_POLLY_VOICE_ID,'Zhiyu');
+    assert.ok(!task.Properties.ContainerDefinitions[0].Secrets?.length);
+    const statements = Object.values(template.Resources).filter(item => item.Type === 'AWS::IAM::Policy')
+      .flatMap(item => item.Properties.PolicyDocument.Statement)
+      .filter(item => [item.Action].flat().includes('polly:SynthesizeSpeech'));
+    assert.equal(statements.length,1);
+    assert.equal(statements[0].Resource,'*');
+    assert.deepEqual(statements[0].Condition,{StringEquals:{'aws:RequestedRegion':'us-west-2'}});
+    cfg.polly.region = 'us-east-1';
+    writeFileSync(configPath,JSON.stringify(cfg));
+    const invalid = spawnSync(process.execPath,[path.join(root,'node_modules','aws-cdk','bin','cdk'),'synth','--output',path.join(temp,'invalid')],
+      {cwd:root,encoding:'utf8',env:{...process.env,COURTLENS_CONFIG_FILE:configPath,COURTLENS_SYNTH_FIXTURE:'1',AWS_REGION:'us-west-2',AWS_DEFAULT_REGION:'us-west-2'}});
+    assert.notEqual(invalid.status,0);
+  } finally {
+    rmSync(temp,{recursive:true,force:true});
   }
 });
 

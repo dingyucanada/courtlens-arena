@@ -42,6 +42,8 @@ npm run synth
 
 每个 Secrets Manager Secret 的**完整 ARN**须位于同一账号与 Region，SecretString 直接存该供应商 API key（非 JSON）。CDK 只把 secret 注入 Fargate 容器环境变量，并将读取权限授予任务执行角色；API 只知道哪些 provider 已配置，不能读密钥。能力响应对已配置项给出 `available=true, verified=false`，代表可以排队尝试但尚未真实验证供应商、模型及音色。未经真实供应商测试时不承诺配音可用，也不在配置、站点或日志中写明文 key。云端 `local-tts` 与未配置的供应商请求会拒绝。
 
+若团队账号获准使用 Amazon Polly，可另外选填（默认不启用）`"polly":{"region":"<allowedRegion>","engine":"neural","voiceId":"Zhiyu"}`，其中 `region` 必须与 `allowedRegion` 完全相同。Fargate 任务通过 boto3 的 AWS 凭证链调用同区域 `SynthesizeSpeech`，无需第三方密钥；权限只授予 `polly:SynthesizeSpeech`，并以 `aws:RequestedRegion` 限定区域。该 API 不以合成语音作 IAM 资源，且本实现不引用词典，所以策略资源须为 `*`；[Polly 授权参考](https://docs.aws.amazon.com/service-authorization/latest/reference/list_polly.html)列有动作和可用的词典资源类型。引擎和 Zhiyu 普通话音色见[官方语音清单](https://docs.aws.amazon.com/polly/latest/dg/neural-voices.html)，区域可用性仍需在团队账号核对。单句最多 3000 字符，合成 MP3 最多接收 8 MiB，随后复用已有 ffprobe 时长与字幕窗口溢出检查；[SynthesizeSpeech API](https://docs.aws.amazon.com/polly/latest/APIReference/API_SynthesizeSpeech.html)的请求上限和 MP3 返回协议是依据。当前只有接口单元测试与离线 CDK 模板验证，**没有 AWS 账号上的真实配音试听或成片测试**。
+
 StepFun `stepfunApiVariant` 只允许 `openapi`（默认固定 `https://api.stepfun.com/v1/audio/speech`）和 `step-plan`（固定 `https://api.stepfun.com/step_plan/v1/audio/speech`）；未知值会在部署配置或服务端调用前拒绝，不接受任意 base URL、重定向或浏览器提供的地址。本地最小 probe 已对 step-plan 的 `stepaudio-2.5-tts` / `elegantgentle-female` 收到 HTTP 200、有效 MP3（24 kHz、2.736 秒）；这只验证供应商接口，云端 Fargate 配音与最终成片仍待实测。
 
 ```sh

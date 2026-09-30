@@ -1,8 +1,9 @@
 """HTTP-contract adapter over BroadcastService; Lambda can reuse dispatch_json."""
 import json
 import re
+from urllib.parse import parse_qs, urlsplit
 
-from .common import BroadcastError, require, valid_id
+from .common import BroadcastError, finite, require, valid_id
 from .service import BroadcastService
 
 PREFIX = "/api/broadcast/v1"
@@ -19,11 +20,25 @@ class BroadcastRoutes:
         """Return (status, JSON data). Binary media uses file() separately."""
         headers = headers or {}
         body = body or {}
-        if not path.startswith(PREFIX + "/"):
+        parsed = urlsplit(path)
+        if not parsed.path.startswith(PREFIX + "/"):
             return None
-        route = path[len(PREFIX):]
+        route = parsed.path[len(PREFIX):]
         service = self.service
         if method == "GET":
+            if route == "/tactics":
+                from .tactics import retrieve
+                query = parse_qs(parsed.query, keep_blank_values=True)
+                require(set(query) in ({"projectId", "at"}, {"projectId", "at", "q"}) and
+                        all(len(items) == 1 for items in query.values()) and valid_id(query["projectId"][0]),
+                        "invalid_request", "战术检索需要唯一的项目、时刻和可选关键词。", 422)
+                try:
+                    at = float(query["at"][0])
+                except ValueError:
+                    raise BroadcastError("invalid_request", "战术检索时刻无效。", 422)
+                require(finite(at), "invalid_request", "战术检索时刻无效。", 422)
+                project = service.get(query["projectId"][0])
+                return 200, retrieve(project, service._frame_times(project), at, query.get("q", [""])[0])
             if route == "/capabilities":
                 return 200, service.capabilities()
             if route == "/projects":
@@ -67,13 +82,13 @@ class BroadcastRoutes:
                 require(set(body) == {"expectedRevision", "result"}, "invalid_request", "CV 导入字段无效。")
                 return 200, service.import_cv(pid, expected, body["result"])
             if action == "story":
-                require(set(body) == {"expectedRevision", "audience", "mode", "providerId"}, "invalid_request", "故事字段无效。")
+                require({"expectedRevision", "audience", "mode", "providerId"} <= set(body) <= {"expectedRevision", "audience", "mode", "providerId", "commentaryStyle"}, "invalid_request", "故事字段无效。")
                 if body["mode"] == "model":
-                    return 202, service.start_job(pid, expected, "model-story", {"audience": body["audience"], "providerId": body["providerId"]}, headers.get("Idempotency-Key"))
-                return 200, service.template_story(pid, expected, body["audience"], body["mode"], body["providerId"])
+                    return 202, service.start_job(pid, expected, "model-story", {"audience": body["audience"], "providerId": body["providerId"], "commentaryStyle": body.get("commentaryStyle", "zh-analysis")}, headers.get("Idempotency-Key"))
+                return 200, service.template_story(pid, expected, body["audience"], body["mode"], body["providerId"], body.get("commentaryStyle", "zh-analysis"))
             if action == "review":
-                require(set(body) == {"expectedRevision", "actor", "checks", "note"}, "invalid_request", "审核字段无效。")
-                return 200, service.review(pid, expected, body["actor"], body["checks"], body["note"])
+                require(set(body) in ({"expectedRevision", "actor", "checks", "note"}, {"expectedRevision", "actor", "checks", "note", "reviewerType"}), "invalid_request", "审核字段无效。")
+                return 200, service.review(pid, expected, body["actor"], body["checks"], body["note"], body.get("reviewerType", "human"))
             if action == "render":
                 require(set(body) == {"expectedRevision", "voiceMode", "voiceId"}, "invalid_request", "导出字段无效。")
                 return 202, service.start_job(pid, expected, "render", {"voiceMode": body["voiceMode"], "voiceId": body["voiceId"]}, headers.get("Idempotency-Key"))

@@ -33,7 +33,7 @@ def build(output, presentation=None, repo='dingyucanada/courtlens'):
         raise ValueError('Use a separate site-dist or dist directory')
     # Fail closed rather than deleting or accidentally deploying unrelated files.
     pro_files = ('styles.css','app.mjs','model.mjs','store.mjs','analytics.mjs','calibration.mjs','render.mjs','director.mjs','agent-contract.mjs','export-video.mjs','delivery.mjs','playback.mjs','spectator.mjs','readiness.mjs','metrics-v2.mjs','story-plan.mjs','camera-view.mjs')
-    broadcast_files = ('index.html','styles.css','app.mjs','api.mjs','auth.mjs','capability_ui.mjs')
+    broadcast_files = ('index.html','styles.css','app.mjs','api.mjs','auth.mjs','capability_ui.mjs','playback_state.mjs','data_readiness.mjs')
     allowed_files = {'index.html','arena.html','studio.html','demo.html','styles.css','app.js','logic.mjs','favicon.svg',
         'studio/styles.css','studio/app.mjs','studio/domain.mjs','studio/store.mjs','studio/export.mjs',
         'data/analysis.json','data/demo.json','data/metrics-v2-example.json','media/demo.mp4',

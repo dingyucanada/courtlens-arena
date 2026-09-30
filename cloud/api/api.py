@@ -20,7 +20,7 @@ INPUT = os.environ["INPUT_BUCKET"]
 RELEASES = os.environ["RELEASE_BUCKET"]
 WORKFLOW = os.environ.get("WORKFLOW_ARN")
 MAX_UPLOAD = 256 * 1024 * 1024
-VOICE_PROVIDERS = frozenset(x for x in os.environ.get("VOICE_PROVIDER_IDS", "").split(",") if x in ("minimax", "stepfun"))
+VOICE_PROVIDERS = frozenset(x for x in os.environ.get("VOICE_PROVIDER_IDS", "").split(",") if x in ("minimax", "stepfun", "polly"))
 ID = re.compile(r"^[a-f0-9]{32}$")
 DDB = boto3.client("dynamodb")
 S3 = boto3.client("s3")
@@ -253,6 +253,7 @@ def handler(event, context):
         if any(x in (".", "..") or "%" in x for x in parts):
             raise HttpError("invalid_request", "Invalid path", 400)
         if method == "GET" and parts == ["capabilities"]:
+            from core.broadcast.commentary_style import capability_styles
             def agent_capability(pid, modalities):
                 return {"id": pid, "kind": "semantic", "configured": True, "available": True, "verified": False,
                         "modalities": modalities, "mode": "agentcore-runtime", "reasonCode": "provider_unverified",
@@ -260,14 +261,28 @@ def handler(event, context):
             def voice_capability(pid):
                 configured = pid in VOICE_PROVIDERS
                 return {"id": pid, "kind": "voice", "configured": configured, "available": configured, "verified": False,
-                        "modalities": ["text"], "mode": "https-tts", "reasonCode": "provider_unverified" if configured else "voice_unavailable",
+                        "modalities": ["text"], "mode": "aws-polly" if pid == "polly" else "https-tts", "reasonCode": "provider_unverified" if configured else "voice_unavailable",
                         "message": "已配置但尚未实测语音供应商。" if configured else "此部署未配置该语音供应商。",
                         "lastProbeAt": None, "lastProbeResult": "never"}
             return response(200, {"data": {"schema": "courtlens-broadcast-capabilities/1",
                 "renderer": {"available": True, "ffmpeg": True, "ffprobe": True, "node": True, "font": True},
-                "providers": [agent_capability("agentcore-proposal", ["video", "image", "text"]), agent_capability("agentcore-story", ["text"]), voice_capability("minimax"), voice_capability("stepfun")],
+                "providers": [agent_capability("agentcore-proposal", ["video", "image", "text"]), agent_capability("agentcore-story", ["text"]), voice_capability("minimax"), voice_capability("stepfun"), voice_capability("polly")], "commentaryStyles": capability_styles(),
                 "upload": {"mode": "signed-async", "maxBytes": MAX_UPLOAD},
                 "deployment": {"mode": "aws", "agentService": "bedrock-agentcore-candidate", "region": os.environ.get("AWS_REGION"), "verified": False}}})
+        if method == "GET" and parts == ["tactics"]:
+            from core.broadcast.tactics import retrieve
+            query = event.get("queryStringParameters") or {}
+            if not isinstance(query, dict) or set(query) not in ({"projectId", "at"}, {"projectId", "at", "q"}):
+                raise HttpError("invalid_request", "Tactic lookup requires a project and source time", 422)
+            pid = query["projectId"]
+            if not isinstance(pid, str) or not ID.fullmatch(pid):
+                raise HttpError("invalid_request", "Invalid project ID", 422)
+            try:
+                at = float(query["at"])
+            except (TypeError, ValueError):
+                raise HttpError("invalid_request", "Invalid source time", 422)
+            return response(200, {"data": with_project(owner, pid, lambda svc, current, root:
+                retrieve(current, svc._frame_times(current), at, query.get("q", "")))})
         if method == "POST" and parts == ["projects"]:
             body = json_body(event)
             with tempfile.TemporaryDirectory(prefix="courtlens-create-") as root:
@@ -308,10 +323,10 @@ def handler(event, context):
                         idem = next((v for k,v in (event.get("headers") or {}).items() if k.lower() == "idempotency-key"), None)
                         if body.get("audience") not in ("fan", "pro") or body.get("providerId") != "agentcore-story":
                             raise HttpError("invalid_request", "Cloud model story requires AgentCore and a valid audience", 422)
-                        return response(202, {"data": start_job(owner, pid, expected, "model-story", {"audience": body["audience"], "providerId": "agentcore-story"}, idem)})
-                    return response(200, {"data": with_project(owner, pid, lambda s,c,r: s.template_story(pid, expected, body.get("audience"), body.get("mode"), body.get("providerId")), True)})
+                        return response(202, {"data": start_job(owner, pid, expected, "model-story", {"audience": body["audience"], "providerId": "agentcore-story", "commentaryStyle": body.get("commentaryStyle", "zh-analysis")}, idem)})
+                    return response(200, {"data": with_project(owner, pid, lambda s,c,r: s.template_story(pid, expected, body.get("audience"), body.get("mode"), body.get("providerId"), body.get("commentaryStyle", "zh-analysis")), True)})
                 if action == "review":
-                    return response(200, {"data": with_project(owner, pid, lambda s,c,r: s.review(pid, expected, body.get("actor"), body.get("checks"), body.get("note")), True)})
+                    return response(200, {"data": with_project(owner, pid, lambda s,c,r: s.review(pid, expected, body.get("actor"), body.get("checks"), body.get("note"), body.get("reviewerType", "human")), True)})
                 if action in ("render", "analyze", "cv"):
                     if action == "cv":
                         raise HttpError("cv_not_installed", "No cloud CV weights/executor configured", 503)

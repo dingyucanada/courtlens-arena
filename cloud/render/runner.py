@@ -177,7 +177,9 @@ def invoke_agent_story(workspace, job, project):
     media = project.get("media")
     if not isinstance(media, dict) or not re.fullmatch(r"[a-f0-9]{64}", media.get("sha256", "")):
         raise ValueError("Current project has no verified source media")
+    from core.broadcast.commentary_style import resolve_style
     audience = job["options"].get("audience")
+    style = resolve_style(job["options"].get("commentaryStyle"))
     if audience not in ("fan", "pro") or job["options"].get("providerId") != "agentcore-story":
         raise ValueError("Story job audience/provider invalid")
     accepted = sorted((o for o in project["observations"] if o["review"]["status"] == "accepted"), key=lambda o: o["start"])[:30]
@@ -198,7 +200,7 @@ def invoke_agent_story(workspace, job, project):
     end = round(media["duration"] * 25) / 25
     if end > media["duration"]:
         end -= .04
-    evidence = {"audience": audience, "sourceRange": {"start": 0, "end": end},
+    evidence = {"audience": audience, "commentaryStyle": style["id"], "sourceRange": {"start": 0, "end": end},
                 "observations": [{k: o[k] for k in ("id", "type", "start", "end", "anchorTime", "segmentId", "description", "playerIds", "frameIds")} for o in accepted],
                 "bindings": [{k: b[k] for k in ("id", "observationId", "officialEventId", "shotId", "metricRecordIds", "timeMapping")} for b in confirmed],
                 "metricHandles": handles}

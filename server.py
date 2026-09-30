@@ -88,7 +88,7 @@ class Handler(BaseHTTPRequestHandler):
                 file = self.server.broadcast_routes.file(route)
                 if file is not None:
                     return self.serve_file(*file, immutable=route.startswith("/api/broadcast/v1/releases/"))
-                result = self.server.broadcast_routes.dispatch_json("GET", route)
+                result = self.server.broadcast_routes.dispatch_json("GET", self.path)
                 return self.send_json({"data": result[1]}, result[0])
             except BroadcastError as exc:
                 return self.send_json({"error": exc.body()}, exc.status)
