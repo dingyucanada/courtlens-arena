@@ -57,7 +57,7 @@ def build(output, presentation=None, repo='dingyucanada/courtlens-arena'):
     # Fail closed rather than deleting or accidentally deploying unrelated files.
     allowed_files = {'index.html','demo.html','styles.css','app.js','logic.mjs','favicon.svg',
         'data/analysis.json','data/demo.json','media/demo.mp4','media/broadcast-rehearsal.mp4',
-        'presentation.pptx','.nojekyll','manifest.json','broadcast/index.html'}
+        'presentation.pptx','.nojekyll','manifest.json','broadcast/index.html','broadcast/preview.mjs'}
     legacy_files = {'arena.html','studio.html','data/metrics-v2-example.json','media/narrated-demo.mp4',
         'media/annotated-demo.vtt','media/arena-story.mp4','media/arena-story.mp4.voice.json',
         'media/arena-browser-story.mp4','media/arena-local-4.1.mp4','media/arena-local-4.1.vtt',
@@ -88,6 +88,7 @@ def build(output, presentation=None, repo='dingyucanada/courtlens-arena'):
     # Pages has no /api/broadcast/v1 backend. Serve an honest, working preview
     # while keeping the production editor source intact for local/CloudFront use.
     copy_file(ROOT/'site/broadcast-preview.html', output/'broadcast/index.html')
+    copy_file(ROOT/'site/broadcast-preview.mjs', output/'broadcast/preview.mjs')
     data_dir, media_dir = output/'data', output/'media'
     data_dir.mkdir(exist_ok=True); media_dir.mkdir(exist_ok=True)
     dataset = validate_dataset(json.loads((ROOT/'data/demo.json').read_text()))
