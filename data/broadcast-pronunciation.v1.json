@@ -1,0 +1,21 @@
+{
+  "schema": "courtlens-broadcast-pronunciation/1",
+  "version": "2026-10-01",
+  "policy": "Editorial reading aids only. Check player names against the dated game roster and listen to the actual selected voice. No celebrity voices or voice cloning.",
+  "sourceRefs": {
+    "fiba-terms": "https://assets.fiba.basketball/image/upload/documents-corporate-regional-offices-europe-programs-fiba-europe-basketball-terminology.pdf",
+    "nba-metrics": "https://www.nba.com/news/inside-the-game-stat-glossary",
+    "project-language-policy": "docs/Broadcast-技术解决方案-vNext.md#102-三语三风格"
+  },
+  "entries": [
+    {"id":"screen", "terms":{"zh-CN":"掩护", "en-US":"screen", "yue-HK":"掩護"}, "aliases":["掩护","掩護","screen","screens"], "readingAids":{"zh-CN":"yǎn hù", "en-US":"screen", "yue-HK":"jim2 wu6"}, "sourceRefs":["fiba-terms"], "review":"editorial-guide-needs-listening"},
+    {"id":"pick-and-roll", "terms":{"zh-CN":"挡拆", "en-US":"pick-and-roll", "yue-HK":"擋拆"}, "aliases":["挡拆","擋拆","pick-and-roll","pick and roll","PnR"], "readingAids":{"zh-CN":"dǎng chāi", "en-US":"pick and roll", "yue-HK":"dong2 caak3"}, "sourceRefs":["fiba-terms"], "review":"editorial-guide-needs-listening"},
+    {"id":"weak-side", "terms":{"zh-CN":"弱侧", "en-US":"weak side", "yue-HK":"弱邊"}, "aliases":["弱侧","弱側","弱邊","weak side","weak-side"], "readingAids":{"zh-CN":"ruò cè", "en-US":"weak side", "yue-HK":"joek6 bin1"}, "sourceRefs":["fiba-terms"], "review":"editorial-guide-needs-listening"},
+    {"id":"switch", "terms":{"zh-CN":"换防", "en-US":"switch", "yue-HK":"換防"}, "aliases":["换防","換防","switch","switches"], "readingAids":{"zh-CN":"huàn fáng", "en-US":"switch", "yue-HK":"wun6 fong4"}, "sourceRefs":["fiba-terms"], "review":"editorial-guide-needs-listening"},
+    {"id":"rebound", "terms":{"zh-CN":"篮板", "en-US":"rebound", "yue-HK":"籃板"}, "aliases":["篮板","籃板","rebound","rebounds"], "readingAids":{"zh-CN":"lán bǎn", "en-US":"rebound", "yue-HK":"laam4 baan2"}, "sourceRefs":["fiba-terms"], "review":"editorial-guide-needs-listening"},
+    {"id":"xfg", "terms":{"zh-CN":"预期命中率", "en-US":"expected field goal percentage", "yue-HK":"預期命中率"}, "aliases":["xFG","预期命中率","預期命中率","expected field goal"], "readingAids":{"zh-CN":"优先读已确认字典中的中文指标名", "en-US":"Prefer the confirmed dictionary label over unexplained letters", "yue-HK":"優先讀已確認字典嘅指標名"}, "sourceRefs":["nba-metrics"], "review":"confirm-official-dictionary-and-listen"},
+    {"id":"grav", "terms":{"zh-CN":"引力", "en-US":"gravity", "yue-HK":"引力"}, "aliases":["GRAV","gravity","引力"], "readingAids":{"zh-CN":"yǐn lì", "en-US":"gravity", "yue-HK":"jan5 lik6"}, "sourceRefs":["nba-metrics"], "review":"confirm-official-dictionary-and-listen"},
+    {"id":"lvg", "terms":{"zh-CN":"杠杆值", "en-US":"leverage", "yue-HK":"槓桿值"}, "aliases":["LVG","leverage","杠杆值","槓桿值"], "readingAids":{"zh-CN":"不在字典确认前读成胜率百分点", "en-US":"Do not read as win probability percentage points without the official definition", "yue-HK":"未確認字典前唔好讀成勝率百分點"}, "sourceRefs":["nba-metrics"], "review":"confirm-official-dictionary-and-listen"}
+  ],
+  "players": []
+}

@@ -11,7 +11,7 @@ import time
 import urllib.error
 import urllib.request
 
-from ..common import BroadcastError, finite, hash_json, now, require, uid
+from ..common import BroadcastError, finite, hash_json, now, require, uid, valid_id
 from .bedrock import _extract_json, _normalize
 from .story_model import normalize_proposal
 from ..media import FFMPEG
@@ -75,7 +75,7 @@ def _chat(kind, content, *, max_tokens=MAX_TOKENS, timeout=TIMEOUT_SECONDS):
             detail = f"finishReason={reason}, contentLength={len(raw) if isinstance(raw, str) else 0}, outputTokens={token_count if token_count is not None else 'unknown'}"
             raise BroadcastError("provider_failed", "StepFun 生成未完成或返回空内容（" + detail + "）。", 502,
                                  reason == "length")
-        return raw, answer.get("usage", {}), model
+        return raw, _safe_usage(answer.get("usage", {})), model
     except (KeyError, IndexError, TypeError, ValueError):
         raise BroadcastError("provider_failed", "StepFun 响应结构无效。", 502)
 
@@ -166,19 +166,107 @@ def _candidate_windows(result, scope, revisions):
     candidates = result.get("observations") if isinstance(result, dict) else None
     require(isinstance(candidates, list) and len(candidates) <= 12, "schema_invalid", "视频模型候选窗无效。", 422)
     usable = []
-    for row in candidates:
+    for index, row in enumerate(candidates):
         if not isinstance(row, dict) or not finite(row.get("start")) or not finite(row.get("end")):
-            revisions.append({"reason": "invalid_time", "candidate": row})
+            revisions.append(_revision("invalid_time" if isinstance(row, dict) else "invalid_candidate_schema", row,
+                                       candidateIndex=index, sourceWindow=scope))
+            continue
+        if (not isinstance(row.get("type"), str) or row["type"] not in
+                ("pass", "shot", "catch", "movement", "screen", "result", "other")):
+            revisions.append(_revision("invalid_candidate_schema", row, candidateIndex=index, sourceWindow=scope))
             continue
         if row["start"] == row["end"] and scope["start"] <= row["start"] < scope["end"]:
             point = row["start"]
             row = {**row, "start": max(scope["start"], point - .5), "end": min(scope["end"], point + .5)}
-            revisions.append({"reason": "point_expanded_to_search_window", "point": point, "window": [row["start"], row["end"]]})
+            revisions.append({"reason": "point_expanded_to_search_window", "point": point, "window": [row["start"], row["end"]],
+                              "candidateIndex": index, "sourceWindow": scope})
         if not scope["start"] <= row["start"] < row["end"] <= scope["end"]:
-            revisions.append({"reason": "outside_source_scope", "candidate": row})
+            revisions.append(_revision("outside_source_scope", row, candidateIndex=index, sourceWindow=scope))
             continue
-        usable.append(row)
+        usable.append({**row, "_initialCandidateIndex": index})
     return usable[:6]
+
+
+def _audit_value(value):
+    """Diagnostics must remain JSON-safe even when a rejected row contains NaN."""
+    if isinstance(value, dict):
+        return {key: _audit_value(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_audit_value(item) for item in value]
+    if isinstance(value, float) and not finite(value):
+        return None
+    return value
+
+
+def _revision(reason, candidate, **references):
+    return {"reason": reason, "candidate": _audit_value(candidate), **references}
+
+
+def _save_vision_audit(service, project, job, filename, value):
+    """Persist content only, never requests, authorization, media or hidden reasoning."""
+    if not (hasattr(service.store, "project_dir") and hasattr(service.store, "atomic") and valid_id(job.get("id"))):
+        return
+    directory = service.store.project_dir(project["id"]) / "jobs" / job["id"]
+    require(not directory.is_symlink() and not directory.parent.is_symlink(),
+            "invalid_request", "模型审计目录无效。", 403)
+    directory.mkdir(parents=True, exist_ok=True)
+    directory.chmod(0o700)
+    service.store.atomic(directory / filename, _audit_value({
+        "schema": "courtlens-vision-audit/1", "projectId": project["id"], "jobId": job["id"],
+        "inputRevision": project["revision"], "mediaSha256": project["media"]["sha256"],
+        "recordedAt": now(), **value}))
+    (directory / filename).chmod(0o600)
+
+
+def _safe_usage(usage):
+    return {key: value for key, value in (usage.items() if isinstance(usage, dict) else [])
+            if key in ("input_tokens", "output_tokens", "prompt_tokens", "completion_tokens", "total_tokens")
+            and type(value) is int and value >= 0}
+
+
+def _ground_candidate(item, project, scope, run_id, available, references, revisions):
+    """Reject the whole invalid candidate; a legal ID never establishes fact truth."""
+    def reject(reason):
+        revisions.append(_revision(reason, item, **references))
+        return None
+
+    if not isinstance(item, dict):
+        return reject("invalid_candidate_schema")
+    if item.get("segmentId") is not None and not valid_id(item["segmentId"]):
+        return reject("invalid_candidate_schema")
+    player_ids = item.get("playerIds", [])
+    roster_ids = {player["id"] for player in project["context"]["roster"]}
+    if (not isinstance(player_ids, list) or len(player_ids) > 20 or
+            any(not isinstance(player_id, str) or player_id not in roster_ids for player_id in player_ids)):
+        return reject("illegal_player_identity")
+    refs = item.get("frameIds", [])
+    local_frames = references.get("frameIds", list(available))
+    if (not isinstance(refs, list) or not 1 <= len(refs) <= 8 or
+            any(not isinstance(ref, str) or ref not in available or ref not in local_frames for ref in refs)):
+        return reject("invalid_frame_reference")
+    a, b, anchor = item.get("start"), item.get("end"), item.get("anchorTime")
+    if not (finite(a) and finite(b) and scope["start"] <= a < b <= scope["end"] and
+            (anchor is None or finite(anchor) and a <= anchor <= b)):
+        return reject("invalid_final_time")
+    times = [available[ref]["actualTime"] for ref in refs]
+    start, end = min(a, *times), max(b, *times)
+    source_window = references.get("sourceWindow", scope)
+    if (start < source_window["start"] or end > source_window["end"] or
+            max(a - start, end - b) > 1.2):
+        return reject("final_time_conflicts_with_frame")
+    corrected = {**item, "start": start, "end": end}
+    adjustments = []
+    if start != a or end != b:
+        adjustments.append({"reason": "window_extended_to_cited_frame", "before": [a, b], "after": [start, end], **references})
+    if anchor is not None and not any(abs(anchor - t) <= .04 for t in times):
+        adjustments.append({"reason": "anchor_snapped_to_cited_frame", "before": anchor, "after": times[0], **references})
+        corrected["anchorTime"] = times[0]
+    try:
+        row = _normalize({"observations": [corrected]}, project, scope, run_id, "video-model", available, max_rows=1)[0]
+    except (BroadcastError, TypeError, ValueError):
+        return reject("invalid_candidate_schema")
+    revisions.extend(adjustments)
+    return corrected, row
 
 
 def _background(project):
@@ -201,7 +289,7 @@ def _read_scoreboard(service, frame):
     try:
         raw, usage, _ = _chat("vision", content, max_tokens=1200, timeout=25)
         value = _parse_scoreboard(raw)
-        return value, {"frameId": frame["id"], "raw": raw, "usage": usage}
+        return value, {"frameId": frame["id"], "raw": raw, "usage": _safe_usage(usage)}
     except (BroadcastError, ValueError, TypeError, KeyError) as exc:
         return None, {"frameId": frame["id"], "error": getattr(exc, "code", "invalid_scoreboard")}
 
@@ -319,13 +407,17 @@ def execute_vision(service, project, job, options):
                 service.store.atomic(service.store.project_dir(project["id"]) / "jobs" / job["id"] / "video-retry.json",
                                      {"attempt": video_attempt, "code": exc.code, "retryable": True,
                                       "videoSha256": video_input["sha256"]})
-    if hasattr(service.store, "project_dir") and hasattr(service.store, "atomic") and isinstance(job.get("id"), str):
-        service.store.atomic(service.store.project_dir(project["id"]) / "jobs" / job["id"] / "video-proposal.json",
-                             {"rawProposal": raw_video, "promptHash": hash_json(prompt), "videoInput": video_input,
-                              "background": background_audit, "usage": video_usage, "proposalOnly": True})
-    preliminary, _ = _extract_json({"output": {"message": {"content": [{"text": raw_video}]}}})
+    _save_vision_audit(service, project, job, "video-proposal.json",
+                       {"rawProposal": raw_video, "promptHash": hash_json(prompt), "videoInput": video_input,
+                        "background": background_audit, "usage": _safe_usage(video_usage), "proposalOnly": True})
     candidate_revisions = []
-    candidates = _candidate_windows(preliminary, scope, candidate_revisions)
+    try:
+        preliminary, _ = _extract_json({"output": {"message": {"content": [{"text": raw_video}]}}})
+        candidates = _candidate_windows(preliminary, scope, candidate_revisions)
+    except BroadcastError as exc:
+        candidates = []
+        candidate_revisions.append({"reason": "invalid_initial_schema", "code": exc.code,
+                                    "sourceWindow": scope, "rawResponseFile": "video-proposal.json"})
     run_id = uid()
     available = {}
     scoreboard_evidence = []
@@ -378,7 +470,8 @@ def execute_vision(service, project, job, options):
         for row in candidates:
             crossing = [cut for cut in scene_cuts if row["start"] + .04 < cut < row["end"] - .04]
             if crossing:
-                candidate_revisions.append({"reason": "crosses_scene_cut", "cutTimes": crossing, "candidate": row})
+                candidate_revisions.append(_revision("crosses_scene_cut", row, cutTimes=crossing,
+                                            candidateIndex=row["_initialCandidateIndex"], sourceWindow=scope))
             else:
                 continuous.append(row)
         candidates = continuous
@@ -409,15 +502,19 @@ def execute_vision(service, project, job, options):
         frames = service.frames(project["id"], project["revision"], times)["frames"]
     available.update({frame["id"]: frame for frame in frames})
     final_rows = list(corroborated)
+    final_references = [{"sourceWindow": scope, "frameIds": row["frameIds"], "origin": "scoreboard"}
+                        for row in corroborated]
     evidence_raw = []
     evidence_usage = []
     evidence_prompt_hashes = []
     evidence_clips = []
     evidence_attempts = []
+    evidence_audits = []
     if frames:
         for index, candidate in enumerate(candidates):
             if time.monotonic() >= deadline - 20:
-                candidate_revisions.append({"reason": "deadline_before_evidence_clip", "candidate": candidate})
+                candidate_revisions.append(_revision("deadline_before_evidence_clip", candidate,
+                                            candidateIndex=candidate["_initialCandidateIndex"], sourceWindow=scope))
                 break
             pair = frames[index * 2:index * 2 + 2]
             lower, upper = safe_window(candidate)
@@ -435,7 +532,7 @@ def execute_vision(service, project, job, options):
                                + RESULT_EVIDENCE_RULE + "战术影响仅作有依据的定性候选。"
                                "只输出JSON {\"observations\":[{\"type\":\"pass|shot|catch|movement|screen|result|other\",\"start\":源PTS秒,\"end\":源PTS秒,\"anchorTime\":所引真实帧PTS或null,\"segmentId\":\"segment-1\",\"description\":\"事实与不确定性\",\"playerIds\":[],\"unknownActors\":[],\"frameIds\":[],\"confidence\":0到1或null}]}，最多1条。"
                                "观察时间窗须覆盖所引帧，必须引用下面的真实frameId；证据不足返回空数组。"
-                               "待复核假设=" + json.dumps(candidate, ensure_ascii=False, separators=(",", ":")) +
+                               "待复核假设=" + json.dumps({key: value for key, value in candidate.items() if not key.startswith("_")}, ensure_ascii=False, separators=(",", ":")) +
                                "；当场名单=" + json.dumps(roster, ensure_ascii=False, separators=(",", ":")))
             evidence_prompt_hashes.append(hash_json(evidence_prompt))
             content = [{"type": "video_url", "video_url": {"url": "data:video/mp4;base64," + base64.b64encode(evidence_video).decode("ascii")}},
@@ -453,13 +550,19 @@ def execute_vision(service, project, job, options):
                     except BroadcastError as exc:
                         if attempt == 2 or not exc.retryable or time.monotonic() >= deadline - 30:
                             raise
+                references = {"candidateIndex": candidate["_initialCandidateIndex"], "evidenceIndex": len(evidence_raw),
+                              "sourceWindow": clip_scope, "frameIds": [f["id"] for f in pair],
+                              "clipSha256": evidence_clips[-1]["sha256"]}
+                # Save the actual answer before parsing or rejecting any candidate.
+                evidence_raw.append(raw)
+                evidence_usage.append(_safe_usage(usage))
+                evidence_audits.append({**references, "rawProposal": raw, "usage": _safe_usage(usage)})
+                _save_vision_audit(service, project, job, "evidence-proposals.json",
+                                   {"responses": evidence_audits, "proposalOnly": True})
                 parsed, _ = _extract_json({"output": {"message": {"content": [{"text": raw}]}}})
                 require(len(parsed["observations"]) <= 1, "schema_invalid", "短片复核最多返回1条观察。", 422)
-                require(all(set(item.get("frameIds", [])) <= {f["id"] for f in pair} for item in parsed["observations"]),
-                        "schema_invalid", "短片模型引用了其他候选窗的帧。", 422)
                 final_rows.extend(parsed["observations"])
-                evidence_raw.append(raw)
-                evidence_usage.append(usage)
+                final_references.extend([references] * len(parsed["observations"]))
             except BroadcastError as exc:
                 message = str(exc)
                 classification = ("output_limit" if "finishReason=length" in message else
@@ -467,32 +570,21 @@ def execute_vision(service, project, job, options):
                                   "upstream_http" if message.startswith("StepFun HTTP ") else "response_or_validation")
                 evidence_attempts.append({"clipSha256": evidence_clips[-1]["sha256"], "attempts": attempt,
                                           "outcome": "failed", "code": exc.code, "class": classification})
-                candidate_revisions.append({"reason": "evidence_clip_failed", "code": exc.code,
-                                            "retryable": exc.retryable, "class": classification, "candidate": candidate})
+                candidate_revisions.append(_revision("invalid_evidence_schema" if exc.code == "schema_invalid" else "evidence_clip_failed", candidate,
+                                            code=exc.code, retryable=exc.retryable, **{"class": classification},
+                                            candidateIndex=candidate["_initialCandidateIndex"], sourceWindow=clip_scope,
+                                            frameIds=[f["id"] for f in pair],
+                                            evidenceIndex=len(evidence_raw) - 1 if exc.code == "schema_invalid" else None))
     grounded_rows = []
-    for item in final_rows:
-        refs = item.get("frameIds", [])
-        if not isinstance(refs, list) or not refs or any(ref not in available for ref in refs):
-            candidate_revisions.append({"reason": "missing_source_frame", "candidate": item})
-            continue
-        if not finite(item.get("start")) or not finite(item.get("end")):
-            candidate_revisions.append({"reason": "invalid_final_time", "candidate": item})
-            continue
-        times = [available[ref]["actualTime"] for ref in refs]
-        start, end = min(item["start"], *times), max(item["end"], *times)
-        if (start < scope["start"] or end > scope["end"] or start >= end or
-                max(item["start"] - start, end - item["end"]) > 1.2):
-            candidate_revisions.append({"reason": "final_time_conflicts_with_frame", "candidate": item})
-            continue
-        corrected = {**item, "start": start, "end": end}
-        if start != item["start"] or end != item["end"]:
-            candidate_revisions.append({"reason": "window_extended_to_cited_frame", "before": [item["start"], item["end"]], "after": [start, end]})
-        if corrected.get("anchorTime") is not None and not any(abs(corrected["anchorTime"] - t) <= .04 for t in times):
-            candidate_revisions.append({"reason": "anchor_snapped_to_cited_frame", "before": corrected["anchorTime"], "after": times[0]})
-            corrected["anchorTime"] = times[0]
-        grounded_rows.append(corrected)
+    rows = []
+    require(len(final_rows) <= 6, "schema_invalid", "模型候选事件窗过多。", 422)
+    for item, references in zip(final_rows, final_references):
+        grounded = _ground_candidate(item, project, scope, run_id, available, references, candidate_revisions)
+        if grounded is not None:
+            corrected, row = grounded
+            grounded_rows.append(corrected)
+            rows.append(row)
     normalized_raw = json.dumps({"observations": grounded_rows}, ensure_ascii=False, separators=(",", ":"))
-    rows = _normalize({"observations": grounded_rows}, project, scope, run_id, "video-model", available, max_rows=6)
     pbp_by_frames = {tuple(row["frameIds"]): record_id for row, record_id in zip(corroborated, corroborated_ids)}
     for row in rows:
         record_id = pbp_by_frames.get(tuple(row["frameIds"]))
@@ -501,17 +593,27 @@ def execute_vision(service, project, job, options):
     require(all(row["frameIds"] for row in rows), "schema_invalid", "视频候选须经过真实源帧取证。", 422)
     require(all(row["anchorTime"] is None or any(abs(row["anchorTime"] - available[fid]["actualTime"]) <= .04 for fid in row["frameIds"]) for row in rows), "schema_invalid", "模型锚点必须来自所引真实源帧。", 422)
     fingerprint = [{"id": f["id"], "actualTime": f["actualTime"], "sha256": f["sha256"]} for f in available.values()]
+    rejected_count = sum(item["reason"] not in ("point_expanded_to_search_window", "window_extended_to_cited_frame", "anchor_snapped_to_cited_frame")
+                         for item in candidate_revisions)
+    semantic_validation = {"status": "partial" if rows and rejected_count else "proposed" if rows else "rejected_all" if rejected_count else "no_candidates",
+                           "proposedCount": len(rows), "rejectedCount": rejected_count,
+                           "requiresHumanReview": True, "factVerified": False}
+    _save_vision_audit(service, project, job, "semantic-validation.json",
+                       {"semanticValidation": semantic_validation, "candidateRevisions": candidate_revisions,
+                        "rawResponseFiles": ["video-proposal.json", *(["evidence-proposals.json"] if evidence_raw else [])],
+                        "proposalOnly": True})
     return {"schema": "courtlens-observations/1", "mediaSha256": project["media"]["sha256"],
             "providerRun": {"id": run_id, "provider": "stepfun-step-plan", "modelId": actual_model, "mode": "video-model",
                             "requestHash": hash_json({"model": model, "scope": scope, "mediaSha256": project["media"]["sha256"], "videoInput": video_input, "frames": fingerprint, "videoPromptHash": hash_json(prompt), "evidencePromptHashes": evidence_prompt_hashes, "background": background_audit, "maxTokens": MAX_TOKENS, "reasoningEffort": REASONING_EFFORT}),
                             "responseHash": hashlib.sha256((raw_video + ''.join(evidence_raw) + json.dumps(scoreboard_evidence, ensure_ascii=False, separators=(",", ":"))).encode()).hexdigest(), "startedAt": started, "completedAt": now()},
             "observations": rows, "rawProposal": normalized_raw, "rawVideoProposal": raw_video,
             "rawEvidenceProposals": evidence_raw, "videoPromptHash": hash_json(prompt), "evidencePromptHashes": evidence_prompt_hashes,
+            "evidenceResponseAudit": evidence_audits, "semanticValidation": semantic_validation,
             "videoInput": video_input, "videoAttempts": video_attempt, "sceneCuts": scene_cuts,
             "evidenceClips": evidence_clips, "evidenceAttempts": evidence_attempts,
             "background": background_audit, "frameFingerprints": fingerprint,
             "scoreboardEvidence": scoreboard_evidence, "matchedPlayIds": corroborated_ids, "candidateRevisions": candidate_revisions,
-            "usage": [video_usage, *(item.get("usage", {}) for item in scoreboard_evidence), *evidence_usage],
+            "usage": [_safe_usage(video_usage), *(item.get("usage", {}) for item in scoreboard_evidence), *evidence_usage],
             "strategy": "video-first", "scope": scope, "proposalOnly": True}
 
 

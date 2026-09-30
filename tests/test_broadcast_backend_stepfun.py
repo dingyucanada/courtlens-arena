@@ -3,7 +3,10 @@ import base64
 import io
 import json
 import os
+import re
+import subprocess
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -13,7 +16,8 @@ from PIL import Image
 from core.broadcast.common import BroadcastError
 from core.broadcast.providers import capabilities, check_configured, voice_fingerprint
 from core.broadcast.providers import stepfun
-from core.broadcast.service import validate_play_by_play
+from core.broadcast.service import BroadcastService, validate_play_by_play
+from core.broadcast.store import BroadcastStore
 
 
 class FakeStore:
@@ -22,6 +26,11 @@ class FakeStore:
 
     def find(self, kind, fid):
         return self.root / kind / fid
+
+    def project_dir(self, project_id):
+        return self.root / project_id
+
+    atomic = staticmethod(BroadcastStore.atomic)
 
 
 class FakeService:
@@ -95,7 +104,157 @@ class StepFunTest(unittest.TestCase):
         with patch.object(stepfun, "_video_bytes", return_value=b"MP4"), patch.object(stepfun, "_chat", side_effect=[(raw1, {}, "step-3.7-flash"), (raw2, {}, "step-3.7-flash")]):
             run = stepfun.execute_vision(self.service, project(), {}, {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 4}})
         self.assertEqual(run["observations"], [])
-        self.assertTrue(any(item["reason"] == "evidence_clip_failed" for item in run["candidateRevisions"]))
+        self.assertTrue(any(item["reason"] == "invalid_frame_reference" for item in run["candidateRevisions"]))
+
+    def _video_semantic_run(self, rows, *, roster=None, initial=None):
+        p = project(8)
+        p["context"]["roster"] = roster or []
+        initial = initial if initial is not None else [{"type": "shot", "start": 1 + 3 * i, "end": 2 + 3 * i}
+                                                       for i in range(len(rows))]
+        raw_initial = json.dumps({"observations": initial}, ensure_ascii=False)
+        raw_evidence = [json.dumps({"observations": [row]}, ensure_ascii=False) for row in rows]
+        responses = [(raw_initial, {"completion_tokens": 17, "authorization": "not-saved"}, "step-3.7-flash")]
+        responses.extend((raw, {}, "step-3.7-flash") for raw in raw_evidence)
+        job = {"id": "c" * 32}
+        with patch.object(stepfun, "_video_bytes", return_value=b"MP4"), patch.object(
+                stepfun, "_scene_cuts", return_value=None), patch.object(stepfun, "_chat", side_effect=responses):
+            run = stepfun.execute_vision(self.service, p, job,
+                {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 8}})
+        audit_dir = self.service.store.project_dir(p["id"]) / "jobs" / job["id"]
+        return run, audit_dir, raw_initial, raw_evidence
+
+    @staticmethod
+    def _candidate(index=0, **changes):
+        return {"type": "shot", "start": 1 + 3 * index, "end": 2 + 3 * index,
+                "description": "画面中球员出手，结果和身份仍需人工复核", "playerIds": [],
+                "frameIds": [f"{1 + 2 * index:032x}"], "unknownActors": ["持球者"], **changes}
+
+    def test_illegal_identity_rejects_only_its_candidate_and_preserves_actual_audit(self):
+        bad = self._candidate(playerIds=["fabricated-player"])
+        good = self._candidate(1)
+        run, directory, initial, responses = self._video_semantic_run([bad, good])
+        self.assertEqual(len(run["observations"]), 1)
+        self.assertEqual(run["observations"][0]["frameIds"], [f"{3:032x}"])
+        self.assertEqual(run["observations"][0]["review"]["status"], "unreviewed")
+        self.assertEqual(run["semanticValidation"]["status"], "partial")
+        rejected = next(row for row in run["candidateRevisions"] if row["reason"] == "illegal_player_identity")
+        self.assertEqual(rejected["candidate"]["playerIds"], ["fabricated-player"])
+        self.assertEqual(rejected["candidateIndex"], 0)
+        self.assertEqual(rejected["evidenceIndex"], 0)
+        self.assertEqual(rejected["sourceWindow"], {"start": 0, "end": 3})
+        self.assertEqual(rejected["frameIds"], [f"{1:032x}", f"{2:032x}"])
+        self.assertEqual(run["rawEvidenceProposals"], responses)
+        self.assertEqual(json.loads((directory / "video-proposal.json").read_text())["rawProposal"], initial)
+        audit = json.loads((directory / "evidence-proposals.json").read_text())
+        self.assertEqual([row["rawProposal"] for row in audit["responses"]], responses)
+        self.assertNotIn("not-saved", (directory / "video-proposal.json").read_text())
+        self.assertEqual((directory / "evidence-proposals.json").stat().st_mode & 0o777, 0o600)
+        self.assertEqual(directory.stat().st_mode & 0o777, 0o700)
+
+    def test_all_rejected_is_empty_unverified_proposal_with_explicit_diagnostics(self):
+        run, directory, _, _ = self._video_semantic_run([
+            self._candidate(playerIds=["fabricated-player"]), self._candidate(1, frameIds=["not-provided"])])
+        self.assertEqual(run["observations"], [])
+        self.assertEqual(run["semanticValidation"], {"status": "rejected_all", "proposedCount": 0,
+            "rejectedCount": 2, "requiresHumanReview": True, "factVerified": False})
+        self.assertEqual({row["reason"] for row in run["candidateRevisions"]},
+                         {"illegal_player_identity", "invalid_frame_reference"})
+        audit = json.loads((directory / "semantic-validation.json").read_text())
+        self.assertEqual(audit["candidateRevisions"], run["candidateRevisions"])
+        self.assertTrue(run["proposalOnly"])
+
+    def test_malformed_candidate_does_not_abort_valid_neighbor(self):
+        for bad in ("not-an-object", self._candidate(unknownActors=[{}]),
+                    self._candidate(anchorTime="1.5"), self._candidate(start=float("nan")),
+                    self._candidate(frameIds=[{}]), self._candidate(playerIds=[{}])):
+            with self.subTest(bad=bad):
+                run, _, _, _ = self._video_semantic_run([bad, self._candidate(1)])
+                self.assertEqual(len(run["observations"]), 1)
+                self.assertEqual(run["observations"][0]["frameIds"], [f"{3:032x}"])
+                self.assertEqual(run["semanticValidation"]["status"], "partial")
+
+    def test_legal_roster_id_keeps_fact_and_review_unverified(self):
+        roster = [{"id": "player-1", "name": "Player One", "teamId": "TEAM"}]
+        run, _, _, _ = self._video_semantic_run([self._candidate(playerIds=["player-1"])], roster=roster)
+        self.assertEqual(run["observations"][0]["playerIds"], ["player-1"])
+        self.assertEqual(run["observations"][0]["review"]["status"], "unreviewed")
+        self.assertFalse(run["semanticValidation"]["factVerified"])
+        self.assertTrue(run["semanticValidation"]["requiresHumanReview"])
+
+    def test_excessive_candidate_count_remains_bounded_and_is_not_semantic_success(self):
+        initial = [{"type": "shot", "start": 1, "end": 2}] * 13
+        run, _, _, _ = self._video_semantic_run([], initial=initial)
+        self.assertEqual(run["observations"], [])
+        self.assertEqual(run["semanticValidation"]["status"], "rejected_all")
+        self.assertEqual(run["candidateRevisions"][0]["reason"], "invalid_initial_schema")
+
+    def test_malformed_supplement_is_saved_before_json_validation(self):
+        initial = json.dumps({"observations": [{"type": "shot", "start": 1, "end": 2}]})
+        raw = "This is not the requested JSON."
+        job = {"id": "c" * 32}
+        with patch.object(stepfun, "_video_bytes", return_value=b"MP4"), patch.object(
+                stepfun, "_scene_cuts", return_value=None), patch.object(
+                stepfun, "_chat", side_effect=[(initial, {}, "step-3.7-flash"), (raw, {}, "step-3.7-flash")]):
+            run = stepfun.execute_vision(self.service, project(), job,
+                {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 4}})
+        self.assertEqual(run["observations"], [])
+        self.assertEqual(run["rawEvidenceProposals"], [raw])
+        self.assertEqual(run["candidateRevisions"][0]["reason"], "invalid_evidence_schema")
+        directory = self.service.store.project_dir(project()["id"]) / "jobs" / job["id"]
+        audit = json.loads((directory / "evidence-proposals.json").read_text())
+        self.assertEqual(audit["responses"][0]["rawProposal"], raw)
+
+    def test_neighbor_window_frame_is_not_valid_local_evidence(self):
+        run, _, _, _ = self._video_semantic_run([
+            self._candidate(), self._candidate(1, frameIds=[f"{1:032x}"])])
+        self.assertEqual(len(run["observations"]), 1)
+        rejected = next(row for row in run["candidateRevisions"] if row["reason"] == "invalid_frame_reference")
+        self.assertEqual(rejected["candidateIndex"], 1)
+        self.assertEqual(rejected["frameIds"], [f"{3:032x}", f"{4:032x}"])
+
+    def test_cancelled_or_stale_vision_does_not_replace_project(self):
+        video = Path(self.temporary.name) / "cancel-test.mp4"
+        result = subprocess.run([stepfun.FFMPEG, "-v", "error", "-f", "lavfi", "-i",
+            "testsrc2=size=320x180:rate=25", "-t", "4", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-y", str(video)],
+            capture_output=True)
+        self.assertEqual(result.returncode, 0)
+        for cancel in (True, False):
+            with self.subTest(cancel=cancel):
+                service = BroadcastService(Path(self.temporary.name) / ("cancelled" if cancel else "stale"))
+                p = service.create("取消或旧版本测试", "manual")
+                with video.open("rb") as source:
+                    p = service.upload(p["id"], p["revision"], source, video.stat().st_size, "cancel-test.mp4", "video/mp4")
+                entered, release = threading.Event(), threading.Event()
+                initial = json.dumps({"observations": [{"type": "shot", "start": 1, "end": 2}]})
+                calls = []
+                def fake_chat(kind, content, **kwargs):
+                    calls.append(content)
+                    if len(calls) == 1:
+                        return initial, {}, "step-3.7-flash"
+                    fid = next(re.search(r"frameId=([A-Za-z0-9_-]+)", item["text"]).group(1)
+                               for item in content if item.get("type") == "text" and item["text"].startswith("frameId="))
+                    entered.set()
+                    self.assertTrue(release.wait(5))
+                    return json.dumps({"observations": [self._candidate(frameIds=[fid])]}), {}, "step-3.7-flash"
+                with patch.object(stepfun, "_video_bytes", return_value=b"MP4"), patch.object(
+                        stepfun, "_scene_cuts", return_value=None), patch.object(stepfun, "_chat", side_effect=fake_chat):
+                    job = service.start_job(p["id"], p["revision"], "analyze",
+                        {"providerId": "stepfun-vision", "strategy": "video-first", "scope": {"start": 0, "end": 4}})
+                    self.assertTrue(entered.wait(5))
+                    if cancel:
+                        service.cancel(job["id"])
+                    else:
+                        p = service.edit(p["id"], p["revision"], {"title": "newer edit"})
+                    release.set()
+                    service._threads[job["id"]].join(5)
+                self.assertFalse(service._threads[job["id"]].is_alive())
+                finished = service.job(job["id"])
+                self.assertEqual(finished["status"], "cancelled" if cancel else "needs_review")
+                current = service.get(p["id"])
+                self.assertEqual(current["revision"], p["revision"])
+                self.assertEqual(current["observations"], [])
+                directory = service.store.project_dir(p["id"]) / "jobs" / job["id"]
+                self.assertTrue((directory / "evidence-proposals.json").is_file())
 
     def test_evidence_clip_retries_transient_failure_without_publishing_raw_guess(self):
         initial = json.dumps({"observations": [{"type": "result", "start": 1, "end": 2,

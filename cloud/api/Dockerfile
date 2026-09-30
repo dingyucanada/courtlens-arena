@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements-cloud.txt awslambdaric==3.1.1
 COPY core ./core
 COPY data/commentary-styles.v1.json ./data/commentary-styles.v1.json
 COPY data/basketball-tactics.v1.json ./data/basketball-tactics.v1.json
+COPY data/broadcast-pronunciation.v1.json ./data/broadcast-pronunciation.v1.json
 COPY contracts ./contracts
 COPY cloud/__init__.py ./cloud/__init__.py
 COPY cloud/api ./cloud/api

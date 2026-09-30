@@ -302,8 +302,34 @@ def handler(event, context):
             return response(200, {"data": {"projects": summaries}})
         if len(parts) >= 2 and parts[0] == "projects" and ID.fullmatch(parts[1]):
             pid = parts[1]
+            if method == "GET" and parts[2:] == ["preflight"]:
+                def preflight(svc, current, root):
+                    report = svc.preflight(pid)
+                    for check in report["checks"]:
+                        if check["id"] == "renderer":
+                            check.update(status="unknown", detail="媒体任务运行于远程 worker；须以实际生成影片验证，不能由 API 容器依赖判断。")
+                    for frame in report["frames"]:
+                        frame["url"] = S3.generate_presigned_url("get_object", Params={"Bucket": INPUT,
+                            "Key": f"projects/{pid}/frames/{frame['id']}/frame.png"}, ExpiresIn=600)
+                    return report
+                return response(200, {"data": with_project(owner, pid, preflight)})
             if method == "GET" and len(parts) == 2:
                 return response(200, {"data": with_project(owner, pid, lambda svc, current, root: public_project_view(svc, current, owner))})
+            if method == "POST" and parts[2:] in (["metrics", "source"], ["metrics", "preview"]):
+                body = json_body(event)
+                is_source = parts[-1] == "source"
+                fields = {"expectedRevision", "format", "text"} if is_source else {"expectedRevision", "request"}
+                if set(body) != fields:
+                    raise HttpError("invalid_request", "Invalid metric intake fields", 422)
+                return response(200, {"data": with_project(owner, pid, lambda svc, current, root:
+                    svc.metric_source(pid, body["expectedRevision"], body["format"], body["text"]) if is_source else
+                    svc.metric_preview(pid, body["expectedRevision"], body["request"]))})
+            if method == "POST" and parts[2:] == ["clock", "preview"]:
+                body = json_body(event)
+                if set(body) != {"expectedRevision", "request"}:
+                    raise HttpError("invalid_request", "Invalid clock alignment fields", 422)
+                return response(200, {"data": with_project(owner, pid, lambda svc, current, root:
+                    svc.clock_preview(pid, body["expectedRevision"], body["request"]))})
             if method == "POST" and len(parts) == 3:
                 action = parts[2]
                 if action == "media":

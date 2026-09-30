@@ -5,6 +5,7 @@ import {playbackState} from './playback_state.mjs';
 import {dataReadiness} from './data_readiness.mjs';
 import {commentarySelection, languages, styles, languageLabel, voiceProvidersForLanguage} from './commentary_ui.mjs';
 import {updateWorkspace} from './retained_video.mjs';
+import {renderProductionDesk, renderClockTool, renderMetricIntake} from './production_ui.mjs';
 
 const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
@@ -23,7 +24,29 @@ const stageNames = {queued:'等待开始',probe:'检查素材',frames:'提取画
 const state = {project:null, projects:[], capabilities:null, step:0, view:'library', busy:false, offline:false, job:null, jobTimer:null, jobDeadline:0,
   frames:[], chosenFrameIds:new Set(), currentTime:0, selectedObservationId:null, selectedBeatId:null, createProject:false, annotation:false, annotationPoints:[], annotationActor:'',annotationFrame:null,frameJobId:null,frameRefreshAttempts:0,frameRequestTimes:null,
   reviewActor:sessionStorage.getItem('courtlens.broadcast.reviewer')||'',release:null, manifest:null, watchOriginal:false, evidenceOpen:false, activeChapter:0,analysisScope:null,analysisMediaSha:null,draftStyle:"analysis",draftLanguage:"zh-CN",tactics:null,tacticsOpen:false};
-let noticeTimer=null;
+Object.assign(state,{preflight:null,preflightKey:null,preflightLoading:false,preflightError:null,deskTab:'vision',loop:null,clockPreview:null,metricSource:null,metricPreview:null});
+let noticeTimer=null,preflightSequence=0;
+async function loadPreflight(force=false) {
+  const p=state.project;if(!p?.media)return;
+  const key=`${p.id}:${p.revision}`;
+  if(!force&&(state.preflightKey===key||state.preflightLoading&&state.preflightKey===key))return;
+  const sequence=++preflightSequence;state.preflightLoading=true;state.preflightKey=key;state.preflightError=null;
+  try {
+    const report=await api.preflight(p);
+    if(state.project?.id!==p.id||state.project?.revision!==p.revision)return;
+    state.preflight=report;state.frames=report.frames||[];
+  } catch(error) {if(sequence===preflightSequence&&state.project?.id===p.id&&state.project?.revision===p.revision){state.preflightError=error.message;state.preflightKey=null;}}
+  finally {if(sequence===preflightSequence){state.preflightLoading=false;if(state.view==='studio')render();}}
+}
+function productionDesk() {
+  const selected=state.project?.observations?.find(o=>o.id===state.selectedObservationId);
+  return renderProductionDesk({report:state.preflight,tab:state.deskTab,selected,frames:state.frames,loading:state.preflightLoading,error:state.preflightError,loop:state.loop});
+}
+function downloadReport() {
+  if(!state.preflight)return;
+  const blob=new Blob([JSON.stringify(state.preflight,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);
+  const link=document.createElement('a');link.href=url;link.download='courtlens-preflight.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
 
 function notify(message, kind = 'info', retry = null) {
   clearTimeout(noticeTimer);
@@ -80,6 +103,7 @@ async function bootstrap() {
         state.view = 'studio';
         state.step = state.project.media ? (state.project.story ? 2 : 1) : 0;
         await restoreLastJob();
+        void loadPreflight();
       } else state.view = 'library';
     }
   } catch (error) {
@@ -110,23 +134,25 @@ function setProject(project, preferredStep = null) {
   state.currentTime = 0;
   state.analysisScope=null;state.analysisMediaSha=project?.media?.sha256||null;
   state.tactics=null;state.tacticsOpen=false;
+  state.preflight=null;state.preflightKey=null;state.preflightError=null;state.loop=null;state.clockPreview=null;state.metricSource=null;state.metricPreview=null;
   state.step = preferredStep ?? (project.media ? 1 : 0);
   localStorage.setItem('courtlens.broadcast.recentProject', project.id);
   history.replaceState(null, '', `/broadcast/?project=${encodeURIComponent(project.id)}`);
   render();
   void restoreLastJob();
+  void loadPreflight();
 }
 async function refreshProject() {
   if (!state.project) return;
   state.project = await api.project(state.project.id);
-  state.tactics=null;
-  render();
+  state.tactics=null;state.preflight=null;state.clockPreview=null;state.metricPreview=null;
+  render();void loadPreflight();
 }
 function saveProject(result) {
   state.project = result;
-  state.tactics=null;
+  state.tactics=null;state.preflight=null;state.clockPreview=null;state.metricPreview=null;
   state.selectedBeatId = result?.story?.beats?.find(b => b.id === state.selectedBeatId)?.id || result?.story?.beats?.[0]?.id || null;
-  render();
+  render();void loadPreflight();
 }
 function safeSourceKind(media) { return media?.source?.kind === 'synthetic' ? '合成演练素材' : media?.source?.kind === 'official-provided' ? '官方提供素材 · 来源待核' : '用户提供素材'; }
 function modeLabel(project) { return project?.mode === 'manual' ? '人工辅助制作' : '计划使用自动辅助 · 结果须人工确认'; }
@@ -231,7 +257,7 @@ function renderStudio() {
   const p = state.project;
   const pill = validReview(p) ? `<span class="status-pill good">${p.review?.reviewerType === 'ai' ? '已 AI 复核' : '已人工审核'}</span>` : p.review || (p.releases?.length && p.story) ? '<span class="status-pill warn">内容已修改 · 需重新审核</span>' : '<span class="status-pill">制作中</span>';
   const steps = stepNames.map((name, index) => `<button data-action="step" data-step="${index}" type="button" class="${state.step === index ? 'active' : ''}" ${index && !p.media ? 'disabled' : ''}><b>${name}</b></button>`).join('');
-  return `<div class="studio-header"><div class="project-meta"><div><h1>${esc(p.title)}</h1><p>已保存 · ${esc(date(p.updatedAt))}</p></div>${pill}</div><nav class="step-nav" aria-label="制作步骤">${steps}</nav></div><div class="studio-layout"><div class="stage-column"><div class="stage-heading"><div><strong>${p.media ? '视频' : '添加视频'}</strong></div><span>${p.media ? time(mediaDuration()) : ''}</span></div>${renderStage()}${p.media ? renderTimeline() : ''}</div><aside class="work-panel" aria-label="当前制作步骤">${renderPanel()}</aside></div>`;
+  return `<div class="studio-header"><div class="project-meta"><div><h1>${esc(p.title)}</h1><p>已保存 · ${esc(date(p.updatedAt))}</p></div>${pill}</div><nav class="step-nav" aria-label="制作步骤">${steps}</nav></div><div class="studio-layout"><div class="stage-column"><div class="stage-heading"><div><strong>${p.media ? '视频' : '添加视频'}</strong></div><span>${p.media ? time(mediaDuration()) : ''}</span></div>${renderStage()}${p.media ? renderTimeline()+productionDesk() : ''}</div><aside class="work-panel" aria-label="当前制作步骤">${renderPanel()}</aside></div>`;
 }
 function renderStage() {
   const p = state.project;
@@ -288,14 +314,20 @@ function renderObservePanel() {
   const analysis = `<section class="panel-section ai-analysis"><div class="analysis-heading"><h3>视频分析</h3></div>${activeJob}${choices.length ? `<form data-form="analyze"><label class="field"><span>画面理解方式</span><select name="analysisChoice">${analysisOptions}</select></label><div class="field-row"><label class="field"><span>分析从 · 秒</span><input name="scopeStart" type="number" min="0" max="${mediaDuration()}" step="0.01" value="${scope.start}" required></label><label class="field"><span>分析到 · 秒</span><input name="scopeEnd" type="number" min="0" max="${mediaDuration()}" step="0.01" value="${scope.end}" required></label></div><p class="help-text" id="analysis-window-hint"></p><button class="button orange full" type="submit">分析视频 · 识别关键动作 →</button></form>` : `<p class="inline-note">当前没有可用的自动画面理解。可以继续通过人工观察完成成片；未运行的模型不会被标为已看懂视频。</p>`}${cvOptions ? `<form data-form="cv" style="margin-top:10px"><label class="field"><span>视觉追踪</span><select name="providerId">${cvOptions}</select></label><button class="button quiet full" type="submit">运行视觉辅助</button></form>` : ''}${semantic.some(x => x.available && !x.verified) ? `<button class="button quiet full" data-action="probe-provider" type="button" style="margin-top:9px">先实测画面理解</button>` : ''}<p class="help-text">分析结果需要确认。</p></section>`;
   const list = (p.observations || []).slice().sort((a,b) => a.start-b.start).map(o => `<div class="record ${o.id === state.selectedObservationId ? 'selected' : ''}"><div class="record-top"><strong>${time(o.start)} · ${esc(obsNames[o.type] || '观察')}</strong><span class="tag ${o.review?.status === 'accepted' ? 'good' : o.review?.status === 'rejected' ? 'bad' : 'orange'}">${o.review?.status === 'accepted' ? '已接受' : o.review?.status === 'rejected' ? '已排除' : '待核对'}</span></div>${!cloudEnabled()&&o.frameIds?.length?`<button class="event-frame" data-action="seek-observation" data-id="${esc(o.id)}" type="button"><img loading="lazy" src="/api/broadcast/v1/frames/${encodeURIComponent(o.frameIds[0])}" alt="这条候选对应的真实取证帧"><span>回看动作 ↗</span></button>`:''}<p>${esc(o.description)}</p><div class="actor-chips">${(o.playerIds||[]).map(pid=>p.context.roster.find(r=>r.id===pid)).filter(Boolean).map(r=>`<span class="tiny-pill">${esc(r.teamId)} · ${esc(r.name)}</span>`).join('')}${(o.unknownActors||[]).map(name=>`<span class="tiny-pill">${esc(name)}</span>`).join('')}</div><small>${o.source?.kind === 'manual' ? '编辑记录' : o.source?.kind === 'cv' ? '视觉候选' : '模型候选'} · ${time(o.start)}—${time(o.end)}</small><div class="record-actions">${o.review?.status!=='accepted'?`<button data-action="accept-observation" data-id="${esc(o.id)}" type="button">确认属实</button>`:''}<button data-action="select-observation" data-id="${esc(o.id)}" type="button">修改</button><button data-action="seek-observation" data-id="${esc(o.id)}" type="button">回看画面</button></div></div>`).join('');
   const observations = `<section class="panel-section"><h3>这一回合发生了什么</h3>${p.observations?.length?`<label class="field"><span>核对者 · 本次填写后复用</span><input id="quick-reviewer" maxlength="80" value="${esc(state.reviewActor)}" placeholder="你的姓名或制作署名"></label>`:''}<div class="observation-list">${list || '<div class="analysis-empty"><span>◉</span><p>上传的画面，将成为故事的依据。</p><small>点击分析视频，关键动作会按时间出现在这里。</small></div>'}</div></section>`;
-  const frameChecks = [...state.frames.map(f => `<label class="check"><input type="checkbox" name="frameId" value="${esc(f.id)}" ${selected?.frameIds?.includes(f.id) || state.chosenFrameIds.has(f.id) ? 'checked' : ''}><span>引用 ${time(f.actualTime)} 的真实画面</span></label>`),...(selected?.frameIds||[]).filter(fid=>!state.frames.some(f=>f.id===fid)).map(fid=>`<label class="check"><input type="checkbox" name="frameId" value="${esc(fid)}" checked><span>已引用的取证帧 ${esc(fid.slice(0,8))}</span></label>`)].join('');
+  const citedFrameIds=new Set([...(selected?.frameIds||[]),...state.chosenFrameIds]);
+  const anchor=selected?.anchorTime??selected?.start??state.currentTime;
+  const nearby=state.frames.slice().sort((a,b)=>Math.abs(a.actualTime-anchor)-Math.abs(b.actualTime-anchor)).slice(0,6);
+  const visibleFrameIds=new Set([...citedFrameIds,...nearby.map(f=>f.id)]);
+  const frameChoice=f=>`<label class="source-frame-choice"><input type="checkbox" name="frameId" value="${esc(f.id)}" ${citedFrameIds.has(f.id)?'checked':''}><img loading="lazy" src="${esc(f.url)}" alt="源帧 ${time(f.actualTime)}"><span>${time(f.actualTime)}</span></label>`;
+  const frameChecks=`<div class="source-frame-choices">${state.frames.filter(f=>visibleFrameIds.has(f.id)).map(frameChoice).join('')}</div>${state.frames.some(f=>!visibleFrameIds.has(f.id))?`<details class="other-source-frames"><summary>其他已保存画面 · ${state.frames.filter(f=>!visibleFrameIds.has(f.id)).length}</summary><div class="source-frame-choices">${state.frames.filter(f=>!visibleFrameIds.has(f.id)).map(frameChoice).join('')}</div></details>`:''}${[...citedFrameIds].filter(fid=>!state.frames.some(f=>f.id===fid)).map(fid=>`<label class="check"><input type="checkbox" name="frameId" value="${esc(fid)}" checked><span>已引用的取证帧 ${esc(fid.slice(0,8))}</span></label>`).join('')}`;
+
   const roster = (p.context?.roster || []).map(person => `<option value="${esc(person.id)}" ${selected?.playerIds?.includes(person.id) ? 'selected' : ''}>${esc(person.name)} · ${esc(person.jersey || '号码未知')}</option>`).join('');
   const edit = `<section class="panel-section"><h3>${selected ? '核对这条观察' : '在此添加观察'}</h3><form data-form="observation"><label class="field"><span>动作类型</span><select name="type">${Object.entries(obsNames).map(([key,label]) => `<option value="${key}" ${selected?.type === key ? 'selected' : ''}>${label}</option>`).join('')}</select></label><div class="field-row triple"><label class="field"><span>开始 · 秒</span><input type="number" name="start" min="0" max="${mediaDuration()}" step="0.01" required value="${selected ? selected.start : Math.max(0,state.currentTime-.5).toFixed(2)}"></label><label class="field"><span>结束 · 秒</span><input type="number" name="end" min="0" max="${mediaDuration()}" step="0.01" required value="${selected ? selected.end : Math.min(mediaDuration(),state.currentTime+1).toFixed(2)}"></label><label class="field"><span>锚点 · 秒</span><input type="number" name="anchorTime" min="0" max="${mediaDuration()}" step="0.01" value="${selected?.anchorTime ?? state.currentTime.toFixed(2)}"></label></div><label class="field"><span>画面中可确认的事实</span><textarea name="description" required maxlength="800" placeholder="例如：持球人把球传向左侧底角">${esc(selected?.description || '')}</textarea></label>${roster ? `<label class="field"><span>确认的球员（可留空）</span><select name="playerId"><option value="">身份未确认</option>${roster}</select></label>` : `<p class="help-text">未导入当场名单，先用“持球人”等画面描述，不猜球员姓名。</p>`}${frameChecks ? `<div class="minor-title">取证画面</div>${frameChecks}` : `<p class="help-text">先点时间线的「取证当前画面」，可将真实帧附在观察上。</p>`}<label class="field"><span>核对者</span><input name="actor" maxlength="80" placeholder="你的姓名或制作署名" value="${esc(state.reviewActor)}"></label><div class="button-row"><button class="button" type="submit">${selected ? '保存修改' : '保存观察'}</button>${selected && selected.review?.status !== 'accepted' ? `<button class="button orange" data-action="accept-observation" data-id="${esc(selected.id)}" type="button">确认属实</button>` : ''}</div>${selected ? `<div class="button-row" style="margin-top:8px"><button class="button quiet" data-action="new-observation" type="button">新建下一条</button><button class="button danger" data-action="reject-observation" data-id="${esc(selected.id)}" type="button">排除这条</button></div>` : ''}</form></section>`;
   const bindingObs = (p.observations || []).filter(o => o.review?.status === 'accepted');
   const metricRecords = p.metrics?.records || [];
-  const bindings = `<section class="panel-section"><h3>事件与数字核对（可选）</h3><p class="empty-copy">只有确认了源片时刻、赛事事件和对应数据记录，数字才可进入画面。</p>${(p.bindings || []).map(b => `<div class="record"><strong>${esc(b.officialEventId || b.shotId || '人工时刻映射')}</strong><p>${esc(b.reason)}</p><small>${b.status === 'confirmed' ? '已确认' : '待核对'} · ${time(b.timeMapping?.videoTime)}</small></div>`).join('')}<form data-form="binding" style="margin-top:14px"><label class="field"><span>对应观察</span><select name="observationId" required><option value="">选择已接受的观察</option>${bindingObs.map(o => `<option value="${esc(o.id)}">${time(o.start)} · ${esc(o.description.slice(0,35))}</option>`).join('')}</select></label><div class="field-row"><label class="field"><span>赛事事件 ID（如有）</span><input name="officialEventId" maxlength="100"></label><label class="field"><span>出手 ID（如有）</span><input name="shotId" maxlength="100"></label></div><label class="field"><span>确认依据</span><textarea name="reason" maxlength="500" required placeholder="例如：比分牌时钟与画面出手动作逐帧核对"></textarea></label>${metricRecords.length ? `<div class="minor-title">绑定的指标记录</div>${metricRecords.map(r => `<label class="check"><input type="checkbox" name="metricRecordId" value="${esc(r.id)}"><span>${esc(p.metrics.dictionary?.metrics?.[r.metricId]?.label || r.metricId)} · ${esc(r.id)}</span></label>`).join('')}` : ''}<button class="button secondary full" type="submit" ${bindingObs.length ? '' : 'disabled'}>确认事件映射</button></form></section>`;
+  const bindings = `<section class="panel-section"><h3>事件与数字核对（可选）</h3><p class="empty-copy">只有确认了源片时刻、赛事事件和对应数据记录，数字才可进入画面。</p>${(p.bindings || []).map(b => `<div class="record"><strong>${esc(b.officialEventId || b.shotId || '人工时刻映射')}</strong><p>${esc(b.reason)}</p><small>${b.status === 'confirmed' ? '已确认' : '待核对'} · ${time(b.timeMapping?.videoTime)}</small></div>`).join('')}<form data-form="binding" style="margin-top:14px"><label class="field"><span>对应观察</span><select name="observationId" required><option value="">选择已接受的观察</option>${bindingObs.map(o => `<option value="${esc(o.id)}">${time(o.start)} · ${esc(o.description.slice(0,35))}</option>`).join('')}</select></label><div class="field-row"><label class="field"><span>赛事事件 ID（如有）</span><input name="officialEventId" maxlength="100"></label><label class="field"><span>出手 ID（如有）</span><input name="shotId" maxlength="100"></label></div><label class="field"><span>确认依据</span><textarea name="reason" maxlength="500" required placeholder="例如：比分牌时钟与画面出手动作逐帧核对"></textarea></label>${state.clockPreview?`<label class="check"><input type="checkbox" name="useClockMapping"><span>使用已预览的比赛时钟映射（源片 ${time(state.clockPreview.mapping.videoTime)}）</span></label>`:''}${metricRecords.length ? `<div class="minor-title">绑定的指标记录</div>${metricRecords.map(r => `<label class="check"><input type="checkbox" name="metricRecordId" value="${esc(r.id)}"><span>${esc(p.metrics.dictionary?.metrics?.[r.metricId]?.label || r.metricId)} · ${esc(r.id)}</span></label>`).join('')}` : ''}<button class="button secondary full" type="submit" ${bindingObs.length ? '' : 'disabled'}>确认事件映射</button></form></section>`;
   const imports = `<section class="panel-section"><h3>视觉结果导入（可选）</h3><form data-form="cv-import"><label class="field"><span>受检视觉结果 · JSON</span><input name="cvFile" type="file" accept=".json,application/json" required></label><button type="submit" class="button quiet full">导入为待核对候选</button></form><p class="help-text">导入结果与真实运行分开标注；任何候选都要人工确认。</p></section>`;
-  return panel('分析', '', `${analysis}${observations}${renderTacticsPanel()}<details class="manual-tools" ${selected?'open':''}><summary>${selected?'核对当前动作':'补充或修正观察'}</summary>${edit}</details><details class="manual-tools"><summary>官方数据映射与外部视觉结果</summary>${bindings}${imports}</details><button class="button full" data-action="next-step" type="button">编辑解说</button>`);
+  return panel('分析', '', `${analysis}${observations}${renderTacticsPanel()}<details class="manual-tools" ${selected?'open':''}><summary>${selected?'核对当前动作':'补充或修正观察'}</summary>${edit}</details><details class="manual-tools"><summary>官方数据映射与外部视觉结果</summary>${renderMetricIntake(state.metricSource,state.metricPreview)}${renderClockTool(state.frames,state.clockPreview)}${bindings}${imports}</details><button class="button full" data-action="next-step" type="button">编辑解说</button>`);
 }
 function commentaryStyleOptions(selected='analysis') {
   const choices=state.capabilities?.commentaryStyleOptions || styles;
@@ -373,6 +405,9 @@ function renderEvidence() {
 }
 
 function updateTimeUI() {
+  const playing=$('#broadcast-video');
+  if(state.view==='studio'&&state.loop&&playing&&!playing.paused&&!playing.seeking&&playing.currentTime>=state.loop.end){playing.currentTime=state.loop.start;state.currentTime=state.loop.start;}
+
   const display = $('#time-display'), slider = $('#source-seek');
   if (display) display.textContent = `${time(state.currentTime)} / ${time(mediaDuration())}`;
   if (slider) slider.value = clamp(state.currentTime, 0, mediaDuration());
@@ -406,6 +441,7 @@ function updateTimeUI() {
   }
 }
 function seek(t) {
+  if(state.loop&&(t<state.loop.start||t>=state.loop.end))state.loop=null;
   state.currentTime = clamp(num(t), 0, state.view === 'watch' ? Math.max(num(videoRange().end),num(state.project?.media?.duration),num(state.release?.duration)) : mediaDuration());
   const video = $('#broadcast-video');
   if (video) video.currentTime = playbackTimeForSource(state.currentTime);
@@ -420,7 +456,7 @@ async function captureFrame() {
 function addFrames(frames) {
   for (const frame of frames) {const at=state.frames.findIndex(f=>f.id===frame.id);if(at>=0)state.frames[at]=frame;else state.frames.push(frame);}
   state.frames.sort((a,b) => a.actualTime-b.actualTime);
-  render();
+  state.preflightKey=null;render();void loadPreflight(true);
 }
 async function requestFrames(project,times) {
   const initial=await api.frames(project,times);
@@ -555,10 +591,12 @@ async function saveBinding(form) {
   if (!observation || observation.review?.status !== 'accepted') throw new Error('先选择一条已经人工确认的观察。');
   const actor = ($('#quick-reviewer')?.value||cleanText($('[data-form="observation"]'),'actor')||state.reviewActor).trim();
   if (!actor) throw new Error('请先在观察表单填写核对者，再确认事件映射。');
+  const proposedClock=fd.get('useClockMapping')==='on'?state.clockPreview:null;
+  if(proposedClock&&(proposedClock.projectRevision!==p.revision||proposedClock.segmentId!==observation.segmentId))throw new Error('时钟映射版本或镜头段与当前观察不一致，请重新预览。');
   const binding = {id:id(),observationId:observation.id,officialEventId:String(fd.get('officialEventId')||'').trim()||null,shotId:String(fd.get('shotId')||'').trim()||null,
     gameId:p.context?.gameId || null,playerId:observation.playerIds?.[0]||null,metricRecordIds:fd.getAll('metricRecordId').map(String),
-    timeMapping:{source:'video',videoTime:observation.anchorTime ?? observation.start,period:null,clock:null,mappingEvidenceIds:observation.frameIds || []},
-    status:'confirmed',reason:String(fd.get('reason')||'').trim(),confirmedBy:actor,confirmedAt:new Date().toISOString()};
+    timeMapping:proposedClock?proposedClock.mapping:{source:'video',videoTime:observation.anchorTime ?? observation.start,period:null,clock:null,mappingEvidenceIds:observation.frameIds || []},
+    status:'confirmed',reason:String(fd.get('reason')||'').trim()+(proposedClock?`；时钟锚点 ${proposedClock.anchors.map(a=>`${a.clock} @ ${a.videoTime.toFixed(3)}s`).join(' / ')}，读数不确定度 ±${proposedClock.uncertaintySeconds.toFixed(3)}s；映射校验 ${proposedClock.requestHash}`:''),confirmedBy:actor,confirmedAt:new Date().toISOString()};
   saveProject(await api.edit(p,{bindings:[...(p.bindings||[]),binding]}));
   notify('事件时刻与数据记录已保存为人工确认映射。','success');
 }
@@ -680,6 +718,28 @@ async function onForm(event) {
       if(!context||typeof context!=='object'||Array.isArray(context))throw new Error('比赛背景文件格式不正确。');
       saveProject(await api.edit(requiredProject(),{context}));
       notify('同场名单与背景已导入。再次分析时将作为有来源的旁证。','success');
+    } else if(kind==='metric-source') {
+      const p=requiredProject(),file=form.elements.metricSourceFile.files?.[0];
+      if(!file||file.size>4*1024*1024)throw new Error('请选择不超过 4 MiB 的 CSV / JSON。');
+      const format=file.name.toLowerCase().endsWith('.csv')?'csv':'json',text=await file.text();
+      const inspected=await api.metricSource(p,format,text);
+      if(state.project?.id!==p.id||state.project?.revision!==p.revision)throw new Error('项目已变化，请重新载入指标文件。');
+      state.metricSource={...inspected,text,sourceName:file.name};state.metricPreview=null;notify('原始字段已读取，请明确选择对应列。','success');
+    } else if(kind==='metric-preview') {
+      const p=requiredProject(),file=form.elements.metricDictionary.files?.[0],source=state.metricSource;
+      if(!source||!file||file.size>1024*1024)throw new Error('请先载入原始数据与提供者字典。');
+      const dictionary=JSON.parse(await file.text()),mapping={};
+      for(const input of form.querySelectorAll('select[name^="map-"]'))mapping[input.name.slice(4)]=input.value||null;
+      const granularity=cleanText(form,'metricGranularity'),timeBase=cleanText(form,'metricTimeBase');
+      delete mapping[granularity==='shot'?'eventId':'shotId'];
+      const request={format:source.format,text:source.text,sourceName:source.sourceName,dictionary,mapping,granularity,timeBase};
+      if(timeBase==='game-clock') {
+        if(!state.clockPreview||state.clockPreview.projectRevision!==p.revision)throw new Error('请先在下方预览当前镜头的两锚点时钟映射。');
+        request.clockAlignment={segmentId:state.clockPreview.segmentId,period:state.clockPreview.mapping.period,anchors:state.clockPreview.anchors.map(a=>({frameId:a.frameId,clock:a.clock}))};
+      }
+      const result=await api.metricPreview(p,request);
+      if(state.project?.id!==p.id||state.project?.revision!==p.revision)throw new Error('项目已变化，请重新预览。');
+      state.metricPreview=result;notify('预览完成；尚未更改项目。','success');
     } else if (kind==='metrics-import') {
       const file=form.querySelector('[name="metrics"]').files?.[0];if(!file) throw new Error('请选择指标 JSON。');
       const bundle=JSON.parse(await file.text());saveProject(await api.metrics(requiredProject(),bundle));notify('指标已导入。请逐项确认事件映射。','success');
@@ -702,6 +762,9 @@ async function onForm(event) {
       const p=requiredProject(),at=state.currentTime,query=cleanText(form,'query');
       const result=await api.tactics(p,at,query);
       if(state.project?.id===p.id&&state.project?.revision===p.revision){state.tactics=result;state.tacticsOpen=true;notify('已按此刻以前的已审画面线索检索战术资料。','success');}
+    } else if(kind==='clock-preview') {
+      const p=requiredProject();const request={segmentId:cleanText(form,'clockSegment'),period:num(cleanText(form,'clockPeriod'),NaN),clock:cleanText(form,'targetClock'),anchors:[1,2].map(n=>({frameId:cleanText(form,`anchorFrame${n}`),clock:cleanText(form,`anchorClock${n}`)}))};
+      state.clockPreview=await api.clockPreview(p,request);notify('映射已预览；请先回看对应画面，再用于事件绑定。','success');
     } else if (kind==='observation') await saveObservation(form);
     else if (kind==='binding') await saveBinding(form);
     else if (kind==='story') await saveStory(form);
@@ -721,6 +784,19 @@ async function onAction(event) {
   if(!target) return;
   const action=target.dataset.action;
   if(target.tagName==='BUTTON') event.preventDefault();
+  if(action==='download-metric-preview') {
+    if(state.metricPreview){const url=URL.createObjectURL(new Blob([JSON.stringify(state.metricPreview,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='courtlens-metric-preview.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}return;
+  }
+  if(action==='confirm-metric-preview') {
+    await run(async()=>{const p=requiredProject(),result=state.metricPreview;if(!result?.bundle||!result.validation?.ok||!(result.counts?.accepted>0)||result.status==='blocked'||result.projectId!==p.id||result.projectRevision!==p.revision||result.mediaSha256!==p.media.sha256)throw new Error('预览已失效，请重新转换。');saveProject(await api.metrics(p,result.bundle));notify('接受的记录已导入。请重新确认事件映射与解说。','success');});return;
+  }
+  if(action==='desk-tab'){state.deskTab=target.dataset.tab;render();void loadPreflight();return;}
+  if(action==='refresh-preflight'){await loadPreflight(true);return;}
+  if(action==='download-preflight'){downloadReport();return;}
+  if(action==='seek-voice-cue'){const b=state.project?.story?.beats.find(x=>x.id===target.dataset.id);if(b)seek(b.sourceStart);return;}
+  if(action==='loop-observation'){const o=state.project?.observations?.find(x=>x.id===target.dataset.id);if(o){state.loop=state.loop?.id===o.id?null:{id:o.id,start:o.start,end:o.end};if(state.loop){seek(o.start);$('#broadcast-video')?.play().catch(()=>{});}render();}return;}
+  if(action==='inspect-window'){seek(num(target.dataset.start));state.analysisScope={start:num(target.dataset.start),end:num(target.dataset.end)};state.step=1;render();return;}
+  if(action==='evidence-window'){const o=state.project?.observations?.find(x=>x.id===target.dataset.id);if(o)await run(async()=>{const start=Math.max(0,o.start-.3),end=Math.min(mediaDuration()-.04,o.end+.3);addFrames((await requestFrames(requiredProject(),[start,(start+end)/2,end])).frames||[]);});return;}
   if(action==='dismiss-notice') {clearNotice();return;}
   if(action==='retry-current'||action==='reconnect') {clearNotice();await bootstrap();return;}
   if(action==='retry-frames'&&state.frameJobId){clearNotice();await run(async()=>{const result=await waitForFrameJob(state.frameJobId);addFrames(result.frames||[]);notify('画面取证已完成。','success');});return;}
@@ -746,7 +822,7 @@ async function onAction(event) {
     const m=state.project?.media,fps=num(m?.fpsNumerator)/Math.max(1,num(m?.fpsDenominator,1));
     seek(state.currentTime+(action==='frame-back'?-1:1)/Math.max(.1,fps));return;
   }
-  if(action==='select-observation') {state.selectedObservationId=target.dataset.id;state.chosenFrameIds.clear();render();return;}
+  if(action==='select-observation') {state.deskTab='vision';state.selectedObservationId=target.dataset.id;const o=state.project?.observations?.find(x=>x.id===target.dataset.id);if(o)seek(o.anchorTime??o.start);state.chosenFrameIds.clear();render();return;}
   if(action==='new-observation') {state.selectedObservationId=null;state.chosenFrameIds.clear();render();return;}
   if(action==='accept-observation'||action==='reject-observation') {await run(()=>reviewObservation(target.dataset.id,action==='accept-observation'?'accepted':'rejected'));return;}
   if(action==='template-story') {await run(async()=>{saveProject(await api.story(requiredProject(),'fan','template',null,selectedCommentaryStyle(),selectedCommentaryLanguage()));notify('已生成初稿，请逐句审看。','success');});return;}

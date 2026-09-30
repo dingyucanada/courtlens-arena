@@ -44,6 +44,8 @@ class BroadcastRoutes:
             if route == "/projects":
                 return 200, service.list()
             match = PROJECT.fullmatch(route)
+            if match and match.group(2) == "preflight":
+                return 200, service.preflight(match.group(1))
             if match and match.group(2) is None:
                 return 200, service.get(match.group(1))
             match = JOB.fullmatch(route)
@@ -66,6 +68,15 @@ class BroadcastRoutes:
             pid, action = match.groups()
             require(action is not None, "invalid_request", "未找到接口。", 404)
             expected = body.get("expectedRevision")
+            if action == "metrics/source":
+                require(set(body) == {"expectedRevision", "format", "text"}, "invalid_request", "原始指标字段无效。")
+                return 200, service.metric_source(pid, expected, body["format"], body["text"])
+            if action == "metrics/preview":
+                require(set(body) == {"expectedRevision", "request"}, "invalid_request", "指标预览字段无效。")
+                return 200, service.metric_preview(pid, expected, body["request"])
+            if action == "clock/preview":
+                require(set(body) == {"expectedRevision", "request"}, "invalid_request", "时钟预览字段无效。")
+                return 200, service.clock_preview(pid, expected, body["request"])
             if action == "edit":
                 require(set(body) == {"expectedRevision", "patch"}, "invalid_request", "编辑字段无效。")
                 return 200, service.edit(pid, expected, body["patch"])

@@ -16,7 +16,7 @@ class CloudCapabilityContractTest(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         for container in ("agent", "render", "api"):
             dockerfile = (root / "cloud" / container / "Dockerfile").read_text()
-            for catalogue in ("commentary-styles.v1.json", "basketball-tactics.v1.json"):
+            for catalogue in ("commentary-styles.v1.json", "basketball-tactics.v1.json", "broadcast-pronunciation.v1.json"):
                 self.assertIn("COPY data/" + catalogue, dockerfile)
         # The agent's story path only calls resolve_style/converse. The renderer
         # performs JSON Schema validation and must carry contracts/tools/Node.

@@ -9,6 +9,7 @@ RUN pip3 install --break-system-packages --no-cache-dir -r requirements-cloud.tx
 COPY core ./core
 COPY data/commentary-styles.v1.json ./data/commentary-styles.v1.json
 COPY data/basketball-tactics.v1.json ./data/basketball-tactics.v1.json
+COPY data/broadcast-pronunciation.v1.json ./data/broadcast-pronunciation.v1.json
 COPY tools ./tools
 COPY pro ./pro
 COPY contracts ./contracts

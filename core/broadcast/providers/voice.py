@@ -14,6 +14,7 @@ from ..common import BroadcastError, require
 from ..media import FFMPEG, FFPROBE
 
 RATE = 24000
+MAX_TEMPO = 1.15
 MAX_AUDIO_BYTES = 8 * 1024 * 1024
 STEPFUN_ENDPOINTS = {
     "openapi": "https://api.stepfun.com/v1/audio/speech",
@@ -178,7 +179,7 @@ def synthesize(film, beats, target_dir, duration, mode="local-tts", voice_id=Non
             raise BroadcastError("voice_unavailable", "语音长度无法测量。", 503)
         require(math.isfinite(raw_duration) and raw_duration > 0, "voice_unavailable", "语音文件无效。", 503)
         tempo = max(1.0, raw_duration / available)
-        require(tempo <= 2, "voice_overflow", f"第{i+1}句需要{tempo:.2f}倍语速；请缩短文字或延长窗口。", 422)
+        require(tempo <= MAX_TEMPO, "voice_overflow", f"第{i+1}句需要{tempo:.2f}倍语速，超过{MAX_TEMPO:.2f}倍上限；请缩短文字或延长窗口。", 422)
         _run([FFMPEG, "-v", "error", "-nostdin", "-protocol_whitelist", "file", "-i", str(source_audio), "-af", f"atempo={tempo:.8f}", "-ar", str(RATE), "-ac", "1", "-c:a", "pcm_s16le", "-y", str(wav)], 25)
         with wave.open(str(wav), "rb") as source:
             require((source.getnchannels(), source.getsampwidth(), source.getframerate()) == (1, 2, RATE), "voice_unavailable", "语音 PCM 格式无效。", 503)

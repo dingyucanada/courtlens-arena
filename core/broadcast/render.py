@@ -6,6 +6,7 @@ import shutil
 import subprocess
 from pathlib import Path
 import math
+import copy
 
 from .common import BroadcastError, hash_json, now, require, uid
 from .media import FFMPEG, FFPROBE
@@ -66,6 +67,54 @@ def background_evidence(project, used_observations):
     else:
         result["playByPlay"] = None
     return result
+
+
+def public_metric_evidence(project, record_ids):
+    """Export declared evidence only; raw intake and unused rows stay private.
+
+    The project snapshot retains the complete audit. A published manifest is
+    separately allowlisted, so arbitrary unmapped input columns cannot leak.
+    """
+    bundle = project.get("metrics")
+    if not bundle:
+        return None
+    def fields(value, keys):
+        return {key: copy.deepcopy(value[key]) for key in keys if key in value}
+    def provenance(value):
+        return fields(value, ("kind", "source", "retrievedAt", "license")) if isinstance(value, dict) else None
+    records = []
+    for row in bundle.get("records", []):
+        if row["id"] not in record_ids:
+            continue
+        exported = fields(row, ("id", "metricId", "value"))
+        exported["scope"] = fields(row["scope"], ("granularity", "playId", "shotId", "eventId", "gameId", "playerId", "teamId", "seasonId"))
+        exported["time"] = fields(row["time"], ("timeBase", "observedAt", "availableAt", "validFrom", "validTo"))
+        if "aggregation" in row:
+            exported["aggregation"] = fields(row["aggregation"], ("start", "end", "label"))
+        if "provenance" in row:
+            exported["provenance"] = provenance(row["provenance"])
+        records.append(exported)
+    if not records:
+        return None
+    metric_ids = {r["metricId"] for r in records}
+    dictionary = fields(bundle["dictionary"], ("id", "version"))
+    if "provenance" in bundle["dictionary"]:
+        dictionary["provenance"] = provenance(bundle["dictionary"]["provenance"])
+    dictionary["metrics"] = {}
+    for key in metric_ids:
+        entry = bundle["dictionary"]["metrics"][key]
+        dictionary["metrics"][key] = fields(entry, ("version", "label", "role", "semantics", "unit", "definition", "granularity", "ballState", "range", "higherIs", "transforms"))
+        if "provenance" in entry:
+            dictionary["metrics"][key]["provenance"] = provenance(entry["provenance"])
+    exported = {"schema": bundle["schema"], "dictionary": dictionary, "records": records,
+                "bindings": {k: v for k, v in bundle.get("bindings", {}).items() if v in metric_ids}}
+    if "provenance" in bundle:
+        exported["provenance"] = provenance(bundle["provenance"])
+    play_ids = {r["scope"].get("playId") for r in records}
+    exported["plays"] = [fields(p, ("id", "gameId", "title", "start", "end", "shotTime", "resultTime", "playerId", "player", "team", "offense", "seasonId", "shotId", "outcome"))
+                         for p in bundle.get("plays", []) if p.get("id") in play_ids]
+    exported["exportPolicy"] = "Declared used metric evidence only; complete raw intake audit remains in private project."
+    return exported
 
 
 def _stamp(seconds):
@@ -250,8 +299,10 @@ def render(project, source_path, destination, font=FONT, voice_mode="silent", vo
     outputs = [{"name": name, "bytes": (Path(destination) / name).stat().st_size, "sha256": hashlib.sha256((Path(destination) / name).read_bytes()).hexdigest()} for name in names]
     used_obs = {oid for beat in s["beats"] for oid in beat["observationIds"]}
     used_bind = {bid for beat in s["beats"] for bid in beat["bindingIds"]}
+    used_metrics = {rid for binding in project["bindings"] if binding["id"] in used_bind for rid in binding["metricRecordIds"]}
+    used_metrics.update(beat["metricRecordId"] for beat in s["beats"] if beat.get("metricRecordId"))
     understanding = understanding or {"mode": "manual", "providerRunIds": [], "humanReviewed": not ai_review}
-    manifest = {"schema": "courtlens-broadcast-release/1", "createdAt": now(), "source": {"mediaSha256": project["media"]["sha256"], "mediaId": project["media"]["id"], "mediaUrl": project["media"]["mediaUrl"], "startPts": project["media"]["startPts"], "firstFramePts": first_frame_pts, "timeBase": project["media"]["timeBase"], **project["media"]["source"]}, "story": s, "compiledBeats": timing, "evidence": {"observations": [o for o in project["observations"] if o["id"] in used_obs], "bindings": [x for x in project["bindings"] if x["id"] in used_bind], "metrics": project["metrics"], "background": background_evidence(project, used_obs), "tacticKnowledge": story_knowledge(project, frame_times, s)}, "review": project["review"], "timing": {"sourceRange": s["sourceRange"], "outputDuration": duration, "fps": fps, "beats": timing, "mapping": "outputTime=sourceTime-sourceRange.start; decoded source PTS normalized from first frame"}, "outputs": outputs, "understanding": understanding, "voice": voice, "voiceReport": voice_report, "validation": {"videoCodec": "h264", "pixelFormat": "yuv420p", "durationVerified": True, "sourceHashVerified": True, "contentHash": project["review"]["contentHash"]}, "limitations": ["Review actor and reviewerType are declared in review; AI review is not human verification. Provider observations remain proposals until accepted."]}
+    manifest = {"schema": "courtlens-broadcast-release/1", "createdAt": now(), "source": {"mediaSha256": project["media"]["sha256"], "mediaId": project["media"]["id"], "mediaUrl": project["media"]["mediaUrl"], "startPts": project["media"]["startPts"], "firstFramePts": first_frame_pts, "timeBase": project["media"]["timeBase"], **project["media"]["source"]}, "story": s, "compiledBeats": timing, "evidence": {"observations": [o for o in project["observations"] if o["id"] in used_obs], "bindings": [x for x in project["bindings"] if x["id"] in used_bind], "metrics": public_metric_evidence(project, used_metrics), "background": background_evidence(project, used_obs), "tacticKnowledge": story_knowledge(project, frame_times, s)}, "review": project["review"], "timing": {"sourceRange": s["sourceRange"], "outputDuration": duration, "fps": fps, "beats": timing, "mapping": "outputTime=sourceTime-sourceRange.start; decoded source PTS normalized from first frame"}, "outputs": outputs, "understanding": understanding, "voice": voice, "voiceReport": voice_report, "validation": {"videoCodec": "h264", "pixelFormat": "yuv420p", "durationVerified": True, "sourceHashVerified": True, "contentHash": project["review"]["contentHash"]}, "limitations": ["Review actor and reviewerType are declared in review; AI review is not human verification. Provider observations remain proposals until accepted."]}
     manifest["renderer"] = renderer_fingerprint(font)
     manifest["manifestHash"] = hash_json(manifest)
     (Path(destination) / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")

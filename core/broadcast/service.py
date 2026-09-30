@@ -167,6 +167,71 @@ class BroadcastService:
                     pass
         return result
 
+    def frame_catalogue(self, project):
+        """Restore persisted source evidence without decoding or making model calls."""
+        if not project.get("media"):
+            return []
+        result = []
+        directory = self.store.project_dir(project["id"]) / "frames"
+        for path in directory.glob("*/frame.json"):
+            if path.is_symlink() or path.parent.is_symlink() or (path.parent / "frame.png").is_symlink() or path.stat().st_size > 64 * 1024:
+                continue
+            try:
+                row = json.loads(path.read_text())
+                if row.get("mediaSha256") == project["media"]["sha256"] and (path.parent / "frame.png").is_file():
+                    validate_shape(row, "frame")
+                    if hashlib.sha256((path.parent / "frame.png").read_bytes()).hexdigest() != row["sha256"]:
+                        continue
+                    result.append(row)
+            except (OSError, ValueError, BroadcastError):
+                continue
+        return sorted(result, key=lambda row: (row["actualTime"], row["id"]))
+
+    def preflight(self, project_id):
+        from .preflight import inspect_project
+        with self.store.lock:
+            project = self.get(project_id)
+            runs = []
+            for path in sorted((self.store.project_dir(project_id) / "runs").glob("*.json")):
+                if path.is_symlink() or path.stat().st_size > 8 * 1024 * 1024:
+                    continue
+                try:
+                    row = json.loads(path.read_text())
+                    if isinstance(row, dict) and project.get("media") and row.get("mediaSha256") == project["media"]["sha256"]:
+                        runs.append(row)
+                except (OSError, ValueError):
+                    continue
+            manifest = None
+            if project.get("releases"):
+                path = self.store.project_dir(project_id) / "releases" / project["releases"][-1]["id"] / "manifest.json"
+                if path.is_file() and not path.is_symlink():
+                    try:
+                        manifest = json.loads(path.read_text())
+                    except (OSError, ValueError):
+                        pass
+            return inspect_project(project, self.frame_catalogue(project), runs, self.capabilities(), manifest=manifest)
+
+    def metric_source(self, project_id, expected, format, text):
+        from .metric_intake import inspect_source
+        with self.store.lock:
+            project = self.get(project_id)
+            self._revision(project, expected)
+            return inspect_source(format, text)
+
+    def metric_preview(self, project_id, expected, request):
+        from .metric_intake import preview
+        with self.store.lock:
+            project = self.get(project_id)
+            self._revision(project, expected)
+            return preview(project, request, self.frame_catalogue(project))
+
+    def clock_preview(self, project_id, expected, request):
+        from .clock_alignment import preview
+        with self.store.lock:
+            project = self.get(project_id)
+            self._revision(project, expected)
+            return preview(project, self.frame_catalogue(project), request)
+
     def _frame_times(self, project):
         result = {}
         directory = self.store.project_dir(project["id"]) / "frames"
@@ -581,19 +646,23 @@ class BroadcastService:
                         return self.job(jid)
                     current = self.get(project_id)
                     run["trustedExecution"] = True
+                    # Execution provenance proves a provider was called; it is
+                    # independent of whether any valid observation was proposed.
+                    semantic = run.get("semanticValidation") or {}
                     for row in run["observations"]:
                         validate_shape(row, "observation")
                     self.store.atomic(self.store.project_dir(project_id) / "runs" / (run["providerRun"]["id"] + ".json"), run)
                     if job["type"] == "probe-provider":
                         if self.job(jid)["status"] != "cancelled":
-                            self.store.atomic(self.store.root / (input_data["options"]["providerId"] + ".json"), {"passed": True, "at": now(), "runId": run["providerRun"]["id"], "modelId": run["providerRun"]["modelId"]})
+                            self.store.atomic(self.store.root / (input_data["options"]["providerId"] + ".json"), {"passed": bool(run["observations"]), "at": now(), "runId": run["providerRun"]["id"], "modelId": run["providerRun"]["modelId"]})
                     elif current["revision"] == job["inputRevision"] and content_hash(current) == input_data["inputHash"] and self.job(jid)["status"] != "cancelled":
-                        current["observations"].extend(run["observations"])
-                        self._save_edit(current)
+                        if run["observations"]:
+                            current["observations"].extend(run["observations"])
+                            self._save_edit(current)
                     else:
                         job["status"] = "needs_review"
                     if job["status"] != "needs_review":
-                        job["status"] = "succeeded"
+                        job["status"] = "needs_review" if semantic.get("status") == "rejected_all" else "succeeded"
                     job["stage"], job["completedAt"] = "done", now()
                     self._write_job(p, job)
                     return job

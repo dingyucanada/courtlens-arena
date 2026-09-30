@@ -113,16 +113,50 @@ class MetricReleaseIntegrationTest(unittest.TestCase):
             null = copy.deepcopy(bundle)
             null["records"][0]["value"] = None
             project = service.metrics(project["id"], project["revision"], null)
-            project = self._bind(service, project, "event")
             with self.assertRaises(BroadcastError) as exc:
-                service.edit(project["id"], project["revision"], {"story": self._story()})
+                self._bind(service, project, "event")
             self.assertEqual(exc.exception.code, "unresolved_binding")
+            self.assertEqual(service.get(project["id"])["bindings"], [])
         with tempfile.TemporaryDirectory() as workspace:
             service, project, bundle = self._base(workspace, case)
             project = service.metrics(project["id"], project["revision"], bundle)
             with self.assertRaises(BroadcastError) as exc:
                 service.edit(project["id"], project["revision"], {"story": self._story()})
             self.assertEqual(exc.exception.code, "unresolved_binding")
+
+    def test_real_render_keeps_raw_intake_private_and_excludes_unused_metrics(self):
+        import json
+        with tempfile.TemporaryDirectory() as workspace:
+            service, project, bundle = self._base(workspace, CASES[2])
+            bundle["dictionary"]["metrics"][CASES[2][0]].update(higherIs="more", transforms={"editorial": "declared-range"})
+            bundle["intakeAudit"] = {"sourceName": "private-source.csv", "mapping": {"operator": "private_operator_email"}}
+            bundle["records"][0]["intake"] = {"rawRow": {"private_operator_email": "private-sentinel@invalid.test", "unmapped_future_result": "future-sentinel"}}
+            unused = copy.deepcopy(bundle["records"][0])
+            unused.update(id="unused_record", value=4.7)
+            unused["scope"]["eventId"] = "unused-event"
+            unused["time"].update(observedAt=4, availableAt=4, validFrom=4, validTo=5)
+            bundle["records"].append(unused)
+            project = service.metrics(project["id"], project["revision"], bundle)
+            project = self._bind(service, project, "event")
+            project = service.edit(project["id"], project["revision"], {"story": self._story()})
+            project = service.review(project["id"], project["revision"], "synthetic AI fixture", {key: True for key in ("identity", "timing", "metrics", "wording", "geometry")}, "test only", reviewer_type="ai")
+            job = service.start_job(project["id"], project["revision"], "render", {"voiceMode": "silent", "voiceId": None})
+            service._threads[job["id"]].join(30)
+            completed = service.job(job["id"])
+            self.assertEqual(completed["status"], "succeeded", completed.get("error"))
+            release = service.release(completed["resultId"])["manifest"]
+            public = json.dumps(release)
+            for sentinel in ("private-sentinel", "future-sentinel", "private_operator_email", "unmapped_future_result", "unused_record", "4.7", "private-source.csv", "rawRow", "intakeAudit"):
+                self.assertNotIn(sentinel, public)
+            self.assertEqual(len(release["evidence"]["metrics"]["records"]), 1)
+            from core.broadcast.validation import metric_bundle
+            from core.broadcast.render import public_metric_evidence
+            self.assertTrue(metric_bundle(release["evidence"]["metrics"]))
+            self.assertEqual(release["evidence"]["metrics"]["dictionary"]["metrics"][CASES[2][0]]["higherIs"], "more")
+            self.assertIsNone(public_metric_evidence(project, set()))
+            saved = service.get(project["id"])
+            self.assertEqual(saved["metrics"]["records"][0]["intake"], bundle["records"][0]["intake"])
+            self.assertEqual(saved["metrics"]["intakeAudit"], bundle["intakeAudit"])
 
 
 if __name__ == "__main__":

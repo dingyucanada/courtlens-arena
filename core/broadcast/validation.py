@@ -120,6 +120,7 @@ def bindings(rows, project):
                 for field, expected in (("playerId", b.get("playerId")), ("teamId", project["context"].get("offenseTeamId")), ("seasonId", project["context"].get("seasonId"))):
                     if scope.get(field) is not None:
                         require(expected == scope[field], "unresolved_binding", field + " 不匹配。", 422)
+                require(r.get("value") is not None, "unresolved_binding", "指标数值未知，不能确认展示绑定。", 422)
                 require(r["time"].get("availableAt") is not None, "unresolved_binding", "指标可用时间未知。", 422)
 
 
