@@ -23,7 +23,7 @@ function sync() {
     evidenceNode.textContent = '演练数据独立于正式 NBA 指标';
     return;
   }
-  statusNode.textContent = `ON AIR / ${cue.possession.toUpperCase()}`;
+  statusNode.textContent = `REPLAY / ${cue.possession.toUpperCase()}`;
   titleNode.textContent = cue.metric ? '数字解释这一刻' : '这一刻发生了什么';
   copyNode.textContent = cue.text;
   evidenceNode.textContent = `依据：${cue.evidence.join(' · ')} · 合成数据`;
@@ -53,7 +53,7 @@ jumps.addEventListener('click', (event) => {
   const button = event.target.closest('button[data-seek]');
   if (!button) return;
   video.currentTime = Number(button.dataset.seek);
-  video.play().catch(() => {});
+  // Chapter seeks keep the current pause/play state.
   sync();
 });
 loadTimeline();

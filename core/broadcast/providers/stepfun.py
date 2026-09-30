@@ -95,6 +95,11 @@ def _jpeg(path):
     return data
 
 
+RESULT_EVIDENCE_RULE = ("比分更新可能滞后，回放或剪辑跳时可能造成旧比分；比分未变不能作为投篮不中的证据。"
+                        "命中或未中必须有独立可见的球入篮/弹出或连续完整的后续球权证据；"
+                        "仅见防守者拿球、底线取球或旧比分，不能判定不中。证据不足只描述出手，结果unknown。")
+
+
 def _execute_frames(service, project, job, options):
     require(options.get("providerId") == "stepfun-vision" and options.get("strategy") == "frames-first", "unsupported_modality", "StepFun 当前仅提供逐帧图像理解。", 422)
     model = model_for("vision")
@@ -108,7 +113,7 @@ def _execute_frames(service, project, job, options):
     prompt = ("你在看按源PTS排序的篮球素材关键帧，帧间可能发生未知动作。素材也可能只是合成圆点示意图；只有看得见人体姿势和球的动作才能说出手、接球等篮球事件。圆点移动只能写圆点位置变化，不能猜运动员、关节、球权或出手。"
               "只返回JSON对象 {\"observations\":[{\"type\":\"pass|shot|catch|movement|screen|result|other\",\"start\":秒,\"end\":秒,\"anchorTime\":秒或null,\"description\":\"可见事实\",\"frameIds\":[\"实际帧ID\"]}]}，最多2条。"
               "每条必须引用至少一张下方给定的frameId，起止时间须覆盖该帧的真实PTS且位于允许范围；anchorTime只能为所引帧的实际PTS或null。看不清就返回空数组。"
-              "不要凭衣服猜具体身份、比赛结果、官方指标或战术因果。允许范围：" + json.dumps(scope, separators=(",", ":")))
+              + RESULT_EVIDENCE_RULE + "不要凭衣服猜具体身份、比赛结果、官方指标或战术因果。允许范围：" + json.dumps(scope, separators=(",", ":")))
     content = [{"type": "text", "text": prompt}]
     for frame in frames:
         image = _jpeg(service.store.find("frames", frame["id"]) / "frame.png")
@@ -292,7 +297,8 @@ def execute_vision(service, project, job, options):
     background_prompt, background_audit = _background(project)
     prompt = ("请直接观看这段有连续运动的篮球转播视频，先辨认球衣/球队线索、持球和防守关系，再找最值得解说的出手、篮下动作和结果。"
               "视频派生片0秒约对应源PTS " + str(scope["start"]) + "秒；时间只是候选窗，不能声称帧级精度。"
-              "注意转播可能插入回放：根据比分牌比赛时钟和画面识别回放，重复镜头不能计为新的得分。结果须看球实际入框或比分变化；防守者拿球并不等于完成上篮。"
+              "注意转播可能插入回放：根据比分牌比赛时钟和画面识别回放，重复镜头不能计为新的得分。"
+              + RESULT_EVIDENCE_RULE +
               "优先选关键事件及其可见结果，不要把普通推进挤占有限名额；投篮与结果若分别可见，应分别列出。"
               "这是未经验证的素材，可能是示意图；没有真实球员、球和动作就返回空候选。"
               "只返回JSON {\"observations\":[{\"type\":\"pass|shot|catch|movement|screen|result|other\",\"start\":源PTS秒,\"end\":源PTS秒,\"anchorTime\":源PTS秒或null,\"description\":\"可见动作和不确定的战术影响\"}]}，最多6条，覆盖不同动作和结果。"
@@ -425,8 +431,8 @@ def execute_vision(service, project, job, options):
                                    "sha256": hashlib.sha256(evidence_video).hexdigest(), "bytes": len(evidence_video)})
             evidence_prompt = ("独立核对这段连续篮球视频和两张原片PTS证据帧。短片0秒约对应源PTS " + str(clip_scope["start"]) + "秒。"
                                "以下第一轮候选可能完全错误；请重新辨别球队、动作、球是否入筐、比分变化及回放，不可照抄候选。"
-                               "只在球衣颜色和可辨号码与当场名单相符时给球员ID，否则保留未知角色。"
-                               "命中或未中须有画面/比分依据；没有就只写出手。战术影响仅作有依据的定性候选。"
+                               "只在球衣颜色和可辨号码与当场名单相符时给球员ID，否则保留未知角色。playerIds只允许名单给定的ID；名单为空必须为[]，不要填球衣号或自造未知ID。"
+                               + RESULT_EVIDENCE_RULE + "战术影响仅作有依据的定性候选。"
                                "只输出JSON {\"observations\":[{\"type\":\"pass|shot|catch|movement|screen|result|other\",\"start\":源PTS秒,\"end\":源PTS秒,\"anchorTime\":所引真实帧PTS或null,\"segmentId\":\"segment-1\",\"description\":\"事实与不确定性\",\"playerIds\":[],\"unknownActors\":[],\"frameIds\":[],\"confidence\":0到1或null}]}，最多1条。"
                                "观察时间窗须覆盖所引帧，必须引用下面的真实frameId；证据不足返回空数组。"
                                "待复核假设=" + json.dumps(candidate, ensure_ascii=False, separators=(",", ":")) +
@@ -509,9 +515,9 @@ def execute_vision(service, project, job, options):
             "strategy": "video-first", "scope": scope, "proposalOnly": True}
 
 
-def propose_story(project, audience, frame_times, commentary_style=None, audit_sink=None):
+def propose_story(project, audience, frame_times, commentary_style=None, audit_sink=None, language=None):
     from .story_model import story_prompt
-    prompt = story_prompt(project, audience, frame_times, commentary_style)
+    prompt = story_prompt(project, audience, frame_times, commentary_style, language)
     model = model_for("story")
     started = now()
     last_error = None
@@ -519,7 +525,7 @@ def propose_story(project, audience, frame_times, commentary_style=None, audit_s
         content = [{"type": "text", "text": prompt if attempt == 0 else prompt + "\n上一份候选未通过服务端证据校验：" + str(last_error)[:300] + "。请只返回修正的JSON。"}]
         raw, usage, actual_model = _chat("story", content)
         try:
-            result = normalize_proposal(project, audience, raw, frame_times, commentary_style)
+            result = normalize_proposal(project, audience, raw, frame_times, commentary_style, language)
             audit = {"provider": "stepfun-step-plan", "modelId": actual_model, "requestHash": hash_json({"model": model, "prompt": prompt, "maxTokens": MAX_TOKENS, "temperature": .1, "reasoningEffort": REASONING_EFFORT}), "responseHash": hashlib.sha256(raw.encode()).hexdigest(), "startedAt": started, "completedAt": now(), "attempts": attempt + 1, "usage": usage, "proposalOnly": True}
             return result, audit
         except BroadcastError as exc:

@@ -49,7 +49,8 @@ class PublicSiteTest(unittest.TestCase):
         self.assertIn('真实 48 秒版本',preview)
         self.assertIn('src="../media/broadcast-rehearsal.mp4"',preview)
         self.assertIn('src="./preview.mjs"',preview)
-        self.assertIn('LIVE SIGNAL',preview)
+        self.assertIn('REPLAY / 赛后复盘',preview)
+        self.assertIn('本站没有制作后端',preview)
         self.assertTrue((self.out/'broadcast/preview.mjs').is_file())
         preview_data=json.loads((self.out/'broadcast/preview-data.json').read_text())
         self.assertEqual(preview_data['provenance'],'synthetic')
@@ -66,6 +67,9 @@ class PublicSiteTest(unittest.TestCase):
         self.assertNotIn('合成演练',app)
         self.assertFalse((cloud/'demo.html').exists())
         self.assertFalse((cloud/'media').exists())
+        for source in (cloud/'broadcast').glob('*.mjs'):
+            for name in re.findall(r"from\s+['\"]\./([^'\"]+)['\"]",source.read_text()):
+                self.assertTrue((source.parent/name).is_file(),f'{source.name} imports missing {name}')
     def test_project_pages_asset_paths_are_relative_and_exist(self):
         for page in ('index.html','broadcast/index.html'):
             html=(self.out/page).read_text()

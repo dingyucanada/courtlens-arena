@@ -21,6 +21,10 @@ await api.analyze(project,'model-test',{start:0,end:2},'frames-first');
 await api.cv(project,'cv-test',{start:0,end:2});
 const modelStoryJob=await api.story(project,'fan','model','agentcore-story');
 assert.equal(modelStoryJob.type,'model-story');
+await api.story(project,'fan','template',null,'data','en-US');
+const modernStoryBody=JSON.parse(requests.at(-1).options.body);
+assert.equal(modernStoryBody.language,'en-US');
+assert.equal(modernStoryBody.commentaryStyle,'data');
 await api.probe('model-test',project,null,{start:0,end:2});
 await api.render(project,'silent');
 await api.commitUpload(project,{size:5,type:'video/mp4',name:'clip.mp4'},'a'.repeat(64),'upload-test');
@@ -31,5 +35,5 @@ for(const {url,options} of requests){
   assert.ok(!seen.has(key),`${url} reused a task key`);
   seen.add(key);
 }
-assert.equal(requests.length,7);
-console.log('7 cloud task-entry requests carry unique idempotency keys');
+assert.equal(requests.length,8);
+console.log('8 cloud task-entry requests carry unique idempotency keys');

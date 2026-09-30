@@ -1,4 +1,4 @@
-name: Publish historical synthetic demo (manual)
+name: Publish Broadcast public rehearsal (manual)
 on:
   workflow_dispatch:
 permissions:
@@ -18,12 +18,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check public evidence and browser logic
+      - name: Check Broadcast public evidence and browser logic
         run: |
           python tools/test_site.py
-          node --test site/logic.test.mjs studio/domain.test.mjs studio/export.test.mjs studio/ui-boundaries.test.mjs
-          node --test tests/test-pro-*.mjs
-      - name: Check Arena agent, voice contracts and artifact delivery
+          npm test
+      - name: Check Broadcast agent, voice contracts and artifact delivery
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-noto-cjk

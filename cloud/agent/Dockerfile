@@ -6,6 +6,7 @@ COPY cloud/agent/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY core ./core
 COPY data/commentary-styles.v1.json ./data/commentary-styles.v1.json
+COPY data/basketball-tactics.v1.json ./data/basketball-tactics.v1.json
 COPY cloud/agent/main.py ./main.py
 EXPOSE 8080
 USER 10001:10001

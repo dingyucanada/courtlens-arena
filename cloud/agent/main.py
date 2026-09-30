@@ -164,7 +164,7 @@ def propose_story(payload):
     if type(payload.get("inputRevision")) is not int or not isinstance(evidence, dict) or evidence.get("audience") not in ("fan", "pro"):
         raise ApiError("invalid_request", "Story revision or audience invalid")
     try:
-        style = resolve_style(evidence.get("commentaryStyle"))
+        style = resolve_style(evidence.get("commentaryStyle"), evidence.get("language"))
     except BroadcastError:
         raise ApiError("invalid_request", "Story commentary style invalid")
     observations = evidence.get("observations")

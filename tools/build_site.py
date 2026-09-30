@@ -32,7 +32,7 @@ def build_cloud(output):
     output=output.resolve()
     if output == ROOT or (ROOT in output.parents and output.name not in ('site-dist','dist')):
         raise ValueError('Use a separate site-dist or dist directory')
-    broadcast_files=('index.html','styles.css','app.mjs','api.mjs','auth.mjs','capability_ui.mjs','playback_state.mjs','data_readiness.mjs')
+    broadcast_files=('index.html','styles.css','app.mjs','api.mjs','auth.mjs','capability_ui.mjs','playback_state.mjs','data_readiness.mjs','commentary_ui.mjs','retained_video.mjs')
     allowed={'favicon.svg','index.html','.nojekyll','manifest.json'} | {'broadcast/'+name for name in broadcast_files}
     if output.exists():
         for entry in output.rglob('*'):
@@ -64,7 +64,7 @@ def build(output, presentation=None, repo='dingyucanada/courtlens-arena'):
         'media/arena-story-silent.mp4.vtt','media/arena-story-silent.mp4.json'}
     legacy_files |= {'pro/'+name for name in ('styles.css','app.mjs','model.mjs','store.mjs','analytics.mjs','calibration.mjs','render.mjs','director.mjs','agent-contract.mjs','export-video.mjs','delivery.mjs','playback.mjs','spectator.mjs','readiness.mjs','metrics-v2.mjs','story-plan.mjs','camera-view.mjs')}
     legacy_files |= {'studio/'+name for name in ('styles.css','app.mjs','domain.mjs','store.mjs','export.mjs')}
-    legacy_files |= {'broadcast/'+name for name in ('styles.css','app.mjs','api.mjs','auth.mjs','capability_ui.mjs','playback_state.mjs','data_readiness.mjs')}
+    legacy_files |= {'broadcast/'+name for name in ('styles.css','app.mjs','api.mjs','auth.mjs','capability_ui.mjs','playback_state.mjs','data_readiness.mjs','commentary_ui.mjs','retained_video.mjs')}
     if output.exists():
         for entry in output.rglob('*'):
             relative = entry.relative_to(output).as_posix()

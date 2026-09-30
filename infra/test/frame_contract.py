@@ -109,7 +109,22 @@ class FramesContract(unittest.TestCase):
         with patch.object(api, "start_job", return_value={"id": "b" * 32, "type": "model-story", "status": "queued"}) as start:
             response = api.handler(event, None)
         self.assertEqual(response["statusCode"], 202)
-        start.assert_called_once_with("owner", pid, 7, "model-story", {"audience": "fan", "providerId": "agentcore-story", "commentaryStyle": "zh-analysis"}, "story-12345")
+        start.assert_called_once_with("owner", pid, 7, "model-story", {"audience": "fan", "providerId": "agentcore-story", "commentaryStyle": "zh-analysis", "language": None}, "story-12345")
+
+    def test_model_story_forwards_language_independently_of_style(self):
+        pid = "a" * 32
+        for language in ("zh-CN", "en-US", "yue-HK"):
+            event = {"httpMethod": "POST", "path": f"/api/broadcast/v1/projects/{pid}/story",
+                     "requestContext": {"authorizer": {"claims": {"sub": "owner"}}},
+                     "headers": {"Idempotency-Key": "story-language"},
+                     "body": json.dumps({"expectedRevision": 7, "audience": "fan", "mode": "model",
+                                         "providerId": "agentcore-story", "commentaryStyle": "data", "language": language})}
+            with self.subTest(language=language), patch.object(api, "start_job", return_value={"id": "b" * 32}) as start:
+                response = api.handler(event, None)
+                self.assertEqual(response["statusCode"], 202)
+                start.assert_called_once_with("owner", pid, 7, "model-story",
+                    {"audience": "fan", "providerId": "agentcore-story", "commentaryStyle": "data", "language": language},
+                    "story-language")
 
     def test_model_story_poll_reports_committed_revision(self):
         pid, jid, audit = "a" * 32, "c" * 32, "d" * 32

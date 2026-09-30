@@ -136,7 +136,7 @@ def story(project, frame_times=None):
     a, b = source_range.get("start"), source_range.get("end")
     require(finite(a) and finite(b) and 0 <= a < b <= media["duration"], "schema_invalid", "剪辑范围无效。", 422)
     require(s.get("audience") in ("fan", "pro"), "schema_invalid", "受众无效。", 422)
-    resolve_style(s.get("commentaryStyle"))
+    resolve_style(s.get("commentaryStyle"), s.get("language"))
     obs = {o["id"]: o for o in project["observations"]}
     bind = {x["id"]: x for x in project["bindings"]}
     metric = {r["id"]: r for r in (project.get("metrics") or {}).get("records", [])}
@@ -174,6 +174,8 @@ def story(project, frame_times=None):
         grounded_wording(beat["label"], [obs[r] for r in refs], project["context"]["roster"])
         if beat.get("secondaryLabel"):
             grounded_wording(beat["secondaryLabel"], [obs[r] for r in refs], project["context"]["roster"])
+        from .tactics import validate_beat_tactics
+        validate_beat_tactics(project, beat, frame_times)
         annotation = beat.get("annotation")
         if annotation is not None:
             require(isinstance(annotation, dict) and annotation.get("sourceObservationId") in refs and bool(annotation.get("confirmedBy")) and bool(annotation.get("confirmedAt")), "review_required", "箭头须来自已确认观察。", 422)

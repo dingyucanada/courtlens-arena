@@ -8,6 +8,8 @@ from pathlib import Path
 from .common import BroadcastError, require, valid_id
 from .service import BroadcastService
 
+BUSINESS_WAIT_SECONDS = 600
+
 
 def run(request, workspace_root):
     require(isinstance(request, dict) and set(request) == {"projectId", "expectedRevision", "jobType", "options"}, "invalid_request", "云任务字段无效。")
@@ -26,10 +28,10 @@ def run(request, workspace_root):
         options["_trustedAgentCore"] = True
     job = service.start_job(request["projectId"], request["expectedRevision"], request["jobType"], options)
     thread = service._threads[job["id"]]
-    thread.join(timeout=240)
+    thread.join(timeout=BUSINESS_WAIT_SECONDS)
     if thread.is_alive():
         service.cancel(job["id"])
-        raise BroadcastError("provider_failed", "云任务超过240秒，已取消。", 504)
+        raise BroadcastError("provider_failed", f"云任务超过{BUSINESS_WAIT_SECONDS}秒，已取消。", 504)
     job = service.job(job["id"])
     result = {"job": job}
     if job["type"] == "render" and job["status"] == "succeeded":

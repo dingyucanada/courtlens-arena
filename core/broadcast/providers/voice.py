@@ -1,4 +1,4 @@
-"""Measured sentence-by-sentence local Mandarin narration for an existing film."""
+"""Measured sentence-by-sentence narration in the reviewed story language."""
 import hashlib
 import json
 import math
@@ -19,6 +19,9 @@ STEPFUN_ENDPOINTS = {
     "openapi": "https://api.stepfun.com/v1/audio/speech",
     "step-plan": "https://api.stepfun.com/step_plan/v1/audio/speech",
 }
+LANGUAGE_BOOST = {"zh-CN": "Chinese", "en-US": "English", "yue-HK": "Chinese,Yue"}
+LOCAL_VOICES = {"zh-CN": ("Tingting", "zh_CN"), "en-US": ("Samantha", "en_US"), "yue-HK": ("Sinji", "zh_HK")}
+MINIMAX_VOICE_KEYS = {"zh-CN": "COURTLENS_MINIMAX_VOICE_ID", "en-US": "COURTLENS_MINIMAX_VOICE_ID_EN", "yue-HK": "COURTLENS_MINIMAX_VOICE_ID_YUE"}
 
 
 def _stepfun_endpoint():
@@ -32,13 +35,16 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
-def configured_voice(mode, requested=None):
+def configured_voice(mode, requested=None, language="zh-CN"):
     """Resolve only a deployment-approved voice, never a client supplied endpoint."""
     require(mode in ("local-tts", "minimax", "stepfun", "polly"), "invalid_request", "声音提供者无效。")
+    require(language in LANGUAGE_BOOST, "voice_unavailable", "解说语言无配音支持。", 503)
     if mode == "local-tts":
-        require(requested in (None, "Tingting"), "invalid_request", "本地语音仅支持已安装的 Tingting。")
-        return "Tingting"
+        voice, _ = LOCAL_VOICES[language]
+        require(requested in (None, voice), "invalid_request", "所选本地音色与解说语言不一致。")
+        return voice
     if mode == "polly":
+        require(language == "zh-CN", "voice_unavailable", "当前 Polly 音色只支持普通话解说。", 503)
         region = os.environ.get("COURTLENS_POLLY_REGION")
         engine = os.environ.get("COURTLENS_POLLY_ENGINE")
         voice = os.environ.get("COURTLENS_POLLY_VOICE_ID")
@@ -46,11 +52,19 @@ def configured_voice(mode, requested=None):
         require(bool(region and allowed and region == allowed and engine == "neural" and voice == "Zhiyu"), "voice_unavailable", "Polly 区域、引擎或中文音色未正确配置。", 503)
         require(requested in (None, voice), "invalid_request", "所选音色与部署配置不一致。")
         return voice
+    if mode == "stepfun":
+        require(language == "zh-CN", "voice_unavailable", "当前 StepFun 音色仅完成普通话配置；不能作为英语或粤语配音。", 503)
     prefix = "MINIMAX" if mode == "minimax" else "STEPFUN"
     key = os.environ.get("COURTLENS_" + prefix + "_API_KEY")
     model = os.environ.get("COURTLENS_" + prefix + "_MODEL")
-    voice = os.environ.get("COURTLENS_" + prefix + "_VOICE_ID")
+    voice = os.environ.get(MINIMAX_VOICE_KEYS[language] if mode == "minimax" else "COURTLENS_STEPFUN_VOICE_ID")
     require(bool(key and model and voice), "voice_unavailable", mode + " 语音密钥、模型或音色未配置。", 503)
+    if mode == "minimax" and language == "yue-HK":
+        # An ordinary Chinese voice, including a Hong Kong themed Mandarin voice,
+        # is not evidence of Cantonese pronunciation.
+        require(voice.startswith("Cantonese_"), "voice_unavailable", "粤语须配置供应商标为 Cantonese 的音色。", 503)
+    if mode == "minimax" and language == "en-US":
+        require(voice.startswith("English_"), "voice_unavailable", "英语须配置供应商标为 English 的音色。", 503)
     if mode == "stepfun":
         _stepfun_endpoint()
     require(requested in (None, voice), "invalid_request", "所选音色与部署配置不一致。")
@@ -72,7 +86,7 @@ def _post_audio(url, token, payload, limit):
         raise BroadcastError("voice_unavailable", "语音供应商请求失败；请检查配置和服务状态。", 503)
 
 
-def _external_audio(mode, text, voice):
+def _external_audio(mode, text, voice, language="zh-CN"):
     if mode == "polly":
         return _polly_audio(text, voice)
     prefix = "MINIMAX" if mode == "minimax" else "STEPFUN"
@@ -82,7 +96,7 @@ def _external_audio(mode, text, voice):
         region = os.environ.get("COURTLENS_MINIMAX_REGION", "global")
         require(region in ("global", "china"), "voice_unavailable", "MiniMax 区域配置无效。", 503)
         host = "api.minimax.io" if region == "global" else "api.minimaxi.com"
-        payload = {"model": model, "text": text, "stream": False, "output_format": "hex", "voice_setting": {"voice_id": voice, "speed": 1, "vol": 1, "pitch": 0}, "audio_setting": {"sample_rate": RATE, "bitrate": 128000, "format": "mp3", "channel": 1}}
+        payload = {"model": model, "text": text, "stream": False, "language_boost": LANGUAGE_BOOST[language], "output_format": "hex", "voice_setting": {"voice_id": voice, "speed": 1, "vol": 1, "pitch": 0}, "audio_setting": {"sample_rate": RATE, "bitrate": 128000, "format": "mp3", "channel": 1}}
         content_type, raw = _post_audio("https://" + host + "/v1/t2a_v2", key, payload, MAX_AUDIO_BYTES * 2 + 4096)
         require("json" in content_type, "voice_unavailable", "MiniMax 未返回协议 JSON。", 503)
         try:
@@ -134,13 +148,14 @@ def _run(args, timeout=30):
     return p.stdout
 
 
-def synthesize(film, beats, target_dir, duration, mode="local-tts", voice_id=None, has_source_audio=False):
-    voice = configured_voice(mode, voice_id)
+def synthesize(film, beats, target_dir, duration, mode="local-tts", voice_id=None, has_source_audio=False, language="zh-CN"):
+    voice = configured_voice(mode, voice_id, language)
     say = shutil.which("say") if mode == "local-tts" else None
     if mode == "local-tts":
         require(say is not None, "voice_unavailable", "本地配音需要 macOS say。", 503)
         voices = _run([say, "-v", "?"], 5).decode("utf-8", "replace")
-        require(any(line.split()[:1] == ["Tingting"] for line in voices.splitlines()), "voice_unavailable", "本机没有安装婷婷中文语音。", 503)
+        local_voice, locale = LOCAL_VOICES[language]
+        require(any(line.split()[:1] == [local_voice] and locale in line for line in voices.splitlines()), "voice_unavailable", "本机没有安装所选语言的语音。", 503)
     target_dir = Path(target_dir)
     sample_count = math.ceil(duration * RATE)
     timeline = bytearray(sample_count * 2)
@@ -156,7 +171,7 @@ def synthesize(film, beats, target_dir, duration, mode="local-tts", voice_id=Non
         if mode == "local-tts":
             _run([say, "-v", voice, "-r", "250", "-o", str(source_audio), "-f", str(text_file)], 25)
         else:
-            source_audio.write_bytes(_external_audio(mode, beat["compiledText"], voice))
+            source_audio.write_bytes(_external_audio(mode, beat["compiledText"], voice, language))
         try:
             raw_duration = float(_run([FFPROBE, "-v", "error", "-protocol_whitelist", "file", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", str(source_audio)], 5).strip())
         except ValueError:
@@ -188,4 +203,4 @@ def synthesize(film, beats, target_dir, duration, mode="local-tts", voice_id=Non
     command += ["-c:v", "copy", "-c:a", "aac", "-b:a", "128k", "-t", str(duration), "-movflags", "+faststart", "-y", str(mixed)]
     _run(command, 60)
     mixed.replace(film)
-    return {"mode": mode, "provider": {"local-tts": "macos-say", "minimax": "minimax", "stepfun": "stepfun", "polly": "amazon-polly"}[mode], "voiceId": voice, "audioSha256": hashlib.sha256(output.read_bytes()).hexdigest(), "cues": report}
+    return {"mode": mode, "provider": {"local-tts": "macos-say", "minimax": "minimax", "stepfun": "stepfun", "polly": "amazon-polly"}[mode], "voiceId": voice, "language": language, "audioSha256": hashlib.sha256(output.read_bytes()).hexdigest(), "cues": report}

@@ -8,6 +8,7 @@ COPY requirements-cloud.txt ./
 RUN pip3 install --break-system-packages --no-cache-dir -r requirements-cloud.txt
 COPY core ./core
 COPY data/commentary-styles.v1.json ./data/commentary-styles.v1.json
+COPY data/basketball-tactics.v1.json ./data/basketball-tactics.v1.json
 COPY tools ./tools
 COPY pro ./pro
 COPY contracts ./contracts

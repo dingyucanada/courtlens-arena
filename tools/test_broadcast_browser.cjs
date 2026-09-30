@@ -51,11 +51,30 @@ const OUT = path.resolve(process.env.BROADCAST_TEST_OUTPUT || path.join(ROOT, 'w
     const media=await page.locator('#broadcast-video').evaluate(video=>({duration:video.duration,width:video.videoWidth,height:video.videoHeight}));
     assert.ok(media.duration>0&&media.width>0);pass('real-media-upload-and-decode',media);
     await assertDecoded('source-has-decoded-image',0.8);
+    await page.locator('#broadcast-video').evaluate(video=>{window.retainedVideo=video;window.mediaLoads=0;video.pause();video.currentTime=5;video.addEventListener('loadstart',()=>window.mediaLoads++);});
+    await page.waitForFunction(()=>!document.querySelector('#broadcast-video').seeking);
+    for(const step of ['0','1','2','3','1']){
+      await page.locator(`.step-nav [data-step="${step}"]`).click();
+      const retained=await page.evaluate(()=>({same:window.retainedVideo===document.querySelector('#broadcast-video'),connected:window.retainedVideo.isConnected,time:window.retainedVideo.currentTime,paused:window.retainedVideo.paused,loads:window.mediaLoads}));
+      assert.ok(retained.same&&retained.connected&&retained.paused&&Math.abs(retained.time-5)<.1&&retained.loads===0,JSON.stringify(retained));
+      assert.equal(await page.locator('.panel-head h2').innerText(),['选片','看懂','讲清','出片'][Number(step)]);
+    }
+    pass('panels-preserve-connected-video-and-paused-time',{loads:0});
+    await page.locator('#broadcast-video').evaluate(video=>video.play());
+    const playingTime=await page.locator('#broadcast-video').evaluate(video=>video.currentTime);
+    await page.locator('.step-nav [data-step="0"]').click();
+    await page.waitForTimeout(250);
+    assert.ok(await page.evaluate(()=>window.retainedVideo===document.querySelector('#broadcast-video')&&!window.retainedVideo.paused&&window.mediaLoads===0));
+    assert.ok(await page.locator('#broadcast-video').evaluate((video,start)=>video.currentTime>start,playingTime));
+    await page.locator('#broadcast-video').evaluate(video=>video.pause());
+    await page.locator('.step-nav [data-step="1"]').click();
+    pass('panel-change-preserves-playing-video',{loads:0});
+
     await page.locator('#notice [data-action="dismiss-notice"]').click().catch(()=>{});
     await resetScroll();
-    const stageBounds=await page.locator('.stage').boundingBox(),timelineBounds=await page.locator('.timeline').boundingBox();
-    assert.ok(stageBounds.y>0&&stageBounds.y+stageBounds.height<900&&timelineBounds.y+timelineBounds.height<=900,`first-screen stage/timeline ${stageBounds.y}/${stageBounds.y+stageBounds.height}/${timelineBounds.y+timelineBounds.height}`);
-    pass('studio-video-and-timeline-first-screen',{videoBottom:Math.round(stageBounds.y+stageBounds.height),timelineBottom:Math.round(timelineBounds.y+timelineBounds.height)});
+    const stageBounds=await page.locator('.stage').boundingBox(),timelineBounds=await page.locator('.timeline').boundingBox(),seekBounds=await page.locator('#source-seek').boundingBox();
+    assert.ok(stageBounds.y>0&&stageBounds.y+stageBounds.height<900&&seekBounds.y+seekBounds.height<=900,`first-screen stage/seek ${stageBounds.y}/${stageBounds.y+stageBounds.height}/${seekBounds.y+seekBounds.height}`);
+    pass('studio-video-and-timeline-first-screen',{videoBottom:Math.round(stageBounds.y+stageBounds.height),seekBottom:Math.round(seekBounds.y+seekBounds.height),timelineBottom:Math.round(timelineBounds.y+timelineBounds.height)});
     const panelScroll=await page.evaluate(()=>{const el=document.querySelector('.work-panel');return {client:el.clientHeight,content:el.scrollHeight,overflow:getComputedStyle(el).overflowY};});
     assert.ok(panelScroll.content>panelScroll.client&&panelScroll.overflow==='auto');pass('independent-task-scroll',panelScroll);
     const isolatedScroll=await page.evaluate(()=>{const panel=document.querySelector('.work-panel'),stage=document.querySelector('.stage');const before={stageY:stage.getBoundingClientRect().y,pageY:window.scrollY};panel.scrollTop=220;const after={stageY:stage.getBoundingClientRect().y,pageY:window.scrollY,panelY:panel.scrollTop};panel.scrollTop=0;return {before,after};});

@@ -82,10 +82,10 @@ class BroadcastRoutes:
                 require(set(body) == {"expectedRevision", "result"}, "invalid_request", "CV 导入字段无效。")
                 return 200, service.import_cv(pid, expected, body["result"])
             if action == "story":
-                require({"expectedRevision", "audience", "mode", "providerId"} <= set(body) <= {"expectedRevision", "audience", "mode", "providerId", "commentaryStyle"}, "invalid_request", "故事字段无效。")
+                require({"expectedRevision", "audience", "mode", "providerId"} <= set(body) <= {"expectedRevision", "audience", "mode", "providerId", "commentaryStyle", "language"}, "invalid_request", "故事字段无效。")
                 if body["mode"] == "model":
-                    return 202, service.start_job(pid, expected, "model-story", {"audience": body["audience"], "providerId": body["providerId"], "commentaryStyle": body.get("commentaryStyle", "zh-analysis")}, headers.get("Idempotency-Key"))
-                return 200, service.template_story(pid, expected, body["audience"], body["mode"], body["providerId"], body.get("commentaryStyle", "zh-analysis"))
+                    return 202, service.start_job(pid, expected, "model-story", {"audience": body["audience"], "providerId": body["providerId"], "commentaryStyle": body.get("commentaryStyle", "zh-analysis"), "language": body.get("language")}, headers.get("Idempotency-Key"))
+                return 200, service.template_story(pid, expected, body["audience"], body["mode"], body["providerId"], body.get("commentaryStyle", "zh-analysis"), body.get("language"))
             if action == "review":
                 require(set(body) in ({"expectedRevision", "actor", "checks", "note"}, {"expectedRevision", "actor", "checks", "note", "reviewerType"}), "invalid_request", "审核字段无效。")
                 return 200, service.review(pid, expected, body["actor"], body["checks"], body["note"], body.get("reviewerType", "human"))

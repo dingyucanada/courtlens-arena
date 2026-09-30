@@ -10,6 +10,7 @@ import math
 from .common import BroadcastError, hash_json, now, require, uid
 from .media import FFMPEG, FFPROBE
 from .validation import story
+from .tactics import story_knowledge
 
 FONT = os.environ.get("COURTLENS_BROADCAST_FONT") or next((path for path in (
     "/System/Library/Fonts/Hiragino Sans GB.ttc",
@@ -229,8 +230,9 @@ def render(project, source_path, destination, font=FONT, voice_mode="silent", vo
     voice_report = None
     if voice_mode in ("local-tts", "minimax", "stepfun", "polly"):
         from .providers.voice import synthesize
-        voice_report = synthesize(film, timing, overlay_dir, b - a, mode=voice_mode, voice_id=voice_id, has_source_audio=project["media"]["hasAudio"])
-        voice = {key: voice_report[key] for key in ("mode", "provider", "voiceId", "audioSha256")}
+        from .commentary_style import resolve_style
+        voice_report = synthesize(film, timing, overlay_dir, b - a, mode=voice_mode, voice_id=voice_id, has_source_audio=project["media"]["hasAudio"], language=resolve_style(s.get("commentaryStyle"), s.get("language"))["language"])
+        voice = {key: voice_report[key] for key in ("mode", "provider", "voiceId", "language", "audioSha256")}
         (overlay_dir / "narration.wav").replace(Path(destination) / "narration.wav")
     if cancel_check and cancel_check():
         raise BroadcastError("cancelled", "任务已取消。", 409)
@@ -249,7 +251,7 @@ def render(project, source_path, destination, font=FONT, voice_mode="silent", vo
     used_obs = {oid for beat in s["beats"] for oid in beat["observationIds"]}
     used_bind = {bid for beat in s["beats"] for bid in beat["bindingIds"]}
     understanding = understanding or {"mode": "manual", "providerRunIds": [], "humanReviewed": not ai_review}
-    manifest = {"schema": "courtlens-broadcast-release/1", "createdAt": now(), "source": {"mediaSha256": project["media"]["sha256"], "mediaId": project["media"]["id"], "mediaUrl": project["media"]["mediaUrl"], "startPts": project["media"]["startPts"], "firstFramePts": first_frame_pts, "timeBase": project["media"]["timeBase"], **project["media"]["source"]}, "story": s, "compiledBeats": timing, "evidence": {"observations": [o for o in project["observations"] if o["id"] in used_obs], "bindings": [x for x in project["bindings"] if x["id"] in used_bind], "metrics": project["metrics"], "background": background_evidence(project, used_obs)}, "review": project["review"], "timing": {"sourceRange": s["sourceRange"], "outputDuration": duration, "fps": fps, "beats": timing, "mapping": "outputTime=sourceTime-sourceRange.start; decoded source PTS normalized from first frame"}, "outputs": outputs, "understanding": understanding, "voice": voice, "voiceReport": voice_report, "validation": {"videoCodec": "h264", "pixelFormat": "yuv420p", "durationVerified": True, "sourceHashVerified": True, "contentHash": project["review"]["contentHash"]}, "limitations": ["Review actor and reviewerType are declared in review; AI review is not human verification. Provider observations remain proposals until accepted."]}
+    manifest = {"schema": "courtlens-broadcast-release/1", "createdAt": now(), "source": {"mediaSha256": project["media"]["sha256"], "mediaId": project["media"]["id"], "mediaUrl": project["media"]["mediaUrl"], "startPts": project["media"]["startPts"], "firstFramePts": first_frame_pts, "timeBase": project["media"]["timeBase"], **project["media"]["source"]}, "story": s, "compiledBeats": timing, "evidence": {"observations": [o for o in project["observations"] if o["id"] in used_obs], "bindings": [x for x in project["bindings"] if x["id"] in used_bind], "metrics": project["metrics"], "background": background_evidence(project, used_obs), "tacticKnowledge": story_knowledge(project, frame_times, s)}, "review": project["review"], "timing": {"sourceRange": s["sourceRange"], "outputDuration": duration, "fps": fps, "beats": timing, "mapping": "outputTime=sourceTime-sourceRange.start; decoded source PTS normalized from first frame"}, "outputs": outputs, "understanding": understanding, "voice": voice, "voiceReport": voice_report, "validation": {"videoCodec": "h264", "pixelFormat": "yuv420p", "durationVerified": True, "sourceHashVerified": True, "contentHash": project["review"]["contentHash"]}, "limitations": ["Review actor and reviewerType are declared in review; AI review is not human verification. Provider observations remain proposals until accepted."]}
     manifest["renderer"] = renderer_fingerprint(font)
     manifest["manifestHash"] = hash_json(manifest)
     (Path(destination) / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")

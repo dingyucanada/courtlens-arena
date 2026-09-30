@@ -31,7 +31,7 @@ def import_proposal(service, project, expected, options):
     except (ValueError, TypeError, AttributeError):
         freshness = float("inf")
     require(freshness <= 600, "provider_unverified", "AgentCore 故事不是本次新调用。", 422)
-    candidate = normalize_proposal(project, options["audience"], raw, service._frame_times(project), options.get("commentaryStyle"))
+    candidate = normalize_proposal(project, options["audience"], raw, service._frame_times(project), options.get("commentaryStyle"), options.get("language"))
     validate_shape(candidate, "story")
     validate_story({**project, "story": candidate}, service._frame_times(project))
     audit_id = uid()

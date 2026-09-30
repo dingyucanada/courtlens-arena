@@ -32,7 +32,7 @@ jobs:
           ARENA_CJK_FONT: /usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc
         run: node --test tests/test-pro-*.mjs
       - name: Browser logic tests
-        run: node --test tests/test_broadcast_ui_contract.mjs tests/test_broadcast_capability_ui.mjs tests/*.test.cjs site/logic.test.mjs studio/domain.test.mjs studio/export.test.mjs studio/ui-boundaries.test.mjs
+        run: node --test tests/test_broadcast_*.mjs tests/*.test.cjs site/logic.test.mjs studio/domain.test.mjs studio/export.test.mjs studio/ui-boundaries.test.mjs
       - name: Install Broadcast cloud contract dependencies
         run: npm ci --prefix infra --ignore-scripts
       - name: Build site assets for CDK synthesis

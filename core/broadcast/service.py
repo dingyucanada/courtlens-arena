@@ -55,14 +55,14 @@ class BroadcastService:
 
     def capabilities(self):
         from .providers import capabilities
-        from .commentary_style import capability_styles
+        from .commentary_style import capability_styles, capability_options
         import shutil as _shutil
         import os as _os
         ffmpeg = bool(_shutil.which(FFMPEG) or Path(FFMPEG).is_file())
         ffprobe = bool(_shutil.which(FFPROBE) or Path(FFPROBE).is_file())
         node = bool(_shutil.which(_os.environ.get("COURTLENS_NODE", "node")) or (_os.environ.get("COURTLENS_NODE") and Path(_os.environ["COURTLENS_NODE"]).is_file()))
         font = font_available(FONT)
-        return validate_shape({"schema": "courtlens-broadcast-capabilities/1", "renderer": {"available": ffmpeg and ffprobe and font, "ffmpeg": ffmpeg, "ffprobe": ffprobe, "node": node, "font": font}, "providers": capabilities(self.store.root), "commentaryStyles": capability_styles(), "deployment": {"mode": "local", "agentService": None, "region": _os.environ.get("AWS_REGION"), "verified": False}}, "capabilities")
+        return validate_shape({"schema": "courtlens-broadcast-capabilities/1", "renderer": {"available": ffmpeg and ffprobe and font, "ffmpeg": ffmpeg, "ffprobe": ffprobe, "node": node, "font": font}, "providers": capabilities(self.store.root), "commentaryStyles": capability_styles(), **capability_options(), "deployment": {"mode": "local", "agentService": None, "region": _os.environ.get("AWS_REGION"), "verified": False}}, "capabilities")
 
     def create(self, title, mode):
         bounded_text(title, "title", 160, True)
@@ -309,22 +309,23 @@ class BroadcastService:
             for row in rows:
                 validate_shape(row, "observation")
             stamp = now()
-            sidecar = {"schema": "courtlens-observations/1", "mediaSha256": p["media"]["sha256"], "providerRun": {"id": run_id, "provider": result["provider"]["id"], "modelId": None, "mode": "cv-imported", "requestHash": hash_json(result), "responseHash": hash_json(rows), "startedAt": stamp, "completedAt": stamp}, "observations": rows, "cvResultHash": hash_json(result)}
+            sidecar = {"schema": "courtlens-observations/1", "mediaSha256": p["media"]["sha256"], "providerRun": {"id": run_id, "provider": result["provider"]["id"], "modelId": None, "mode": "cv-imported", "requestHash": hash_json(result), "responseHash": hash_json(rows), "startedAt": stamp, "completedAt": stamp}, "observations": rows, "cvResultHash": hash_json(result), "cvEvidence": {"provider": result["provider"], "samples": result["samples"], "diagnostics": result.get("diagnostics")}}
             self.store.atomic(self.store.project_dir(project_id) / "runs" / (run_id + ".json"), sidecar)
             p["observations"].extend(rows)
             p["story"] = None
             return self._save_edit(p)
 
-    def template_story(self, project_id, expected, audience, mode, provider_id, commentary_style="zh-analysis"):
+    def template_story(self, project_id, expected, audience, mode, provider_id, commentary_style="zh-analysis", language=None):
         from .commentary_style import resolve_style
-        style = resolve_style(commentary_style)["id"]
+        profile = resolve_style(commentary_style, language)
+        style = profile["id"]
         if mode == "model":
-            return self.model_story(project_id, expected, audience, provider_id, style)
+            return self.model_story(project_id, expected, audience, provider_id, style, profile["language"])
         with self.store.lock:
             p = self.get(project_id)
             self._revision(p, expected)
             require(mode == "template", "provider_not_configured", "模型故事当前未配置，请使用证据模板。", 503)
-            require(style == "zh-analysis", "invalid_request", "事实模板只用普通话；其他语言请选模型或手写初稿。")
+            require(profile["language"] == "zh-CN", "invalid_request", "事实模板只用普通话；其他语言请选模型或手写初稿。")
             require(audience in ("fan", "pro"), "invalid_request", "受众无效。")
             require(p["media"] is not None, "media_mismatch", "先上传视频。", 422)
             accepted = sorted((o for o in p["observations"] if o["review"]["status"] == "accepted"), key=lambda x: x["start"])
@@ -348,17 +349,18 @@ class BroadcastService:
             if source_end > end:
                 source_end -= 1 / 25
             # Template keeps a one-piece source clip. Explicit review still required.
-            p["story"] = {"schema": "courtlens-broadcast-story/1", "title": p["title"], "audience": audience, "commentaryStyle": style, "sourceRange": {"start": 0, "end": source_end}, "beats": beats}
+            p["story"] = {"schema": "courtlens-broadcast-story/1", "title": p["title"], "audience": audience, "commentaryStyle": style, "language": profile["language"], "sourceRange": {"start": 0, "end": source_end}, "beats": beats}
             for beat in beats:
                 beat["sourceEnd"] = min(beat["sourceEnd"], source_end)
             validate_shape(p["story"], "story")
             validate_story(p, self._frame_times(p))
             return self._save_edit(p)
 
-    def model_story(self, project_id, expected, audience, provider_id, commentary_style="zh-analysis"):
+    def model_story(self, project_id, expected, audience, provider_id, commentary_style="zh-analysis", language=None):
         from .providers.story_model import propose
         from .commentary_style import resolve_style
-        style = resolve_style(commentary_style)["id"]
+        profile = resolve_style(commentary_style, language)
+        style = profile["id"]
         with self.store.lock:
             p = self.get(project_id)
             self._revision(p, expected)
@@ -370,7 +372,7 @@ class BroadcastService:
         def save_failure(row):
             failure_rows.append(row)
             self.store.atomic(failure_path, {"status": "failed-validation", "inputRevision": expected, "commentaryStyle": style, "attempts": failure_rows})
-        candidate, audit = propose(p, audience, provider_id, frame_times, style, save_failure)
+        candidate, audit = propose(p, audience, provider_id, frame_times, style, save_failure, profile["language"])
         with self.store.lock:
             current = self.get(project_id)
             require(current["revision"] == expected and content_hash(current) == initial_hash, "revision_conflict", "模型写作期间项目已变更，提议未覆盖当前内容。", 409)
@@ -446,18 +448,19 @@ class BroadcastService:
                     require(options.get("voiceId") is None, "invalid_request", "静音模式不得指定音色。")
                 else:
                     from .providers.voice import configured_voice
-                    configured_voice(options["voiceMode"], options.get("voiceId"))
+                    from .commentary_style import resolve_style
+                    configured_voice(options["voiceMode"], options.get("voiceId"), resolve_style(p["story"].get("commentaryStyle"), p["story"].get("language"))["language"])
             elif kind in ("analyze", "cv", "probe-provider"):
                 from .providers import check_configured
                 check_configured(kind, options)
             elif kind == "model-story":
                 from .commentary_style import resolve_style
-                resolve_style(options.get("commentaryStyle"))
+                resolve_style(options.get("commentaryStyle"), options.get("language"))
                 require(options.get("audience") in ("fan", "pro") and p["media"] is not None, "invalid_request", "先上传视频并选择受众。", 422)
                 if options.get("providerId") == "agentcore-story":
-                    require({"audience", "providerId", "_trustedAgentCore"} <= set(options) <= {"audience", "providerId", "commentaryStyle", "_trustedAgentCore"} and options["_trustedAgentCore"] is True and bool(os.environ.get("AGENT_RUNTIME_ARN")), "provider_not_configured", "云故事任务只接受受控 AgentCore 提议。", 503)
+                    require({"audience", "providerId", "_trustedAgentCore"} <= set(options) <= {"audience", "providerId", "commentaryStyle", "language", "_trustedAgentCore"} and options["_trustedAgentCore"] is True and bool(os.environ.get("AGENT_RUNTIME_ARN")), "provider_not_configured", "云故事任务只接受受控 AgentCore 提议。", 503)
                 else:
-                    require({"audience", "providerId"} <= set(options) <= {"audience", "providerId", "commentaryStyle"} and options["providerId"] in ("stepfun-story", "bedrock-story", "bedrock-video", "bedrock-image"), "provider_not_configured", "选择已配置的文字模型。", 503)
+                    require({"audience", "providerId"} <= set(options) <= {"audience", "providerId", "commentaryStyle", "language"} and options["providerId"] in ("stepfun-story", "bedrock-story", "bedrock-video", "bedrock-image"), "provider_not_configured", "选择已配置的文字模型。", 503)
                     if options["providerId"] == "stepfun-story":
                         from .providers.stepfun import model_for
                         model_for("story")
@@ -545,7 +548,7 @@ class BroadcastService:
                     def save_failure(row):
                         failure_rows.append(row)
                         self.store.atomic(failure_path, {"status": "failed-validation", "inputRevision": job["inputRevision"], "commentaryStyle": options.get("commentaryStyle", "zh-analysis"), "attempts": failure_rows})
-                    candidate, audit = propose(p, options["audience"], options["providerId"], self._frame_times(p), options.get("commentaryStyle"), save_failure)
+                    candidate, audit = propose(p, options["audience"], options["providerId"], self._frame_times(p), options.get("commentaryStyle"), save_failure, options.get("language"))
                     story_run_id = uid()
                 with self.store.lock:
                     job = self.job(jid)

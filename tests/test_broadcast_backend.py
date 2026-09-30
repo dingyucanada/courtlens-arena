@@ -48,6 +48,15 @@ class BroadcastBackendTest(unittest.TestCase):
     def _story(self, p, beat_start=2.0, beat_end=4.0, metric=None, binding_ids=None):
         return {"schema": "courtlens-broadcast-story/1", "title": "故事", "audience": "fan", "sourceRange": {"start": 0, "end": 5}, "beats": [{"id": "b1", "label": "观察", "sourceStart": beat_start, "sourceEnd": beat_end, "anchorTime": beat_start, "observationIds": ["observation1"], "bindingIds": binding_ids or [], "text": "画面中持球人移动" if not metric else "本次指标 {{metric:" + metric + "}}", "explanationKind": "visible-fact" if not metric else "data-fact", "metricRecordId": metric, "secondaryLabel": None, "annotation": None}]}
 
+    def test_manual_story_edit_cannot_publish_unsupported_named_tactic(self):
+        p = self.service.edit(self.project["id"], self.project["revision"], {"observations": [self._accepted()]})
+        for field in ("text", "label", "secondaryLabel"):
+            candidate = self._story(p)
+            candidate["beats"][0][field] = "这是挡拆顺下。"
+            with self.subTest(field=field), self.assertRaises(BroadcastError):
+                self.service.edit(p["id"], p["revision"], {"story": candidate})
+            self.assertIsNone(self.service.get(p["id"])["story"])
+
     def test_model_story_route_is_async_idempotent_and_returns_project_revision(self):
         from core.broadcast.routes import BroadcastRoutes
         p = self.service.edit(self.project["id"], self.project["revision"], {"observations": [self._accepted()]})

@@ -21,6 +21,23 @@ class CommentaryStyleTest(unittest.TestCase):
         self.assertIn('"commentaryStyle":"en-live"', prompt)
         self.assertNotIn('"tacticCandidates"', prompt)
 
+    def test_languages_and_styles_are_independent_and_legacy_maps_are_stable(self):
+        from core.broadcast.commentary_style import capability_options
+        from core.broadcast.schema import validate
+        for language in ("zh-CN", "en-US", "yue-HK"):
+            for style in ("analysis", "energetic", "data"):
+                with self.subTest(language=language, style=style):
+                    profile = resolve_style(style, language)
+                    self.assertEqual((profile["style"], profile["language"]), (style, language))
+        self.assertEqual((resolve_style("en-live")["style"], resolve_style("en-live")["language"]), ("energetic", "en-US"))
+        self.assertEqual(resolve_style("yue-live")["language"], "yue-HK")
+        for bad in ("", "fr-FR", [], 2):
+            with self.subTest(bad=bad), self.assertRaises(BroadcastError):
+                resolve_style("analysis", bad)
+        result = capability_options(cloud_modes=set())
+        self.assertEqual({row["id"] for row in result["commentaryStyleOptions"]}, {"analysis", "energetic", "data"})
+        self.assertTrue(all(row["voiceModes"] == ["silent"] and not row["verified"] for row in result["commentaryLanguages"]))
+
     def test_model_proposal_errors_distinguish_count_and_fields(self):
         project = {"media":{"duration":8}}
         with self.assertRaisesRegex(BroadcastError, "1–3"):

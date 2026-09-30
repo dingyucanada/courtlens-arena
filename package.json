@@ -6,7 +6,7 @@
   "scripts": {
     "start": "python3 tools/launch.py --port 8769",
     "build": "python3 tools/build_site.py --output site-dist",
-    "test": "node --test tests/test-pro-*.mjs tests/test_broadcast_ui_contract.mjs tests/test_broadcast_capability_ui.mjs tests/test_broadcast_job_ui.mjs tests/test_broadcast_playback_state.mjs tests/test_broadcast_data_readiness.mjs tests/*.test.cjs site/logic.test.mjs studio/domain.test.mjs studio/export.test.mjs studio/ui-boundaries.test.mjs",
+    "test": "node --test tests/test-pro-*.mjs tests/test_broadcast_ui_contract.mjs tests/test_broadcast_commentary_ui.mjs tests/test_broadcast_capability_ui.mjs tests/test_broadcast_job_ui.mjs tests/test_broadcast_playback_state.mjs tests/test_broadcast_data_readiness.mjs tests/*.test.cjs site/logic.test.mjs studio/domain.test.mjs studio/export.test.mjs studio/ui-boundaries.test.mjs",
     "test:python": "python3 -m unittest discover -s tests -p 'test_*.py' -v",
     "test:cloud": "npm --prefix infra test",
     "render:arena-demo": "node tools/export_arena.mjs"

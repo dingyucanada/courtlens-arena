@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {commentarySelection, languages, styles, languageLabel, voiceProvidersForLanguage} from '../broadcast/commentary_ui.mjs';
+assert.deepEqual(commentarySelection(null),{language:'zh-CN',commentaryStyle:'analysis'});
+assert.deepEqual(commentarySelection({commentaryStyle:'en-live'}),{language:'en-US',commentaryStyle:'energetic'});
+assert.deepEqual(commentarySelection({profile:'yue-live'}),{language:'yue-HK',commentaryStyle:'energetic'});
+for(const language of languages) for(const style of styles) assert.deepEqual(commentarySelection({language:language.id,commentaryStyle:style.id}),{language:language.id,commentaryStyle:style.id});
+const capabilities={commentaryLanguages:[{id:'zh-CN',voiceModes:['silent','stepfun']},{id:'en-US',voiceModes:['silent','local-tts']},{id:'yue-HK',voiceModes:['silent']}],providers:[{id:'stepfun',kind:'voice',available:true},{id:'local-tts',kind:'voice',available:true},{id:'minimax',kind:'voice',available:false},{id:'wrong-kind',kind:'semantic',available:true}]};
+assert.deepEqual(voiceProvidersForLanguage(capabilities,'en-US').map(x=>x.id),['local-tts']);
+assert.deepEqual(voiceProvidersForLanguage(capabilities,'zh-CN').map(x=>x.id),['stepfun']);
+assert.deepEqual(voiceProvidersForLanguage(capabilities,'yue-HK'),[]);
+assert.deepEqual(voiceProvidersForLanguage({providers:capabilities.providers},'en-US'),[],'unreported language support is not availability');
+assert.equal(languageLabel('en-US'),'英语');
+console.log('9 language/style combinations, old profiles, and language-specific voice availability passed');

@@ -64,6 +64,10 @@ class StepFunTest(unittest.TestCase):
 
         def fake_chat(kind, content, **kwargs):
             calls.append(content)
+            prompt = next(item["text"] for item in content if item["type"] == "text")
+            self.assertIn(stepfun.RESULT_EVIDENCE_RULE, prompt)
+            if len(calls) > 1:
+                self.assertIn("名单为空必须为[]", prompt)
             if len(calls) == 1:
                 self.assertEqual(content[0]["type"], "video_url")
                 self.assertTrue(base64.b64decode(content[0]["video_url"]["url"].split(",", 1)[1]).startswith(b"\0\0\0"))
