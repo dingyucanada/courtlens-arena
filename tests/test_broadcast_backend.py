@@ -223,6 +223,33 @@ class BroadcastBackendTest(unittest.TestCase):
         self.assertIsNone(changed["review"])
         self.assertEqual(restarted.release(j["resultId"])["summary"]["contentHash"], release["summary"]["contentHash"])
 
+    def test_action_audio_and_subtitles_are_separate_from_visual_metric(self):
+        p, binding, s = self._reviewed_event_story()
+        s["language"]="zh-CN"
+        s["commentaryCues"]=[{"id":"oral1","sourceStart":2,"sourceEnd":4,"text":"球员在跑动。","observationIds":["observation1"],"language":"zh-CN"}]
+        p=self.service.edit(p["id"],p["revision"],{"story":s})
+        p=self.service.review(p["id"],p["revision"],"Test reviewer",{key:True for key in ("identity","timing","metrics","wording","geometry")},"")
+        seen=[]
+        from core.broadcast.providers.voice import synthesize
+        sample=Path(self.temp.name)/"offline-tone.mp3"
+        subprocess.run([FFMPEG,"-v","error","-f","lavfi","-i","sine=frequency=440:sample_rate=24000","-t","0.5","-c:a","libmp3lame","-y",str(sample)],check=True)
+        def measured(film,beats,*args,**kwargs):
+            seen.extend(beats)
+            return synthesize(film,beats,*args,**kwargs)
+        with patch.dict(os.environ,{"COURTLENS_STEPFUN_API_KEY":"offline","COURTLENS_STEPFUN_MODEL":"stepaudio-2.5-tts","COURTLENS_STEPFUN_VOICE_ID":"boyinnansheng"}),patch("core.broadcast.providers.voice._external_audio",return_value=sample.read_bytes()),patch("core.broadcast.providers.voice.synthesize",side_effect=measured):
+            job=self.service.start_job(p["id"],p["revision"],"render",{"voiceMode":"stepfun","voiceId":None})
+            self.service._threads[job["id"]].join(30)
+        job=self.service.job(job["id"])
+        self.assertEqual(job["status"],"succeeded",job["error"])
+        result=self.service.release(job["resultId"])
+        self.assertEqual([b["compiledText"] for b in seen],["球员在跑动。"])
+        self.assertIn("1.8",result["manifest"]["compiledBeats"][0]["compiledText"])
+        self.assertEqual(result["manifest"]["voice"]["lane"],"play-by-play")
+        self.assertEqual(result["manifest"]["compiledCommentaryCues"][0]["compiledText"],"球员在跑动。")
+        caption=next(Path(self.temp.name).rglob("captions.vtt")).read_text()
+        self.assertIn("球员在跑动。",caption)
+        self.assertNotIn("1.8",caption)
+
     def test_bad_shapes_and_fake_checks_rejected(self):
         p = self.project
         for malformed in (None, "bad", [12], {"id": "x"}):

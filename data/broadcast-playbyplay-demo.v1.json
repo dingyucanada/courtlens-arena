@@ -1,0 +1,833 @@
+{
+  "schema": "courtlens-public-playbyplay/1",
+  "provenance": "synthetic",
+  "languages": {
+    "zh-CN": {
+      "voice": "boyinnansheng",
+      "cues": [
+        {
+          "start": 0,
+          "end": 4,
+          "text": "红队一号控球。",
+          "possession": "p01",
+          "evidence": [
+            "p01:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 4,
+          "end": 8,
+          "text": "三号在右侧移动。",
+          "possession": "p01",
+          "evidence": [
+            "p01:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 9,
+          "end": 10.5,
+          "text": "三分出手！",
+          "possession": "p01",
+          "evidence": [
+            "p01:event"
+          ],
+          "metric": false
+        },
+        {
+          "start": 10.5,
+          "end": 12,
+          "text": "进了！",
+          "possession": "p01",
+          "evidence": [
+            "p01:result"
+          ],
+          "metric": false
+        },
+        {
+          "start": 12,
+          "end": 16,
+          "text": "蓝队控制球。",
+          "possession": "p02",
+          "evidence": [
+            "p02:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 16,
+          "end": 20,
+          "text": "二号在场上移动。",
+          "possession": "p02",
+          "evidence": [
+            "p02:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 21,
+          "end": 22.5,
+          "text": "出手！",
+          "possession": "p02",
+          "evidence": [
+            "p02:event"
+          ],
+          "metric": false
+        },
+        {
+          "start": 22.5,
+          "end": 24,
+          "text": "没进。",
+          "possession": "p02",
+          "evidence": [
+            "p02:result"
+          ],
+          "metric": false
+        },
+        {
+          "start": 24,
+          "end": 28,
+          "text": "红队一号拿球。",
+          "possession": "p03",
+          "evidence": [
+            "p03:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 28,
+          "end": 32,
+          "text": "五号移动到右侧。",
+          "possession": "p03",
+          "evidence": [
+            "p03:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 33,
+          "end": 34.5,
+          "text": "三分！",
+          "possession": "p03",
+          "evidence": [
+            "p03:event"
+          ],
+          "metric": false
+        },
+        {
+          "start": 34.5,
+          "end": 36,
+          "text": "进了！",
+          "possession": "p03",
+          "evidence": [
+            "p03:result"
+          ],
+          "metric": false
+        }
+      ],
+      "voiceReport": {
+        "mode": "stepfun",
+        "provider": "stepfun",
+        "voiceId": "boyinnansheng",
+        "language": "zh-CN",
+        "audioSha256": "a7d7c8b882aa72adb40bb78f8c273e780bfedd4e23f0e16923633e9dcc089a4e",
+        "cues": [
+          {
+            "beatId": "p01-speech-0",
+            "outputStart": 0,
+            "speechDuration": 1.5775,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p01-speech-1",
+            "outputStart": 4,
+            "speechDuration": 1.7244583333333334,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p01-speech-2",
+            "outputStart": 9,
+            "speechDuration": 1.216,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p01-speech-3",
+            "outputStart": 10.5,
+            "speechDuration": 0.85675,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-0",
+            "outputStart": 12,
+            "speechDuration": 1.410625,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-1",
+            "outputStart": 16,
+            "speechDuration": 1.5974166666666667,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-2",
+            "outputStart": 21,
+            "speechDuration": 1.0978333333333334,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-3",
+            "outputStart": 22.5,
+            "speechDuration": 0.763375,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-0",
+            "outputStart": 24,
+            "speechDuration": 1.4822916666666666,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-1",
+            "outputStart": 28,
+            "speechDuration": 1.816625,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-2",
+            "outputStart": 33,
+            "speechDuration": 1.40925,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-3",
+            "outputStart": 34.5,
+            "speechDuration": 0.85675,
+            "tempo": 1.0,
+            "tailTruncated": false
+          }
+        ],
+        "coverage": {
+          "spokenSeconds": 15.808875,
+          "longestGapSeconds": 3.4025833333333324,
+          "gaps": [
+            {
+              "start": 1.5775,
+              "end": 4
+            },
+            {
+              "start": 5.724458333333334,
+              "end": 9
+            },
+            {
+              "start": 10.216,
+              "end": 10.5
+            },
+            {
+              "start": 11.35675,
+              "end": 12
+            },
+            {
+              "start": 13.410625,
+              "end": 16
+            },
+            {
+              "start": 17.597416666666668,
+              "end": 21
+            },
+            {
+              "start": 22.097833333333334,
+              "end": 22.5
+            },
+            {
+              "start": 23.263375,
+              "end": 24
+            },
+            {
+              "start": 25.482291666666665,
+              "end": 28
+            },
+            {
+              "start": 29.816625,
+              "end": 33
+            },
+            {
+              "start": 34.40925,
+              "end": 34.5
+            },
+            {
+              "start": 35.35675,
+              "end": 36
+            }
+          ]
+        },
+        "sourceAudioMix": "narration-only",
+        "naturalnessValidated": false
+      },
+      "videoSha256": "1c5a300d8e730bbfd7e30328ecd42cd0d03665057a6a0369c67a6324d4064da5"
+    },
+    "en-US": {
+      "voice": "vibrant-youth",
+      "cues": [
+        {
+          "start": 0,
+          "end": 4,
+          "text": "Red has possession.",
+          "possession": "p01",
+          "evidence": [
+            "p01:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 4,
+          "end": 8,
+          "text": "Three moving on the right.",
+          "possession": "p01",
+          "evidence": [
+            "p01:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 9,
+          "end": 10.5,
+          "text": "For three!",
+          "possession": "p01",
+          "evidence": [
+            "p01:event"
+          ],
+          "metric": false
+        },
+        {
+          "start": 10.5,
+          "end": 12,
+          "text": "Good!",
+          "possession": "p01",
+          "evidence": [
+            "p01:result"
+          ],
+          "metric": false
+        },
+        {
+          "start": 12,
+          "end": 16,
+          "text": "Blue with the ball.",
+          "possession": "p02",
+          "evidence": [
+            "p02:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 16,
+          "end": 20,
+          "text": "Two moving into position.",
+          "possession": "p02",
+          "evidence": [
+            "p02:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 21,
+          "end": 22.5,
+          "text": "Up!",
+          "possession": "p02",
+          "evidence": [
+            "p02:event"
+          ],
+          "metric": false
+        },
+        {
+          "start": 22.5,
+          "end": 24,
+          "text": "No good.",
+          "possession": "p02",
+          "evidence": [
+            "p02:result"
+          ],
+          "metric": false
+        },
+        {
+          "start": 24,
+          "end": 28,
+          "text": "Red has the ball.",
+          "possession": "p03",
+          "evidence": [
+            "p03:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 28,
+          "end": 32,
+          "text": "Five moving right.",
+          "possession": "p03",
+          "evidence": [
+            "p03:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 33,
+          "end": 34.5,
+          "text": "For three!",
+          "possession": "p03",
+          "evidence": [
+            "p03:event"
+          ],
+          "metric": false
+        },
+        {
+          "start": 34.5,
+          "end": 36,
+          "text": "Good!",
+          "possession": "p03",
+          "evidence": [
+            "p03:result"
+          ],
+          "metric": false
+        }
+      ],
+      "voiceReport": {
+        "mode": "stepfun",
+        "provider": "stepfun",
+        "voiceId": "vibrant-youth",
+        "language": "en-US",
+        "audioSha256": "fdc82ff92b21b5ef728a2d177e16ee0b79ff62ce0cb6f7bec2622ebfb08f0371",
+        "cues": [
+          {
+            "beatId": "p01-speech-0",
+            "outputStart": 0,
+            "speechDuration": 1.964375,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p01-speech-1",
+            "outputStart": 4,
+            "speechDuration": 2.062291666666667,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p01-speech-2",
+            "outputStart": 9,
+            "speechDuration": 1.1240833333333333,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p01-speech-3",
+            "outputStart": 10.5,
+            "speechDuration": 1.119375,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-0",
+            "outputStart": 12,
+            "speechDuration": 1.2405,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-1",
+            "outputStart": 16,
+            "speechDuration": 2.18,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-2",
+            "outputStart": 21,
+            "speechDuration": 0.8795416666666667,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-3",
+            "outputStart": 22.5,
+            "speechDuration": 0.9294166666666667,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-0",
+            "outputStart": 24,
+            "speechDuration": 3.1654166666666668,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-1",
+            "outputStart": 28,
+            "speechDuration": 2.493375,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-2",
+            "outputStart": 33,
+            "speechDuration": 1.1240833333333333,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-3",
+            "outputStart": 34.5,
+            "speechDuration": 1.119375,
+            "tempo": 1.0,
+            "tailTruncated": false
+          }
+        ],
+        "coverage": {
+          "spokenSeconds": 19.401833333333332,
+          "longestGapSeconds": 2.937708333333333,
+          "gaps": [
+            {
+              "start": 1.964375,
+              "end": 4
+            },
+            {
+              "start": 6.062291666666667,
+              "end": 9
+            },
+            {
+              "start": 10.124083333333333,
+              "end": 10.5
+            },
+            {
+              "start": 11.619375,
+              "end": 12
+            },
+            {
+              "start": 13.2405,
+              "end": 16
+            },
+            {
+              "start": 18.18,
+              "end": 21
+            },
+            {
+              "start": 21.879541666666668,
+              "end": 22.5
+            },
+            {
+              "start": 23.42941666666667,
+              "end": 24
+            },
+            {
+              "start": 27.165416666666665,
+              "end": 28
+            },
+            {
+              "start": 30.493375,
+              "end": 33
+            },
+            {
+              "start": 34.12408333333333,
+              "end": 34.5
+            },
+            {
+              "start": 35.619375,
+              "end": 36
+            }
+          ]
+        },
+        "sourceAudioMix": "narration-only",
+        "naturalnessValidated": false
+      },
+      "videoSha256": "62e241b663401698f3052ed27c038cde8daef13d60195dc757fa162989d1a0bc"
+    },
+    "yue-HK": {
+      "voice": "shuangkuainansheng",
+      "cues": [
+        {
+          "start": 0,
+          "end": 4,
+          "text": "紅隊一號控波。",
+          "possession": "p01",
+          "evidence": [
+            "p01:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 4,
+          "end": 8,
+          "text": "三號向右邊移動。",
+          "possession": "p01",
+          "evidence": [
+            "p01:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 9,
+          "end": 10.5,
+          "text": "三分起手！",
+          "possession": "p01",
+          "evidence": [
+            "p01:event"
+          ],
+          "metric": false
+        },
+        {
+          "start": 10.5,
+          "end": 12,
+          "text": "入咗！",
+          "possession": "p01",
+          "evidence": [
+            "p01:result"
+          ],
+          "metric": false
+        },
+        {
+          "start": 12,
+          "end": 16,
+          "text": "藍隊控波。",
+          "possession": "p02",
+          "evidence": [
+            "p02:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 16,
+          "end": 20,
+          "text": "二號喺場上走動。",
+          "possession": "p02",
+          "evidence": [
+            "p02:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 21,
+          "end": 22.5,
+          "text": "起手！",
+          "possession": "p02",
+          "evidence": [
+            "p02:event"
+          ],
+          "metric": false
+        },
+        {
+          "start": 22.5,
+          "end": 24,
+          "text": "唔入。",
+          "possession": "p02",
+          "evidence": [
+            "p02:result"
+          ],
+          "metric": false
+        },
+        {
+          "start": 24,
+          "end": 28,
+          "text": "紅隊一號攞波。",
+          "possession": "p03",
+          "evidence": [
+            "p03:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 28,
+          "end": 32,
+          "text": "五號向右邊移動。",
+          "possession": "p03",
+          "evidence": [
+            "p03:synthetic-track"
+          ],
+          "metric": false
+        },
+        {
+          "start": 33,
+          "end": 34.5,
+          "text": "三分！",
+          "possession": "p03",
+          "evidence": [
+            "p03:event"
+          ],
+          "metric": false
+        },
+        {
+          "start": 34.5,
+          "end": 36,
+          "text": "入咗！",
+          "possession": "p03",
+          "evidence": [
+            "p03:result"
+          ],
+          "metric": false
+        }
+      ],
+      "voiceReport": {
+        "mode": "stepfun",
+        "provider": "stepfun",
+        "voiceId": "shuangkuainansheng",
+        "language": "yue-HK",
+        "audioSha256": "6e8f0e0e39d545f54cd8bb56537e45428326e23c6bff48074c63665be2acd4ec",
+        "cues": [
+          {
+            "beatId": "p01-speech-0",
+            "outputStart": 0,
+            "speechDuration": 1.607125,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p01-speech-1",
+            "outputStart": 4,
+            "speechDuration": 1.769875,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p01-speech-2",
+            "outputStart": 9,
+            "speechDuration": 1.1248333333333334,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p01-speech-3",
+            "outputStart": 10.5,
+            "speechDuration": 0.5717916666666667,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-0",
+            "outputStart": 12,
+            "speechDuration": 1.2215833333333332,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-1",
+            "outputStart": 16,
+            "speechDuration": 1.4827083333333333,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-2",
+            "outputStart": 21,
+            "speechDuration": 0.735875,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p02-speech-3",
+            "outputStart": 22.5,
+            "speechDuration": 0.6431666666666667,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-0",
+            "outputStart": 24,
+            "speechDuration": 1.1256666666666666,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-1",
+            "outputStart": 28,
+            "speechDuration": 2.4938333333333333,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-2",
+            "outputStart": 33,
+            "speechDuration": 0.9336666666666666,
+            "tempo": 1.0,
+            "tailTruncated": false
+          },
+          {
+            "beatId": "p03-speech-3",
+            "outputStart": 34.5,
+            "speechDuration": 1.240875,
+            "tempo": 1.0,
+            "tailTruncated": false
+          }
+        ],
+        "coverage": {
+          "spokenSeconds": 14.951,
+          "longestGapSeconds": 3.517291666666665,
+          "gaps": [
+            {
+              "start": 1.607125,
+              "end": 4
+            },
+            {
+              "start": 5.769875,
+              "end": 9
+            },
+            {
+              "start": 10.124833333333333,
+              "end": 10.5
+            },
+            {
+              "start": 11.071791666666666,
+              "end": 12
+            },
+            {
+              "start": 13.221583333333333,
+              "end": 16
+            },
+            {
+              "start": 17.482708333333335,
+              "end": 21
+            },
+            {
+              "start": 21.735875,
+              "end": 22.5
+            },
+            {
+              "start": 23.143166666666666,
+              "end": 24
+            },
+            {
+              "start": 25.125666666666667,
+              "end": 28
+            },
+            {
+              "start": 30.493833333333335,
+              "end": 33
+            },
+            {
+              "start": 33.93366666666667,
+              "end": 34.5
+            },
+            {
+              "start": 35.740875,
+              "end": 36
+            }
+          ]
+        },
+        "sourceAudioMix": "narration-only",
+        "naturalnessValidated": false
+      },
+      "videoSha256": "acb18bd88dc96d8cb0da21d4b55e32c6795c1c2ed689ee881cd30cb0d6d9926c"
+    }
+  },
+  "realNBA": false,
+  "celebrityClone": false
+}

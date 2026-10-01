@@ -30,7 +30,9 @@ def voice_fingerprint(mode):
         settings = {"provider": mode, "region": os.environ.get(prefix + "REGION"), "engine": os.environ.get(prefix + "ENGINE"), "voiceId": os.environ.get(prefix + "VOICE_ID")}
     else:
         variant = os.environ.get("COURTLENS_MINIMAX_REGION", "global") if mode == "minimax" else os.environ.get("COURTLENS_STEPFUN_API_VARIANT", "openapi")
-        settings = {"provider": mode, "model": os.environ.get(prefix + "MODEL"), "voiceId": os.environ.get(prefix + "VOICE_ID"), "variant": variant}
+        settings = {"provider": mode, "model": os.environ.get(prefix + "MODEL"), "voices": {language: os.environ.get(prefix + suffix) for language,suffix in (("zh-CN","VOICE_ID"),("en-US","VOICE_ID_EN"),("yue-HK","VOICE_ID_YUE"))}, "languages": os.environ.get(prefix + "LANGUAGES", "zh-CN"), "variant": variant}
+        from .voice import LIVE_INSTRUCTIONS
+        settings["instructions"] = LIVE_INSTRUCTIONS
     return hashlib.sha256(json.dumps(settings, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 

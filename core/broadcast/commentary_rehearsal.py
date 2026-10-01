@@ -129,8 +129,9 @@ def _measured(manifest, voice, beat_id, cue, story_hash, language, issues, spoke
         return None
     row = records[0]
     duration, tempo = row.get("speechDuration"), row.get("tempo")
-    compiled = [r for r in manifest.get("compiledBeats", []) if isinstance(r, dict) and r.get("beatId") == beat_id]
-    text_matches = (len(compiled) == 1 and compiled[0].get("compiledText") == spoken) if has_metric or compiled else True
+    lane = "compiledCommentaryCues" if "commentaryCues" in manifest.get("story", {}) else "compiledBeats"
+    compiled = [r for r in manifest.get(lane, []) if isinstance(r, dict) and r.get("beatId") == beat_id]
+    text_matches = (len(compiled) == 1 and compiled[0].get("compiledText") == spoken) if has_metric or compiled or lane == "compiledCommentaryCues" else True
     media_matches = ((manifest.get("source") or {}).get("mediaSha256") == media_sha) if media_sha else None
     matches = (isinstance(manifest.get("story"), dict) and _hash(manifest["story"]) == story_hash
                and voice.get("language") == language and text_matches and media_matches is not False)
@@ -176,7 +177,7 @@ def analyze(project, *, manifest=None, roster=None):
     roster = roster if roster is not None else (project.get("context") or {}).get("roster", [])
     if not isinstance(roster, list):
         roster = []
-    beats = story.get("beats", [])
+    beats = story.get("commentaryCues", story.get("beats", []))
     if not isinstance(beats, list):
         beats = []
     if not beats:
@@ -263,6 +264,7 @@ def analyze(project, *, manifest=None, roster=None):
     return {"schema": "courtlens-commentary-rehearsal/1", "language": language,
             "storyHash": story_hash, "status": "needs-attention" if issues else "advisory-ready",
             "readOnly": True, "externalTransmission": False, "issues": issues, "beats": rows,
+            "lane": "play-by-play" if "commentaryCues" in story else "legacy-visual-beats",
             "summary": {"beatCount": len(rows), "estimatedDurationSeconds": round(sum(r["estimate"]["durationSeconds"] for r in rows), 3),
                         "measuredCueCount": sum(r["measuredAudio"] is not None for r in rows),
                         "timingAccepted": bool(rows) and all(r["measuredAudio"] and r["measuredAudio"]["timingAccepted"] for r in rows),

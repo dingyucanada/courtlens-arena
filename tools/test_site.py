@@ -58,6 +58,20 @@ class PublicSiteTest(unittest.TestCase):
         self.assertTrue((self.out/'media/broadcast-rehearsal.mp4').is_file())
         self.assertNotIn('src="./app.mjs"',preview)
         self.assertNotIn('正在连接制作台',preview)
+    def test_three_language_audio_is_bound_and_action_only(self):
+        data=json.loads((self.out/'broadcast/preview-data.json').read_text())['commentary']
+        self.assertFalse(data['realNBA']);self.assertFalse(data['celebrityClone'])
+        self.assertEqual(set(data['languages']),{'zh-CN','en-US','yue-HK'})
+        for lang,lane in data['languages'].items():
+            media=(self.out/'broadcast'/lane['videoUrl']).resolve()
+            self.assertEqual(hashlib.sha256(media.read_bytes()).hexdigest(),lane['videoSha256'])
+            self.assertLess(lane['voiceReport']['coverage']['longestGapSeconds'],4)
+            self.assertFalse(lane['voiceReport']['naturalnessValidated'])
+            for cue in lane['cues']:
+                self.assertNotRegex(cue['text'],r'[%％]|胜率|勝率|xFG|GRAV|LVG|probability')
+            self.assertTrue((self.out/'broadcast'/f'{lang}.vtt').is_file())
+        self.assertTrue((self.out/'media/broadcast-live-multilingual.mp4').is_file())
+
     def test_cloud_package_is_the_real_editor_not_the_pages_preview(self):
         cloud=Path(self.tmp.name)/'cloud-dist'
         build_cloud(cloud)

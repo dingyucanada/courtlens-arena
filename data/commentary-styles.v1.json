@@ -1,22 +1,23 @@
 {
   "schema": "courtlens-commentary-styles/1",
-  "version": "2026-09-30",
+  "version": "2026-10-01",
   "profiles": [
     {
       "id": "zh-analysis",
-      "label": "普通话技战术",
+      "label": "普通话现场",
       "language": "zh-CN",
-      "instruction": "使用简体中文和自然普通话。动作优先，一句说动作，一句解释已见配合；不强塞背景。姓名仅可来自所引用的已复核观察和名单。没有完整战术线索时用基本动作名称。未发生的选择须明确说可能或如果。",
+      "instruction": "使用简体中文和自然普通话。短句先讲球与动作；例如描述外传、接球、借掩护或出手时，措辞干净、有节奏。关键结果确认后可提高情绪，随即让画面呼吸。口播围绕已复核动作，先交代持球与球的去向，再说接球、出手和已经确认的结果。一句一个动作，允许停顿，不为了填满视频而猜下一步。高级指标、胜率与百分比留在视觉分析，不在现场口播读出。姓名只用当前句引用的已审观察所支持的名单；战术因果需要额外证据。情绪随已发生动作变化，未有结果不得庆祝进球。使用原创措辞，不复制名人标志性口头禅，不要求模仿名人音色。",
       "wordsPerSecondGuide": 3,
       "researchReferences": [
-        "https://news.cctv.com/2026/02/23/ARTIlUfCiiColDlkvcaRH1n3260223.shtml"
+        "https://news.cctv.com/2026/02/23/ARTIlUfCiiColDlkvcaRH1n3260223.shtml",
+        "https://sports.cctv.com/lm/485/11/80064.html"
       ]
     },
     {
       "id": "en-live",
       "label": "英文现场",
       "language": "en-US",
-      "instruction": "Write original English play-by-play. Use short active sentences: verified player, visible action, then a brief tactical explanation when time permits. Leave room for the play. Celebrate a made basket only after accepted result evidence is available. Do not copy a broadcaster's signature catchphrase or invent identities, statistics or intentions.",
+      "instruction": "Write original English play-by-play. Short active clauses: the ball, the visible action, then the verified result. Vary sentence openings; leave natural pauses and let the play lead. Energy should rise at a confirmed finish, then settle. Never use a celebrity signature catchphrase, imitate a celebrity voice, invent identities or intentions, or read xFG/GRAV/LVG, win probability or percentages aloud. Put metrics in the visual analysis lane. Mention a name only when that cue's accepted observations support the actor. A shot is not yet a made basket; celebrate only after accepted result evidence is available.",
       "wordsPerSecondGuide": 2.5,
       "researchReferences": [
         "https://espnpressroom.com/us/press-releases/2024/06/transcript-espn-nba-finals-broadcast-team-media-conference-call/amp/"
@@ -26,31 +27,31 @@
       "id": "yue-live",
       "label": "粤语讲波",
       "language": "yue-HK",
-      "instruction": "用繁體字寫自然粵語口語講波。短句先講清持球、掩護、走位；用睇吓、借勢等自然表達，但不要刻意堆口頭禪。只用已復核身份，名字翻譯須前後一致。條件式下一步用如果或可能，未有結果證據不能講入咗。",
+      "instruction": "用繁體字寫自然香港粵語講波，唔好將普通話逐字換成粵語。短句先講持球、傳波、接波、借掩護、出手，確定結果先講入咗或唔入。句式有變化，語氣跟已發生嘅動作走，留空間畀畫面；唔好句句加睇吓、嘩、靚波。只用本句已復核觀察支持嘅名字；冇完整戰術線索就講基本動作。xFG、GRAV、LVG、勝率同百分比留喺視覺分析，唔讀入現場口播。採用原創措辭，唔複製名人招牌語句，唔模仿名人把聲。",
       "wordsPerSecondGuide": 3,
       "researchReferences": [
         "https://www.wanlibk.com/readers/preread/9789621473912.pdf"
       ]
     }
   ],
-  "notes": "Original product style rules informed by public materials. Rate guides are authoring heuristics, not measured broadcaster speech rates or verified TTS guarantees.",
+  "notes": "Original product rules informed by the linked published text; not celebrity voice imitation or cloned voices. Research reads text, not audio performance. Pace and emotion rules are authoring heuristics, not measured broadcaster rates, guaranteed naturalness or verified TTS quality.",
   "languages": [
     {
       "id": "zh-CN",
       "label": "普通话",
-      "instruction": "使用简体中文和自然普通话。",
+      "instruction": "使用简体中文和自然普通话。短句先讲球与动作；例如描述外传、接球、借掩护或出手时，措辞干净、有节奏。关键结果确认后可提高情绪，随即让画面呼吸。口播围绕已复核动作，先交代持球与球的去向，再说接球、出手和已经确认的结果。一句一个动作，允许停顿，不为了填满视频而猜下一步。高级指标、胜率与百分比留在视觉分析，不在现场口播读出。姓名只用当前句引用的已审观察所支持的名单；战术因果需要额外证据。情绪随已发生动作变化，未有结果不得庆祝进球。使用原创措辞，不复制名人标志性口头禅，不要求模仿名人音色。",
       "wordsPerSecondGuide": 3
     },
     {
       "id": "en-US",
       "label": "English",
-      "instruction": "Write original English play-by-play in natural language.",
+      "instruction": "Write original English play-by-play. Short active clauses: the ball, the visible action, then the verified result. Vary sentence openings; leave natural pauses and let the play lead. Energy should rise at a confirmed finish, then settle. Never use a celebrity signature catchphrase, imitate a celebrity voice, invent identities or intentions, or read xFG/GRAV/LVG, win probability or percentages aloud. Put metrics in the visual analysis lane. Mention a name only when that cue's accepted observations support the actor. A shot is not yet a made basket; celebrate only after accepted result evidence is available.",
       "wordsPerSecondGuide": 2.5
     },
     {
       "id": "yue-HK",
       "label": "粵語",
-      "instruction": "用繁體字寫自然粵語口語講波。",
+      "instruction": "用繁體字寫自然香港粵語講波，唔好將普通話逐字換成粵語。短句先講持球、傳波、接波、借掩護、出手，確定結果先講入咗或唔入。句式有變化，語氣跟已發生嘅動作走，留空間畀畫面；唔好句句加睇吓、嘩、靚波。只用本句已復核觀察支持嘅名字；冇完整戰術線索就講基本動作。xFG、GRAV、LVG、勝率同百分比留喺視覺分析，唔讀入現場口播。採用原創措辭，唔複製名人招牌語句，唔模仿名人把聲。",
       "wordsPerSecondGuide": 3
     }
   ],
@@ -58,17 +59,17 @@
     {
       "id": "analysis",
       "label": "战术派",
-      "instruction": "动作优先，解释已见配合和选择。缺少完整战术线索时只用基本动作；候选须条件表述。"
+      "instruction": "视觉分析解释已见配合与选择；独立口播保持短句跟随动作，不照读分析段落。缺完整线索就只用基本动作名称，候选须条件表述。"
     },
     {
       "id": "energetic",
       "label": "现场派",
-      "instruction": "Use short active action-first sentences with measured energy. Only celebrate a basket after accepted result evidence; never invent intentions or use signature catchphrases."
+      "instruction": "Use action-first short clauses and restrained energy. Rise at a verified big play, settle afterward, and preserve pauses. Keep visual analysis separate from the spoken action lane."
     },
     {
       "id": "data",
       "label": "数据派",
-      "instruction": "Explain at most one confirmed bound event metric per beat with its meaning and unit. Use only metric placeholders; when no metric exists, narrate visible actions without invented numbers or causal claims."
+      "instruction": "Visual beats may show at most one confirmed bound event metric with meaning and unit, using metric placeholders. Spoken commentary still follows visible actions and does not recite advanced metrics or probabilities."
     }
   ]
 }

@@ -32,7 +32,7 @@ def build_cloud(output):
     output=output.resolve()
     if output == ROOT or (ROOT in output.parents and output.name not in ('site-dist','dist')):
         raise ValueError('Use a separate site-dist or dist directory')
-    broadcast_files=('index.html','styles.css','app.mjs','api.mjs','auth.mjs','capability_ui.mjs','playback_state.mjs','data_readiness.mjs','commentary_ui.mjs','retained_video.mjs','production_ui.mjs')
+    broadcast_files=('index.html','styles.css','app.mjs','api.mjs','auth.mjs','capability_ui.mjs','playback_state.mjs','data_readiness.mjs','commentary_ui.mjs','retained_video.mjs','production_ui.mjs','quick_ui.mjs','watch_languages.mjs')
     allowed={'favicon.svg','index.html','.nojekyll','manifest.json'} | {'broadcast/'+name for name in broadcast_files}
     if output.exists():
         for entry in output.rglob('*'):
@@ -56,15 +56,15 @@ def build(output, presentation=None, repo='dingyucanada/courtlens-arena'):
         raise ValueError('Use a separate site-dist or dist directory')
     # Fail closed rather than deleting or accidentally deploying unrelated files.
     allowed_files = {'index.html','demo.html','styles.css','app.js','logic.mjs','favicon.svg',
-        'data/analysis.json','data/demo.json','media/demo.mp4','media/broadcast-rehearsal.mp4',
-        'presentation.pptx','.nojekyll','manifest.json','broadcast/index.html','broadcast/preview.mjs','broadcast/preview-data.json'}
+        'data/analysis.json','data/demo.json','media/demo.mp4','media/broadcast-rehearsal.mp4','media/broadcast-live-en.mp4','media/broadcast-live-yue.mp4','media/broadcast-live-multilingual.mp4',
+        'presentation.pptx','.nojekyll','manifest.json','broadcast/index.html','broadcast/preview.mjs','broadcast/preview-data.json','broadcast/zh-CN.vtt','broadcast/en-US.vtt','broadcast/yue-HK.vtt'}
     legacy_files = {'arena.html','studio.html','data/metrics-v2-example.json','media/narrated-demo.mp4',
         'media/annotated-demo.vtt','media/arena-story.mp4','media/arena-story.mp4.voice.json',
         'media/arena-browser-story.mp4','media/arena-local-4.1.mp4','media/arena-local-4.1.vtt',
         'media/arena-story-silent.mp4.vtt','media/arena-story-silent.mp4.json'}
     legacy_files |= {'pro/'+name for name in ('styles.css','app.mjs','model.mjs','store.mjs','analytics.mjs','calibration.mjs','render.mjs','director.mjs','agent-contract.mjs','export-video.mjs','delivery.mjs','playback.mjs','spectator.mjs','readiness.mjs','metrics-v2.mjs','story-plan.mjs','camera-view.mjs')}
     legacy_files |= {'studio/'+name for name in ('styles.css','app.mjs','domain.mjs','store.mjs','export.mjs')}
-    legacy_files |= {'broadcast/'+name for name in ('styles.css','app.mjs','api.mjs','auth.mjs','capability_ui.mjs','playback_state.mjs','data_readiness.mjs','commentary_ui.mjs','retained_video.mjs','production_ui.mjs')}
+    legacy_files |= {'broadcast/'+name for name in ('styles.css','app.mjs','api.mjs','auth.mjs','capability_ui.mjs','playback_state.mjs','data_readiness.mjs','commentary_ui.mjs','retained_video.mjs','production_ui.mjs','quick_ui.mjs','watch_languages.mjs')}
     if output.exists():
         for entry in output.rglob('*'):
             relative = entry.relative_to(output).as_posix()
@@ -106,7 +106,29 @@ def build(output, presentation=None, repo='dingyucanada/courtlens-arena'):
     preview_cues=sorted(({'start':cue['start'],'end':cue['end'],'text':cue['text'],'possession':possession['id'],
                           'evidence':cue['evidence_ids'],'metric':any(':metric:' in item for item in cue['evidence_ids'])}
                          for possession in analyses['fan']['possessions'] for cue in possession['cues']),key=lambda cue:cue['start'])
-    (output/'broadcast/preview-data.json').write_text(json.dumps({'schema':'courtlens-public-preview/1','provenance':'synthetic','cues':preview_cues},ensure_ascii=False,separators=(',',':'))+'\n')
+    spoken=json.loads((ROOT/'data/broadcast-playbyplay-demo.v1.json').read_text())
+    names={'zh-CN':'broadcast-rehearsal.mp4','en-US':'broadcast-live-en.mp4','yue-HK':'broadcast-live-yue.mp4'}
+    if spoken.get('schema')!='courtlens-public-playbyplay/1' or spoken.get('provenance')!='synthetic' or spoken.get('realNBA') is not False or spoken.get('celebrityClone') is not False or set(spoken.get('languages',{}))!=set(names):
+        raise ValueError('Invalid three-language synthetic commentary fixture')
+    from core.broadcast.playbyplay import METRIC_WORDING
+    def stamp(t):
+        ms=round(t*1000);return f'{ms//3600000:02}:{ms//60000%60:02}:{ms//1000%60:02}.{ms%1000:03}'
+    for lang,name in names.items():
+        lane=spoken['languages'][lang]
+        if hashlib.sha256((ROOT/'media'/name).read_bytes()).hexdigest()!=lane['videoSha256']:
+            raise ValueError('Commentary audio and public fixture digest differ')
+        previous=0;captions=['WEBVTT','']
+        for cue in lane['cues']:
+            if not 0<=previous<=cue['start']<cue['end']<=36 or METRIC_WORDING.search(cue['text']):
+                raise ValueError('Public action narration timing/text invalid')
+            previous=cue['end']
+            if ':result' in ' '.join(cue['evidence']):
+                pos=next(p for p in dataset['possessions'] if p['id']==cue['possession'])
+                if cue['start']<pos['result_time']: raise ValueError('Narration announces result early')
+            captions += [f"{stamp(cue['start'])} --> {stamp(cue['end'])}",cue['text'],'']
+        lane['videoUrl']='../media/'+name
+        (output/'broadcast'/f'{lang}.vtt').write_text('\n'.join(captions),encoding='utf-8')
+    (output/'broadcast/preview-data.json').write_text(json.dumps({'schema':'courtlens-public-preview/1','provenance':'synthetic','cues':preview_cues,'commentary':spoken},ensure_ascii=False,separators=(',',':'))+'\n')
     answers = {mode: {p['id']: {key: ask(dataset, q, p['id'], mode) for key,q in QUESTIONS.items()} for p in dataset['possessions']} for mode in analyses}
     # Relative URL is essential for project Pages under /<repository>/.
     dataset['video']['url'] = 'media/demo.mp4'
@@ -115,7 +137,7 @@ def build(output, presentation=None, repo='dingyucanada/courtlens-arena'):
             'analysis_source':'core.engine.analyze / core.engine.ask', 'presentation_available':bool(presentation)}}
     (data_dir/'analysis.json').write_text(json.dumps(bundle,ensure_ascii=False,separators=(',',':'))+'\n')
     (data_dir/'demo.json').write_text(json.dumps(dataset,ensure_ascii=False,indent=2)+'\n')
-    for name in ('demo.mp4','broadcast-rehearsal.mp4'):
+    for name in ('demo.mp4','broadcast-rehearsal.mp4','broadcast-live-en.mp4','broadcast-live-yue.mp4','broadcast-live-multilingual.mp4'):
         copy_file(ROOT/'media'/name, media_dir/name)
     if presentation:
         p=Path(presentation)

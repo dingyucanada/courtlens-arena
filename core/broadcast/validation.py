@@ -188,6 +188,8 @@ def story(project, frame_times=None):
             if frame_times is not None:
                 ids = obs[annotation["sourceObservationId"]]["frameIds"]
                 require(any(fid in frame_times and g["validFrom"] <= frame_times[fid] <= g["validTo"] and x - .2 <= frame_times[fid] <= x + .04 for fid in ids), "review_required", "箭头需要解说开始附近的真实目标帧。", 422)
+    from .playbyplay import validate_cues
+    validate_cues(project, frame_times)
     return True
 
 

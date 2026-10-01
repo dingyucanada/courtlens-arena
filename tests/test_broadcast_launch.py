@@ -21,6 +21,12 @@ class LocalConfigTests(unittest.TestCase):
             self.assertEqual(os.environ['COURTLENS_STEPFUN_MODEL'], 'deployed-model')
             self.assertEqual(os.environ['COURTLENS_STEPFUN_VOICE_ID'], '$(do-not-execute)')
 
+    def test_three_voice_configuration_can_start_without_shell_loading(self):
+        with patch.dict(os.environ,{},clear=True):
+            load_local_config(self.config('COURTLENS_STEPFUN_LANGUAGES=zh-CN,en-US,yue-HK\nCOURTLENS_STEPFUN_VOICE_ID_EN=vibrant-youth\nCOURTLENS_STEPFUN_VOICE_ID_YUE=shuangkuainansheng\n'))
+            self.assertEqual(os.environ['COURTLENS_STEPFUN_VOICE_ID_EN'],'vibrant-youth')
+            self.assertEqual(os.environ['COURTLENS_STEPFUN_VOICE_ID_YUE'],'shuangkuainansheng')
+
     def test_bad_setting_is_atomic_and_does_not_echo_secret(self):
         with patch.dict(os.environ, {}, clear=True):
             path = self.config('COURTLENS_STEPFUN_API_KEY=test-secret\nPATH=malicious\n')

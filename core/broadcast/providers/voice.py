@@ -23,6 +23,12 @@ STEPFUN_ENDPOINTS = {
 LANGUAGE_BOOST = {"zh-CN": "Chinese", "en-US": "English", "yue-HK": "Chinese,Yue"}
 LOCAL_VOICES = {"zh-CN": ("Tingting", "zh_CN"), "en-US": ("Samantha", "en_US"), "yue-HK": ("Sinji", "zh_HK")}
 MINIMAX_VOICE_KEYS = {"zh-CN": "COURTLENS_MINIMAX_VOICE_ID", "en-US": "COURTLENS_MINIMAX_VOICE_ID_EN", "yue-HK": "COURTLENS_MINIMAX_VOICE_ID_YUE"}
+STEPFUN_VOICE_KEYS = {"zh-CN": "COURTLENS_STEPFUN_VOICE_ID", "en-US": "COURTLENS_STEPFUN_VOICE_ID_EN", "yue-HK": "COURTLENS_STEPFUN_VOICE_ID_YUE"}
+LIVE_INSTRUCTIONS = {
+    "zh-CN": "用自然普通话做原创篮球现场解说。男声清晰、有现场感，动作短句，语气随攻防起伏，进球短促兴奋，平时克制，不朗诵，不模仿任何真实人物，不读舞台指令。",
+    "en-US": "Original English basketball play-by-play. Clear conversational short phrases, restrained anticipation, brief excitement on a confirmed finish. No impersonation or recital. Do not read directions.",
+    "yue-HK": "全程用自然香港粤语发音做原创篮球现场解说，唔好读成普通话。口语短句，清楚有节奏，入球短促兴奋，平时克制，不模仿任何真实人物，不读舞台指令。",
+}
 
 
 def _stepfun_endpoint():
@@ -53,12 +59,10 @@ def configured_voice(mode, requested=None, language="zh-CN"):
         require(bool(region and allowed and region == allowed and engine == "neural" and voice == "Zhiyu"), "voice_unavailable", "Polly 区域、引擎或中文音色未正确配置。", 503)
         require(requested in (None, voice), "invalid_request", "所选音色与部署配置不一致。")
         return voice
-    if mode == "stepfun":
-        require(language == "zh-CN", "voice_unavailable", "当前 StepFun 音色仅完成普通话配置；不能作为英语或粤语配音。", 503)
     prefix = "MINIMAX" if mode == "minimax" else "STEPFUN"
     key = os.environ.get("COURTLENS_" + prefix + "_API_KEY")
     model = os.environ.get("COURTLENS_" + prefix + "_MODEL")
-    voice = os.environ.get(MINIMAX_VOICE_KEYS[language] if mode == "minimax" else "COURTLENS_STEPFUN_VOICE_ID")
+    voice = os.environ.get(MINIMAX_VOICE_KEYS[language] if mode == "minimax" else STEPFUN_VOICE_KEYS[language])
     require(bool(key and model and voice), "voice_unavailable", mode + " 语音密钥、模型或音色未配置。", 503)
     if mode == "minimax" and language == "yue-HK":
         # An ordinary Chinese voice, including a Hong Kong themed Mandarin voice,
@@ -67,6 +71,9 @@ def configured_voice(mode, requested=None, language="zh-CN"):
     if mode == "minimax" and language == "en-US":
         require(voice.startswith("English_"), "voice_unavailable", "英语须配置供应商标为 English 的音色。", 503)
     if mode == "stepfun":
+        enabled = os.environ.get("COURTLENS_STEPFUN_LANGUAGES", "zh-CN").split(",")
+        require(language in enabled, "voice_unavailable", "此语言尚未启用 StepFun 配音；需配置独立音色并试听。", 503)
+        require(language == "zh-CN" or model in ("stepaudio-2.5-tts", "stepaudio-3-tts"), "voice_unavailable", "多语现场配音需要支持 instruction 的 StepAudio 模型。", 503)
         _stepfun_endpoint()
     require(requested in (None, voice), "invalid_request", "所选音色与部署配置不一致。")
     return voice
@@ -109,6 +116,9 @@ def _external_audio(mode, text, voice, language="zh-CN"):
             raise BroadcastError("voice_unavailable", "MiniMax 语音响应无效。", 503)
     else:
         payload = {"model": model, "input": text, "voice": voice, "response_format": "mp3", "sample_rate": RATE}
+        require(len(text) <= 1000, "voice_unavailable", "StepFun 单句文字超过 1000 字符限制。", 503)
+        if model in ("stepaudio-2.5-tts", "stepaudio-3-tts"):
+            payload["instruction"] = LIVE_INSTRUCTIONS[language]
         content_type, audio = _post_audio(_stepfun_endpoint(), key, payload, MAX_AUDIO_BYTES)
         require("audio" in content_type or "octet-stream" in content_type, "voice_unavailable", "StepFun 未返回音频。", 503)
     require(0 < len(audio) <= MAX_AUDIO_BYTES and (audio[:3] == b"ID3" or audio[:2] in (b"\xff\xfb", b"\xff\xf3", b"\xff\xf2")), "voice_unavailable", "语音字节不是受支持的 MP3。", 503)
@@ -198,10 +208,19 @@ def synthesize(film, beats, target_dir, duration, mode="local-tts", voice_id=Non
     mixed = target_dir / "with-voice.mp4"
     command = [FFMPEG, "-v", "error", "-nostdin", "-protocol_whitelist", "file", "-i", str(film), "-protocol_whitelist", "file", "-i", str(output), "-map", "0:v:0"]
     if has_source_audio:
-        command += ["-filter_complex", "[0:a:0]volume=0.18[original];[1:a:0]volume=1[narration];[original][narration]amix=inputs=2:duration=longest:dropout_transition=0[mix]", "-map", "[mix]"]
+        command += ["-filter_complex", "[1:a:0]asplit=2[narration][control];[0:a:0]volume=0.5[original];[original][control]sidechaincompress=threshold=0.025:ratio=8:attack=15:release=300[ducked];[ducked][narration]amix=inputs=2:normalize=0:duration=longest:dropout_transition=0[mix]", "-map", "[mix]"]
     else:
         command += ["-map", "1:a:0"]
     command += ["-c:v", "copy", "-c:a", "aac", "-b:a", "128k", "-t", str(duration), "-movflags", "+faststart", "-y", str(mixed)]
     _run(command, 60)
     mixed.replace(film)
-    return {"mode": mode, "provider": {"local-tts": "macos-say", "minimax": "minimax", "stepfun": "stepfun", "polly": "amazon-polly"}[mode], "voiceId": voice, "language": language, "audioSha256": hashlib.sha256(output.read_bytes()).hexdigest(), "cues": report}
+    cursor, gaps = 0.0, []
+    for row in sorted(report, key=lambda r: r["outputStart"]):
+        if row["outputStart"] > cursor:
+            gaps.append({"start": cursor, "end": row["outputStart"]})
+        cursor = row["outputStart"] + row["speechDuration"]
+    if cursor < duration:
+        gaps.append({"start": cursor, "end": duration})
+    return {"mode": mode, "provider": {"local-tts": "macos-say", "minimax": "minimax", "stepfun": "stepfun", "polly": "amazon-polly"}[mode], "voiceId": voice, "language": language, "audioSha256": hashlib.sha256(output.read_bytes()).hexdigest(), "cues": report,
+            "coverage": {"spokenSeconds": sum(row["speechDuration"] for row in report), "longestGapSeconds": max((g["end"]-g["start"] for g in gaps),default=0), "gaps": gaps},
+            "sourceAudioMix": "speech-ducked-original" if has_source_audio else "narration-only", "naturalnessValidated": False}

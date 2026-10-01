@@ -390,7 +390,6 @@ class BroadcastService:
             p = self.get(project_id)
             self._revision(p, expected)
             require(mode == "template", "provider_not_configured", "模型故事当前未配置，请使用证据模板。", 503)
-            require(profile["language"] == "zh-CN", "invalid_request", "事实模板只用普通话；其他语言请选模型或手写初稿。")
             require(audience in ("fan", "pro"), "invalid_request", "受众无效。")
             require(p["media"] is not None, "media_mismatch", "先上传视频。", 422)
             accepted = sorted((o for o in p["observations"] if o["review"]["status"] == "accepted"), key=lambda x: x["start"])
@@ -402,7 +401,7 @@ class BroadcastService:
                 start = max(o["end"], previous)
                 if end - start < .25:
                     continue
-                stop = min(end, start + 2.4)
+                stop = min(end, start + 6)
                 label = {"pass": "传球", "shot": "出手", "catch": "接球", "movement": "跑动", "screen": "掩护", "result": "结果", "other": "关键观察"}[o["type"]]
                 beat = {"id": uid(), "label": label, "sourceStart": start, "sourceEnd": stop, "anchorTime": start, "observationIds": [o["id"]], "bindingIds": [], "text": o["description"], "explanationKind": "visible-fact", "metricRecordId": None, "secondaryLabel": None, "annotation": None}
                 beats.append(beat)
@@ -417,6 +416,8 @@ class BroadcastService:
             p["story"] = {"schema": "courtlens-broadcast-story/1", "title": p["title"], "audience": audience, "commentaryStyle": style, "language": profile["language"], "sourceRange": {"start": 0, "end": source_end}, "beats": beats}
             for beat in beats:
                 beat["sourceEnd"] = min(beat["sourceEnd"], source_end)
+            from .playbyplay import draft_cues
+            p["story"]["commentaryCues"] = draft_cues(p, self._frame_times(p), profile["language"])
             validate_shape(p["story"], "story")
             validate_story(p, self._frame_times(p))
             return self._save_edit(p)
@@ -588,7 +589,7 @@ class BroadcastService:
                     if manifest["voice"]["mode"] in ("minimax", "stepfun") and manifest["voice"]["audioSha256"]:
                         from .providers import voice_fingerprint
                         voice_mode = manifest["voice"]["mode"]
-                        self.store.atomic(self.store.root / ("voice-" + voice_mode + ".json"), {"passed": True, "at": now(), "releaseId": release_id, "fingerprint": voice_fingerprint(voice_mode), "audioSha256": manifest["voice"]["audioSha256"]})
+                        self.store.atomic(self.store.root / ("voice-" + voice_mode + ".json"), {"passed": True, "at": now(), "releaseId": release_id, "fingerprint": voice_fingerprint(voice_mode), "audioSha256": manifest["voice"]["audioSha256"], "language": manifest["voice"].get("language"), "voiceId": manifest["voice"]["voiceId"], "naturalnessValidated": False})
                     job["resultId"] = release_id
                     job["cacheHit"] = False
                     job["status"], job["stage"], job["completedAt"] = "succeeded", "done", now()

@@ -38,7 +38,7 @@ def renderer_fingerprint(font):
     from PIL import __version__ as pillow_version
     import platform
     root = Path(__file__).resolve().parents[2]
-    files = ["core/broadcast/render.py", "core/broadcast/validation.py", "core/broadcast/providers/voice.py", "core/broadcast/common.py", "core/broadcast/media.py"]
+    files = ["core/broadcast/render.py", "core/broadcast/validation.py", "core/broadcast/playbyplay.py", "core/broadcast/providers/voice.py", "core/broadcast/common.py", "core/broadcast/media.py"]
     sources = {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in files}
     versions = {}
     for name, binary in (("ffmpeg", FFMPEG), ("ffprobe", FFPROBE)):
@@ -224,15 +224,17 @@ def render(project, source_path, destination, font=FONT, voice_mode="silent", vo
     overlays = []
     captions = ["WEBVTT", ""]
     timing = []
+    separate_commentary = "commentaryCues" in s
     for i, beat in enumerate(s["beats"]):
         start = beat["sourceStart"] - a
         end = beat["sourceEnd"] - a
         phrase = _metric_text(project, beat)
         metric = _metric_display(project, beat)
-        file = overlay_dir / f"beat-{i}.png"
-        _overlay_text(file, phrase, font)
-        overlays.append((file, start, end))
-        captions += [f"{_stamp(start)} --> {_stamp(end)}", phrase, ""]
+        if not separate_commentary:
+            file = overlay_dir / f"beat-{i}.png"
+            _overlay_text(file, phrase, font)
+            overlays.append((file, start, end))
+            captions += [f"{_stamp(start)} --> {_stamp(end)}", phrase, ""]
         timing.append({"beatId": beat["id"], "compiledText": phrase, "metric": metric, "sourceStart": beat["sourceStart"], "sourceEnd": beat["sourceEnd"], "outputStart": start, "outputEnd": end, "observationIds": beat["observationIds"], "bindingIds": beat["bindingIds"]})
         if metric:
             card = overlay_dir / f"metric-{i}.png"
@@ -249,6 +251,17 @@ def render(project, source_path, destination, font=FONT, voice_mode="silent", vo
                 arrow = overlay_dir / f"arrow-{i}.png"
                 _overlay_arrow(arrow, annotation["points"], project["media"])
                 overlays.append((arrow, visible_start - a, visible_end - a))
+    commentary_timing = []
+    for i, cue in enumerate(s.get("commentaryCues", [])):
+        start, end = cue["sourceStart"] - a, cue["sourceEnd"] - a
+        file = overlay_dir / f"commentary-{i}.png"
+        _overlay_text(file, cue["text"], font)
+        overlays.append((file, start, end))
+        captions += [f"{_stamp(start)} --> {_stamp(end)}", cue["text"], ""]
+        commentary_timing.append({"beatId": cue["id"], "compiledText": cue["text"],
+            "sourceStart": cue["sourceStart"], "sourceEnd": cue["sourceEnd"],
+            "outputStart": start, "outputEnd": end, "observationIds": cue["observationIds"], "bindingIds": []})
+    speech_timing = commentary_timing if separate_commentary else timing
     ai_review = (project.get("review") or {}).get("reviewerType") == "ai"
     title = "AI复核验证片" if ai_review else "人工辅助制作" if project["mode"] == "manual" else "人工复核故事"
     title_file = overlay_dir / "provenance.png"
@@ -280,7 +293,8 @@ def render(project, source_path, destination, font=FONT, voice_mode="silent", vo
     if voice_mode in ("local-tts", "minimax", "stepfun", "polly"):
         from .providers.voice import synthesize
         from .commentary_style import resolve_style
-        voice_report = synthesize(film, timing, overlay_dir, b - a, mode=voice_mode, voice_id=voice_id, has_source_audio=project["media"]["hasAudio"], language=resolve_style(s.get("commentaryStyle"), s.get("language"))["language"])
+        require(bool(speech_timing), "voice_unavailable", "没有可配音的现场解说；请补充已核对的事件。", 422)
+        voice_report = synthesize(film, speech_timing, overlay_dir, b - a, mode=voice_mode, voice_id=voice_id, has_source_audio=project["media"]["hasAudio"], language=resolve_style(s.get("commentaryStyle"), s.get("language"))["language"])
         voice = {key: voice_report[key] for key in ("mode", "provider", "voiceId", "language", "audioSha256")}
         (overlay_dir / "narration.wav").replace(Path(destination) / "narration.wav")
     if cancel_check and cancel_check():
@@ -298,12 +312,17 @@ def render(project, source_path, destination, font=FONT, voice_mode="silent", vo
     names = ("film.mp4", "captions.vtt", "narration.wav") if voice_mode != "silent" else ("film.mp4", "captions.vtt")
     outputs = [{"name": name, "bytes": (Path(destination) / name).stat().st_size, "sha256": hashlib.sha256((Path(destination) / name).read_bytes()).hexdigest()} for name in names]
     used_obs = {oid for beat in s["beats"] for oid in beat["observationIds"]}
+    used_obs.update(oid for cue in s.get("commentaryCues", []) for oid in cue["observationIds"])
     used_bind = {bid for beat in s["beats"] for bid in beat["bindingIds"]}
     used_metrics = {rid for binding in project["bindings"] if binding["id"] in used_bind for rid in binding["metricRecordIds"]}
     used_metrics.update(beat["metricRecordId"] for beat in s["beats"] if beat.get("metricRecordId"))
     understanding = understanding or {"mode": "manual", "providerRunIds": [], "humanReviewed": not ai_review}
     manifest = {"schema": "courtlens-broadcast-release/1", "createdAt": now(), "source": {"mediaSha256": project["media"]["sha256"], "mediaId": project["media"]["id"], "mediaUrl": project["media"]["mediaUrl"], "startPts": project["media"]["startPts"], "firstFramePts": first_frame_pts, "timeBase": project["media"]["timeBase"], **project["media"]["source"]}, "story": s, "compiledBeats": timing, "evidence": {"observations": [o for o in project["observations"] if o["id"] in used_obs], "bindings": [x for x in project["bindings"] if x["id"] in used_bind], "metrics": public_metric_evidence(project, used_metrics), "background": background_evidence(project, used_obs), "tacticKnowledge": story_knowledge(project, frame_times, s)}, "review": project["review"], "timing": {"sourceRange": s["sourceRange"], "outputDuration": duration, "fps": fps, "beats": timing, "mapping": "outputTime=sourceTime-sourceRange.start; decoded source PTS normalized from first frame"}, "outputs": outputs, "understanding": understanding, "voice": voice, "voiceReport": voice_report, "validation": {"videoCodec": "h264", "pixelFormat": "yuv420p", "durationVerified": True, "sourceHashVerified": True, "contentHash": project["review"]["contentHash"]}, "limitations": ["Review actor and reviewerType are declared in review; AI review is not human verification. Provider observations remain proposals until accepted."]}
     manifest["renderer"] = renderer_fingerprint(font)
+    if separate_commentary:
+        manifest["compiledCommentaryCues"] = commentary_timing
+        manifest["timing"]["commentaryCues"] = commentary_timing
+        manifest["voice"]["lane"] = "play-by-play"
     manifest["manifestHash"] = hash_json(manifest)
     (Path(destination) / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
     shutil.rmtree(overlay_dir)
