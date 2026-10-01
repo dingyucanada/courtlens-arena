@@ -2,6 +2,7 @@
 import io
 import hashlib
 import json
+import math
 import os
 import re
 import subprocess
@@ -15,6 +16,7 @@ import boto3
 from botocore.config import Config
 
 from cloud.common.snapshot import Conflict, get_project, hydrate, persist
+from core.broadcast.providers.bedrock import MAX_SEEN_FRAMES
 
 TABLE = os.environ["TABLE_NAME"]
 INPUT = os.environ["INPUT_BUCKET"]
@@ -118,7 +120,25 @@ def invoke_agent_proposal(workspace, job, project):
     head = S3.head_object(Bucket=INPUT, Key=key)
     if head.get("Metadata", {}).get("sha256") != media["sha256"] or head["ContentLength"] != media["bytes"]:
         raise ValueError("Agent media object differs from current project")
-    scope = job["options"].get("scope") or {"start": 0, "end": min(4, media["duration"]) if job["jobType"] == "probe-provider" else media["duration"]}
+    explicit_scope = job["options"].get("scope")
+    selected_frame = None
+    if job["jobType"] == "probe-provider" and job["options"].get("frameId"):
+        frame_id = job["options"]["frameId"]
+        if not isinstance(frame_id, str) or not re.fullmatch(r"[a-f0-9]{32}", frame_id):
+            raise ValueError("Probe frame ID invalid")
+        folder = service.store.project_dir(project["id"]) / "frames" / frame_id
+        frame_path, image_path = folder / "frame.json", folder / "frame.png"
+        if folder.is_symlink() or not frame_path.is_file() or frame_path.is_symlink() or not image_path.is_file() or image_path.is_symlink():
+            raise ValueError("Probe frame is unavailable in current project")
+        selected_frame = json.loads(frame_path.read_text())
+        actual = selected_frame.get("actualTime")
+        if (selected_frame.get("id") != frame_id or selected_frame.get("mediaSha256") != media["sha256"]
+                or type(actual) not in (int, float) or not math.isfinite(actual) or not 0 <= actual < media["duration"]
+                or hashlib.sha256(image_path.read_bytes()).hexdigest() != selected_frame.get("sha256")):
+            raise ValueError("Probe frame differs from current verified source")
+    scope = explicit_scope or ({"start": max(0, selected_frame["actualTime"] - .5),
+                                "end": min(media["duration"], selected_frame["actualTime"] + .5)}
+                               if selected_frame else {"start": 0, "end": min(4, media["duration"]) if job["jobType"] == "probe-provider" else media["duration"]})
     if not isinstance(scope, dict) or type(scope.get("start")) not in (int, float) or type(scope.get("end")) not in (int, float) or not 0 <= scope["start"] < scope["end"] <= min(180, media["duration"]):
         raise ValueError("Agent scope invalid")
     strategy = job["options"].get("strategy") or ("frames-first" if job["jobType"] == "probe-provider" and job["options"].get("frameId") else "video-first" if job["jobType"] == "probe-provider" else None)
@@ -127,17 +147,10 @@ def invoke_agent_proposal(workspace, job, project):
     job["options"]["strategy"] = strategy
     job["options"]["scope"] = scope
     seed_times = None
-    if job["jobType"] == "probe-provider" and job["options"].get("frameId"):
-        frame_id = job["options"]["frameId"]
-        if not isinstance(frame_id, str) or not re.fullmatch(r"[a-f0-9]{32}", frame_id):
-            raise ValueError("Probe frame ID invalid")
-        frame_path = service.store.project_dir(project["id"]) / "frames" / frame_id / "frame.json"
-        if not frame_path.is_file() or frame_path.is_symlink() or frame_path.parent.is_symlink():
-            raise ValueError("Probe frame is unavailable in current project")
-        frame = json.loads(frame_path.read_text())
-        if frame.get("mediaSha256") != media["sha256"] or type(frame.get("actualTime")) not in (int, float) or not scope["start"] <= frame["actualTime"] < scope["end"]:
+    if selected_frame:
+        if strategy != "frames-first" or not scope["start"] <= selected_frame["actualTime"] < scope["end"]:
             raise ValueError("Probe frame differs from selected source scope")
-        seed_times = [frame["actualTime"]]
+        seed_times = [selected_frame["actualTime"]]
     arn = os.environ["AGENT_RUNTIME_ARN"]
     payload = {"kind": "video-proposal", "projectId": project["id"], "key": key, "mediaSha256": media["sha256"],
                "inputRevision": job["expectedRevision"], "scope": scope, "strategy": strategy,
@@ -154,7 +167,7 @@ def invoke_agent_proposal(workspace, job, project):
     if proposal.get("status") != "proposal" or proposal.get("mediaSha256") != media["sha256"] or proposal.get("strategy") != strategy or proposal.get("scope") != scope or proposal.get("mode") != ("video-model" if strategy == "video-first" else "image-model") or not isinstance(proposal.get("rawProposal"), str) or not proposal["rawProposal"] or not re.fullmatch(r"[a-f0-9]{64}", proposal.get("requestHash", "")) or hashlib.sha256(proposal["rawProposal"].encode()).hexdigest() != proposal.get("responseHash"):
         raise RuntimeError("AgentCore proposal missing identity or provenance")
     seen_frames = proposal.get("frameFingerprints")
-    if not isinstance(seen_frames, list) or len(seen_frames) > 16 or any(not isinstance(frame, dict) or not re.fullmatch(r"[a-f0-9]{32}", frame.get("id", "")) or not re.fullmatch(r"[a-f0-9]{64}", frame.get("sha256", "")) or type(frame.get("actualTime")) not in (int, float) or not scope["start"] <= frame["actualTime"] <= scope["end"] for frame in seen_frames):
+    if not isinstance(seen_frames, list) or len(seen_frames) > MAX_SEEN_FRAMES or any(not isinstance(frame, dict) or not re.fullmatch(r"[a-f0-9]{32}", frame.get("id", "")) or not re.fullmatch(r"[a-f0-9]{64}", frame.get("sha256", "")) or type(frame.get("actualTime")) not in (int, float) or not scope["start"] <= frame["actualTime"] <= scope["end"] for frame in seen_frames):
         raise RuntimeError("AgentCore frame evidence invalid or outside selected scope")
     video_input = proposal.get("videoInput")
     if strategy == "video-first" and (not isinstance(video_input, dict) or video_input.get("sourceStart") != scope["start"] or video_input.get("sourceEnd") != scope["end"] or video_input.get("sourceSha256") != media["sha256"] or not isinstance(video_input.get("sha256"), str) or not re.fullmatch(r"[a-f0-9]{64}", video_input["sha256"]) or type(video_input.get("bytes")) is not int or not 0 < video_input["bytes"] <= 4 * 1024 * 1024):
@@ -166,7 +179,9 @@ def invoke_agent_proposal(workspace, job, project):
               "rawProposal": proposal["rawProposal"], "invokedAt": datetime.now(timezone.utc).isoformat(),
               "modelId": proposal.get("modelId"), "usage": proposal.get("usage", []), "requestId": proposal.get("requestId"),
               "scope": scope, "strategy": strategy, "mode": proposal["mode"], "frameFingerprints": seen_frames,
-              "videoInput": video_input, "toolCalls": proposal.get("toolCalls", 0)}
+              "videoInput": video_input, "toolCalls": proposal.get("toolCalls", 0),
+              "semanticValidation": proposal.get("semanticValidation"),
+              "candidateRevisions": proposal.get("candidateRevisions", [])}
     (Path(workspace) / "broadcast" / project["id"] / "agentcore-proposal.json").write_text(json.dumps(record, ensure_ascii=False), encoding="utf-8")
 
 

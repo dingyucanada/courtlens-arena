@@ -9,5 +9,11 @@
   "operatorEmail": "fixture@example.invalid",
   "siteAssetDirectory": "../dist",
   "fixtureOnly": true,
-  "voiceProviders": []
+  "voiceProviders": [],
+  "portalConfirmedModelModalities": [
+    "text",
+    "image",
+    "video"
+  ],
+  "portalConfirmedToolUse": true
 }

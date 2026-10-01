@@ -30,7 +30,9 @@ def run(argv, timeout=90):
 def probe(path):
     data = json.loads(run([FFPROBE, "-v", "error", "-protocol_whitelist", "file", "-show_streams", "-show_format", "-of", "json", str(path)]).stdout)
     require(data.get("format", {}).get("format_name", "").split(",")[0] in {"mov", "matroska", "avi", "mpegts"}, "media_unreadable", "仅允许真实视频容器，不接受播放列表或外部引用。", 422)
-    stream = next((s for s in data.get("streams", []) if s.get("codec_type") == "video"), None)
+    videos = [s for s in data.get("streams", []) if s.get("codec_type") == "video"]
+    require(len(videos) <= 1, "unsupported_video_tracks", "暂不支持多个视频轨；请先导出单视频轨文件再上传。", 422)
+    stream = videos[0] if videos else None
     require(stream is not None, "media_unreadable", "没有视频轨。", 422)
     sar = stream.get("sample_aspect_ratio")
     require(sar in (None, "N/A", "0:1", "1:1"), "unsupported_transform", "暂不支持非方形像素视频；请先转为方形像素并重新上传。", 422)
@@ -92,6 +94,6 @@ def frame_at(media_path, meta, requested, output):
     times = meta["frameTimes"]
     index = min(range(len(times)), key=lambda i: abs(times[i] - requested))
     actual = times[index]
-    run([FFMPEG, "-v", "error", "-nostdin", "-protocol_whitelist", "file", "-i", str(media_path), "-vf", f"select=eq(n\\,{index})", "-vsync", "0", "-frames:v", "1", "-y", str(output)], timeout=60)
+    run([FFMPEG, "-v", "error", "-nostdin", "-protocol_whitelist", "file", "-i", str(media_path), "-map", "0:v:0", "-vf", f"select=eq(n\\,{index})", "-vsync", "0", "-frames:v", "1", "-y", str(output)], timeout=60)
     require(Path(output).is_file() and Path(output).stat().st_size > 0, "media_unreadable", "抽帧失败。", 422)
     return actual, meta["framePts"][index]

@@ -549,6 +549,7 @@ class BroadcastService:
         project_id = job["projectId"]
         p = self.get(project_id)
         input_data = json.loads(self._job_path(p, jid).with_name("input.json").read_text())
+        probe_context = None
         try:
             with self.store.lock:
                 job = self.job(jid)
@@ -640,6 +641,13 @@ class BroadcastService:
                         return self.job(jid)
                     job["stage"] = "infer"
                     self._write_job(p, job)
+                if job["type"] == "probe-provider":
+                    from .providers.model_access import PROVIDERS, configuration_fingerprint, probe_filename
+                    pid = input_data["options"]["providerId"]
+                    if pid in PROVIDERS:
+                        strategy = input_data["options"].get("strategy") or ("frames-first" if pid == "bedrock-image" else "video-first")
+                        probe_context = (self.store.root / probe_filename(pid, strategy),
+                                         {"fingerprint": configuration_fingerprint(pid), "strategy": strategy})
                 run = execute(self, p, job, input_data["options"])
                 job["resultId"] = run["providerRun"]["id"]
                 with self.store.lock:
@@ -655,7 +663,11 @@ class BroadcastService:
                     self.store.atomic(self.store.project_dir(project_id) / "runs" / (run["providerRun"]["id"] + ".json"), run)
                     if job["type"] == "probe-provider":
                         if self.job(jid)["status"] != "cancelled":
-                            self.store.atomic(self.store.root / (input_data["options"]["providerId"] + ".json"), {"passed": bool(run["observations"]), "at": now(), "runId": run["providerRun"]["id"], "modelId": run["providerRun"]["modelId"]})
+                            record = {"passed": bool(run["observations"]), "at": now(), "runId": run["providerRun"]["id"], "modelId": run["providerRun"]["modelId"]}
+                            if probe_context:
+                                self.store.atomic(probe_context[0], {**record, **probe_context[1]})
+                            else:
+                                self.store.atomic(self.store.root / (input_data["options"]["providerId"] + ".json"), record)
                     elif current["revision"] == job["inputRevision"] and content_hash(current) == input_data["inputHash"] and self.job(jid)["status"] != "cancelled":
                         if run["observations"]:
                             current["observations"].extend(run["observations"])
@@ -677,6 +689,8 @@ class BroadcastService:
                 job["error"]["jobId"] = jid
                 job["completedAt"] = now()
                 job["stage"] = "done"
+                if probe_context:
+                    self.store.atomic(probe_context[0], {**probe_context[1], "passed": False, "at": now(), "errorCode": exc.code})
                 self._write_job(p, job)
             return job
         except Exception as exc:
@@ -688,6 +702,8 @@ class BroadcastService:
                 job["error"] = BroadcastError("render_failed" if job["type"] == "render" else "provider_failed", "任务失败：" + str(exc)[:300], 500, job_id=jid).body()
                 job["completedAt"] = now()
                 job["stage"] = "done"
+                if probe_context:
+                    self.store.atomic(probe_context[0], {**probe_context[1], "passed": False, "at": now(), "errorCode": "provider_failed"})
                 self._write_job(p, job)
             return job
 

@@ -87,7 +87,7 @@ class CloudAgentEvidenceTest(unittest.TestCase):
         import boto3
         s3 = _S3(self.source.read_bytes())
         model = model or _Bedrock(strategy)
-        with patch.dict(os.environ, {"INPUT_BUCKET": "private-fixture", "MODEL_ID": "stub-model", "AWS_REGION": "us-east-1"}), patch.object(boto3, "client", side_effect=lambda name, **kwargs: s3 if name == "s3" else model):
+        with patch.dict(os.environ, {"INPUT_BUCKET": "private-fixture", "MODEL_ID": "stub-model", "AWS_REGION": "us-east-1", "COURTLENS_BEDROCK_MODALITIES": "text,image,video", "COURTLENS_BEDROCK_TOOLS": "1"}), patch.object(boto3, "client", side_effect=lambda name, **kwargs: s3 if name == "s3" else model):
             agent = importlib.reload(importlib.import_module("cloud.agent.main"))
             payload = {"kind": "video-proposal", "projectId": self.project["id"], "inputRevision": self.project["revision"],
                        "key": f"projects/{self.project['id']}/media/{self.project['media']['id']}/source.mp4",
@@ -165,12 +165,46 @@ class CloudAgentEvidenceTest(unittest.TestCase):
                 raw = json.dumps({"observations": [{"type": "shot", "start": 1.2, "end": 1.8,
                                                    "anchorTime": 1.4, "description": "未经回看的候选", "frameIds": []}]})
                 return {"output": {"message": {"role": "assistant", "content": [{"text": raw}]}}}
-        with self.assertRaises(Exception) as no_frame:
-            self._propose("video-first", NoFrame())
-        self.assertIn("frame", str(no_frame.exception).lower())
+        proposal, _ = self._propose("video-first", NoFrame())
+        self.assertEqual(proposal["semanticValidation"]["status"], "rejected_all")
+        run = self._import(proposal)
+        self.assertEqual(run["observations"], [])
+        self.assertEqual(run["semanticValidation"]["rejectedCount"], 1)
         class Outside:
             def converse(self, **kwargs):
                 return {"output": {"message": {"role": "assistant", "content": [{"toolUse": {"toolUseId": "t1", "name": "inspect_frames", "input": {"times": [4.5]}}}]}}}
         with self.assertRaises(BroadcastError) as outside:
             self._propose("video-first", Outside())
         self.assertEqual(outside.exception.code, "schema_invalid")
+
+    def test_late_selected_probe_derives_scope_and_verifies_pixels_before_runtime(self):
+        import boto3
+        frame = self.service.frames(self.project["id"], self.project["revision"], [4.4])["frames"][0]
+        received = []
+        class Runtime:
+            def invoke_agent_runtime(inner, **kwargs):
+                payload = json.loads(kwargs["payload"])
+                received.append(payload)
+                raw = json.dumps({"observations": []})
+                proposal = {"status": "proposal", "mediaSha256": self.project["media"]["sha256"],
+                            "strategy": "frames-first", "mode": "image-model", "scope": payload["scope"],
+                            "rawProposal": raw, "requestHash": "b" * 64,
+                            "responseHash": hashlib.sha256(raw.encode()).hexdigest(),
+                            "frameFingerprints": [{"id": frame["id"], "sha256": frame["sha256"], "actualTime": frame["actualTime"]}]}
+                return {"statusCode": 200, "contentType": "application/json", "response": io.BytesIO(json.dumps(proposal).encode())}
+        s3 = _S3(self.source.read_bytes())
+        env = {"TABLE_NAME": "fixture", "INPUT_BUCKET": "private-fixture", "RELEASE_BUCKET": "release-fixture",
+               "OWNER_ID": "owner", "JOB_ID": "a" * 32, "AGENT_RUNTIME_ARN": "arn:fixture:agentcore"}
+        with patch.dict(os.environ, env), patch.object(boto3, "client", side_effect=lambda name, **kwargs: s3 if name == "s3" else Runtime() if name == "bedrock-agentcore" else object()):
+            runner = importlib.reload(importlib.import_module("cloud.render.runner"))
+            job = {"jobType": "probe-provider", "projectId": self.project["id"], "expectedRevision": self.project["revision"],
+                   "options": {"providerId": "agentcore-proposal", "frameId": frame["id"]}}
+            runner.invoke_agent_proposal(self.temporary.name, job, self.project)
+            self.assertEqual(received[0]["seedTimes"], [frame["actualTime"]])
+            self.assertAlmostEqual(received[0]["scope"]["start"], 3.9)
+            self.assertAlmostEqual(received[0]["scope"]["end"], 4.9)
+            folder = self.service.store.project_dir(self.project["id"]) / "frames" / frame["id"]
+            (folder / "frame.png").write_bytes(b"tampered")
+            with self.assertRaisesRegex(ValueError, "verified source"):
+                runner.invoke_agent_proposal(self.temporary.name, job, self.project)
+            self.assertEqual(len(received), 1)

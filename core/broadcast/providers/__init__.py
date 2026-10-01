@@ -8,6 +8,7 @@ import re
 from pathlib import Path
 
 from ..common import BroadcastError, require
+from .model_access import declared_modalities, supports, require_access, matching_probe
 
 
 def _probe_file(root, name):
@@ -19,7 +20,7 @@ def _probe_file(root, name):
 
 
 def _row(id, kind, configured, available, modalities, mode, reason, message, record):
-    return {"id": id, "kind": kind, "configured": configured, "available": available, "verified": bool(record and record.get("passed")), "modalities": modalities, "mode": mode, "reasonCode": reason, "message": message, "lastProbeAt": record.get("at") if record else None, "lastProbeResult": "passed" if record and record.get("passed") else "failed" if record else "never"}
+    return {"id": id, "kind": kind, "configured": configured, "available": available, "verified": bool(configured and available and record and record.get("passed")), "modalities": modalities, "mode": mode, "reasonCode": reason, "message": message, "lastProbeAt": record.get("at") if record else None, "lastProbeResult": "passed" if record and record.get("passed") else "failed" if record else "never"}
 
 
 def voice_fingerprint(mode):
@@ -47,12 +48,16 @@ def capabilities(root):
         sdk = importlib.util.find_spec("boto3") is not None
     except (ImportError, ValueError):
         sdk = False
-    for pid, model, modal in (("bedrock-video", semantic, ["video", "image", "text"]), ("bedrock-image", vision, ["image", "text"]), ("bedrock-story", story, ["text"])):
+    for pid, model, allowed in (("bedrock-video", semantic, ["video", "image", "text"]), ("bedrock-image", vision, ["image", "text"]), ("bedrock-story", story, ["text"])):
         configured = bool(region and model)
-        available = configured and sdk
-        reason = None if available else "provider_not_configured" if not configured else "provider_unverified"
-        message = "已配置，尚未实测。" if available else "请配置区域、模型 ID 和 boto3。"
-        rows.append(_row(pid, "semantic", configured, available, modal, "bedrock-converse", reason, message, _probe_file(root, pid)))
+        modal = [item for item in allowed if item in declared_modalities()]
+        permitted = supports(pid) if pid.endswith("-story") else any(supports(pid, strategy) for strategy in ("video-first", "frames-first"))
+        available = configured and sdk and permitted
+        reason = "provider_not_configured" if not configured else "unsupported_modality" if not permitted else "provider_unverified" if not sdk else None
+        strategy = "text" if pid.endswith("-story") else "frames-first" if pid == "bedrock-image" else "video-first"
+        record = matching_probe(root, pid, strategy) if available else None
+        message = "当前模型与输入方式已通过一次探测；仍需人工复核内容。" if record and record.get("passed") else "已配置，当前模型与输入方式尚未实测。" if available else "请核定模型输入模态及工具调用能力。" if configured and not permitted else "请配置区域、模型 ID 和 boto3。"
+        rows.append(_row(pid, "semantic", configured, available, modal, "bedrock-converse", reason, message, record))
     for pid, model_kind, modal, mode in (("stepfun-vision", "VISION", ["video", "image", "text"], "stepfun-video-evidence"), ("stepfun-story", "STORY", ["text"], "stepfun-story-text")):
         model = os.environ.get("COURTLENS_STEPFUN_" + model_kind + "_MODEL", "step-3.7-flash")
         configured = bool(os.environ.get("COURTLENS_STEPFUN_API_KEY") and isinstance(model, str) and re.fullmatch(r"[A-Za-z0-9_.-]{1,100}", model))
@@ -119,8 +124,7 @@ def check_configured(kind, options):
     else:
         model = os.environ.get("COURTLENS_SEMANTIC_MODEL_ID" if pid == "bedrock-video" else "COURTLENS_VISION_MODEL_ID")
         require(pid != "cv-command" and model and (os.environ.get("COURTLENS_BEDROCK_REGION") or os.environ.get("AWS_REGION")), "provider_not_configured", "Bedrock 区域或模型 ID 未配置。", 503)
-        if options.get("strategy") == "video-first":
-            require(pid == "bedrock-video", "unsupported_modality", "所选模型未声明视频输入能力。", 422)
+        require_access(pid, options.get("strategy"))
 
 
 def execute(service, project, job, options):

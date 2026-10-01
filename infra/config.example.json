@@ -8,5 +8,9 @@
   "modelResourceArn": "REPLACE_WITH_EXACT_ALLOWED_BEDROCK_MODEL_OR_PROFILE_ARN",
   "operatorEmail": "REPLACE_WITH_OPERATOR_EMAIL",
   "siteAssetDirectory": "../dist",
-  "voiceProviders": []
+  "voiceProviders": [],
+  "portalConfirmedModelModalities": [
+    "text"
+  ],
+  "portalConfirmedToolUse": false
 }

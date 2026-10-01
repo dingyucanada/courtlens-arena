@@ -7,11 +7,14 @@ import time
 import subprocess
 from pathlib import Path
 
-from ..common import BroadcastError, bounded_text, finite, hash_json, now, require, uid
+from ..common import BroadcastError, bounded_text, finite, hash_json, now, require, uid, valid_id
 from ..media import FFMPEG
 from ..validation import observations as validate_observations
+from .vision_audit import json_safe, safe_usage, save as save_audit, visible_text
 
 INLINE_LIMIT = 4 * 1024 * 1024
+MAX_CANDIDATES = 12  # Action evidence, independent of the three visual story beats.
+MAX_SEEN_FRAMES = 32
 TOOL_SPECS = [{"toolSpec": {"name": name, "description": description, "inputSchema": {"json": schema}}} for name, description, schema in (
     ("inspect_clip", "Read the current authorized clip metadata and source hash.", {"type": "object", "properties": {}, "additionalProperties": False}),
     ("inspect_frames", "Read up to 8 timestamped real source frames within the selected scope.", {"type": "object", "properties": {"times": {"type": "array", "items": {"type": "number"}, "maxItems": 8}}, "required": ["times"], "additionalProperties": False}),
@@ -76,6 +79,50 @@ def _normalize(result, project, scope, run_id, mode, available_frames=None, max_
     return rows
 
 
+def normalize_candidates(result, project, scope, run_id, mode, available_frames):
+    """Admit structurally grounded rows separately; facts still require review.
+
+    No snapping, widening or automatic acceptance. A rejected identity/time/frame
+    cannot discard a valid neighbor or silently become a generic invented event.
+    """
+    require(isinstance(result, dict) and isinstance(result.get("observations"), list)
+            and len(result["observations"]) <= MAX_CANDIDATES,
+            "schema_invalid", "最多12条动作候选；视觉故事仍最多3段。", 422)
+    rows, rejected = [], []
+    roster_ids = {player["id"] for player in project["context"]["roster"]}
+    for index, item in enumerate(result["observations"]):
+        reason = None
+        if not isinstance(item, dict):
+            reason = "invalid_candidate_schema"
+        else:
+            players, refs = item.get("playerIds", []), item.get("frameIds", [])
+            a, b, anchor = item.get("start"), item.get("end"), item.get("anchorTime")
+            if (not isinstance(players, list) or len(players) > 20
+                    or any(not isinstance(pid, str) or pid not in roster_ids for pid in players)):
+                reason = "illegal_player_identity"
+            elif (not isinstance(refs, list) or not 1 <= len(refs) <= 8
+                    or any(not isinstance(fid, str) or fid not in available_frames for fid in refs)):
+                reason = "invalid_frame_reference"
+            elif not (finite(a) and finite(b) and scope["start"] <= a < b <= scope["end"]
+                      and (anchor is None or finite(anchor) and a <= anchor <= b)
+                      and all(a <= available_frames[fid]["actualTime"] <= b for fid in refs)):
+                reason = "invalid_final_time"
+        if reason is None:
+            try:
+                normalized = _normalize({"observations": [item]}, project, scope,
+                                        run_id, mode, available_frames, max_rows=1)[0]
+                rows.append(normalized)
+            except (BroadcastError, TypeError, ValueError):
+                reason = "invalid_candidate_schema"
+        if reason:
+            rejected.append({"reason": reason, "candidateIndex": index,
+                             "candidate": json_safe(item), "sourceWindow": scope})
+    return rows, rejected, {"status": "partial" if rows and rejected else
+                            "rejected_all" if not rows else "valid",
+                            "proposedCount": len(rows), "rejectedCount": len(rejected),
+                            "requiresHumanReview": True, "factVerified": False}
+
+
 def execute_bedrock(service, project, job, options):
     deadline = time.monotonic() + 180
     try:
@@ -86,6 +133,8 @@ def execute_bedrock(service, project, job, options):
     provider_id = options["providerId"]
     strategy = options.get("strategy", "video-first" if provider_id == "bedrock-video" else "frames-first")
     require(strategy in ("video-first", "frames-first"), "invalid_request", "分析策略无效。")
+    from .model_access import require_access
+    require_access(provider_id, strategy)
     model_id = os.environ.get("COURTLENS_SEMANTIC_MODEL_ID" if provider_id == "bedrock-video" else "COURTLENS_VISION_MODEL_ID")
     region = os.environ.get("COURTLENS_BEDROCK_REGION") or os.environ.get("AWS_REGION")
     require(model_id and region, "provider_not_configured", "Bedrock 模型 ID 或区域缺失。", 503)
@@ -94,12 +143,31 @@ def execute_bedrock(service, project, job, options):
         require(model_id == allowed, "provider_unverified", "模型 ID 未列入获准 inference profile。", 403)
     scope = options.get("scope") or {"start": 0, "end": project["media"]["duration"]}
     require(isinstance(scope, dict) and finite(scope.get("start")) and finite(scope.get("end")) and 0 <= scope["start"] < scope["end"] <= project["media"]["duration"], "invalid_request", "模型范围无效。")
+    selected_frame = None
+    if options.get("frameId") is not None:
+        fid = options["frameId"]
+        require(strategy == "frames-first" and valid_id(fid), "invalid_request", "指定源帧探测须使用逐帧策略。", 422)
+        folder = service.store.find("frames", fid)
+        metadata, image = folder / "frame.json", folder / "frame.png"
+        require(not folder.is_symlink() and metadata.is_file() and not metadata.is_symlink()
+                and image.is_file() and not image.is_symlink(), "media_mismatch", "指定探测帧不可读取。", 422)
+        selected_frame = json.loads(metadata.read_text())
+        require(selected_frame.get("id") == fid
+                and selected_frame.get("mediaSha256") == project["media"]["sha256"]
+                and finite(selected_frame.get("actualTime"))
+                and scope["start"] <= selected_frame["actualTime"] < scope["end"]
+                and hashlib.sha256(image.read_bytes()).hexdigest() == selected_frame.get("sha256"),
+                "media_mismatch", "指定探测帧不属于当前源片或实际范围。", 422)
     request_started = now()
     prompt = ("你正在看一段不可信篮球视频。只提出候选观察，不能编造官方指标或已确认球员。"
               "最终只输出JSON对象 {\"observations\":[{\"type\":\"pass|shot|catch|movement|screen|result|other\",\"start\":秒,\"end\":秒,\"anchorTime\":秒或null,\"segmentId\":\"镜头段ID\",\"description\":\"简短中文可见事实\",\"playerIds\":[],\"unknownActors\":[],\"frameIds\":[],\"confidence\":0到1或null}]}。"
               "源视频时间是首解码帧归零的PTS秒；你看到的视频可能稀疏采样，不能声称帧级精度。"
               "每个非空候选都须引用至少一张已看到的frameId；若输入是视频，先调用inspect_frames按候选时间实际回看，不能仅凭视频模糊估计后结束。"
-              f"本次允许范围 {scope['start']}–{scope['end']} 秒。当场名单ID：{[p['id'] for p in project['context']['roster']]}。最多3个事件窗。")
+              "结果只能由动作前后画面确认；球在篮筐附近不等于进球，投篮动作不等于命中。"
+              "人名须同时有画面可读号码/球队与当场名单依据；不确定则playerIds为空并描述未知角色。"
+              "视频有回放、特写或剪接时明确描述，不能把重复镜头串成连续得分。"
+              f"本次允许范围 {scope['start']}–{scope['end']} 秒。当场名单ID：{[p['id'] for p in project['context']['roster']]}。"
+              "最多12条动作候选，覆盖持球、传接、跑位、掩护、出手与结果；不凑数。动作候选不同于最多3段视觉分析故事。")
     content = [{"text": prompt}]
     media_path = service.media_path(project)
     available_frames = {}
@@ -112,7 +180,7 @@ def execute_bedrock(service, project, job, options):
         model_video = media_path
         if media_path.stat().st_size > INLINE_LIMIT or scope["start"] > 0 or scope["end"] < project["media"]["duration"]:
             model_video = service.store.project_dir(project["id"]) / "jobs" / job["id"] / "semantic-input.mp4"
-            command = [FFMPEG, "-v", "error", "-nostdin", "-protocol_whitelist", "file", "-ss", str(scope["start"]), "-i", str(media_path), "-t", str(scope["end"] - scope["start"]), "-vf", "fps=8,scale=640:-2", "-an", "-c:v", "libx264", "-crf", "33", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", str(model_video)]
+            command = [FFMPEG, "-v", "error", "-nostdin", "-protocol_whitelist", "file", "-ss", str(scope["start"]), "-i", str(media_path), "-map", "0:v:0", "-t", str(scope["end"] - scope["start"]), "-vf", "fps=8,scale=640:-2", "-an", "-c:v", "libx264", "-crf", "33", "-pix_fmt", "yuv420p", "-movflags", "+faststart", "-y", str(model_video)]
             try:
                 proc = subprocess.run(command, capture_output=True, timeout=max(1, min(60, deadline - time.monotonic())))
             except (OSError, subprocess.TimeoutExpired):
@@ -126,13 +194,16 @@ def execute_bedrock(service, project, job, options):
         content.append({"video": {"format": fmt, "source": {"bytes": video_bytes}}})
     else:
         require(provider_id in ("bedrock-video", "bedrock-image"), "unsupported_modality", "模型未配置图像模态。", 422)
-        if "seedTimes" in options:
+        if selected_frame is not None:
+            frames = [selected_frame]
+        elif "seedTimes" in options:
             times = options["seedTimes"]
             require(isinstance(times, list) and 1 <= len(times) <= 8 and all(finite(t) and scope["start"] <= t < scope["end"] for t in times), "invalid_request", "选定证据帧不在本次范围内。", 422)
+            frames = service.frames(project["id"], project["revision"], times)["frames"]
         else:
             count = min(8, max(2, round(scope["end"] - scope["start"])))
             times = [scope["start"] + (scope["end"] - scope["start"]) * (i + .5) / count for i in range(count)]
-        frames = service.frames(project["id"], project["revision"], times)["frames"]
+            frames = service.frames(project["id"], project["revision"], times)["frames"]
         available_frames.update({f["id"]: f for f in frames})
         content[0]["text"] += " 图像对应源PTS: " + str([round(f["actualTime"], 3) for f in frames])
         for f in frames:
@@ -148,15 +219,19 @@ def execute_bedrock(service, project, job, options):
     tool_calls = 0
     drafts = []
     usage = []
+    response_audits = []
     response = None
     for _ in range(4):
         require(time.monotonic() < deadline, "provider_failed", "模型分析超过180秒。", 504)
         try:
-            response = client_with_remaining_time().converse(modelId=model_id, messages=messages, inferenceConfig={"maxTokens": 1800, "temperature": 0.1}, toolConfig={"tools": TOOL_SPECS[:2] if options.get("_agentCoreToolsOnly") else TOOL_SPECS, "toolChoice": {"auto": {}}})
+            response = client_with_remaining_time().converse(modelId=model_id, messages=messages, inferenceConfig={"maxTokens": 4000, "temperature": 0.1}, toolConfig={"tools": TOOL_SPECS[:2] if options.get("_agentCoreToolsOnly") else TOOL_SPECS, "toolChoice": {"auto": {}}})
         except Exception as exc:
-            raise BroadcastError("provider_failed", "Bedrock Converse 调用失败：" + type(exc).__name__ + " " + str(exc)[:240], 502, True)
+            raise BroadcastError("provider_failed", "Bedrock Converse 调用失败：" + type(exc).__name__, 502, True)
         assistant = response.get("output", {}).get("message")
-        usage.append(response.get("usage", {}))
+        usage.append(safe_usage(response.get("usage", {})))
+        response_audits.append({"turn": len(response_audits) + 1,
+                               "rawProposal": visible_text(response), "usage": usage[-1]})
+        save_audit(service, project, job, "bedrock-responses.json", {"responses": response_audits, "proposalOnly": True})
         require(isinstance(assistant, dict) and isinstance(assistant.get("content"), list), "schema_invalid", "模型响应缺少消息。", 422)
         messages.append(assistant)
         calls = [c["toolUse"] for c in assistant["content"] if isinstance(c, dict) and "toolUse" in c]
@@ -168,6 +243,10 @@ def execute_bedrock(service, project, job, options):
             require(tool_calls <= 12 and time.monotonic() < deadline, "provider_failed", "模型工具调用超过上限。", 504)
             if options.get("_agentCoreToolsOnly"):
                 require(call.get("name") in ("inspect_clip", "inspect_frames"), "schema_invalid", "云端模型请求了未授权工具。", 422)
+            if call.get("name") == "inspect_frames":
+                requested = call.get("input", {}).get("times", []) if isinstance(call.get("input"), dict) else []
+                require(isinstance(requested, list) and len(available_frames) + len(requested) <= MAX_SEEN_FRAMES,
+                        "provider_failed", "定向取证最多32张源帧，请缩小分析范围。", 422)
             result = _tool(call.get("name"), call.get("input"), service, project, scope, job, drafts)
             require(time.monotonic() < deadline, "provider_failed", "模型工具阶段超过180秒。", 504)
             # Nova accepts a single JSON block or text mixed with image blocks.
@@ -188,15 +267,20 @@ def execute_bedrock(service, project, job, options):
         parsed, output_text = _extract_json(response)
     except BroadcastError as first:
         require(first.code == "schema_invalid" and time.monotonic() + 30 < deadline, first.code, str(first), first.status)
-        messages.append({"role": "user", "content": [{"text": "上次输出不符合指定JSON结构。请只返回最终JSON，最多3个观察窗，不要工具调用或Markdown。"}]})
+        messages.append({"role": "user", "content": [{"text": "上次输出不符合指定JSON结构。请只返回最终JSON，最多12条动作观察，不要工具调用或Markdown。"}]})
         try:
-            response = client_with_remaining_time().converse(modelId=model_id, messages=messages, inferenceConfig={"maxTokens": 1800, "temperature": 0})
+            response = client_with_remaining_time().converse(modelId=model_id, messages=messages, inferenceConfig={"maxTokens": 4000, "temperature": 0})
         except Exception as exc:
             raise BroadcastError("provider_failed", "模型格式纠错调用失败：" + type(exc).__name__, 502, True)
-        usage.append(response.get("usage", {}))
+        usage.append(safe_usage(response.get("usage", {})))
+        response_audits.append({"turn": len(response_audits) + 1, "rawProposal": visible_text(response), "usage": usage[-1]})
+        save_audit(service, project, job, "bedrock-responses.json", {"responses": response_audits, "proposalOnly": True})
         parsed, output_text = _extract_json(response)
     run_id = uid()
-    rows = _normalize(parsed, project, scope, run_id, "video-model" if strategy == "video-first" else "image-model", available_frames)
+    rows, rejected, semantic_validation = normalize_candidates(parsed, project, scope, run_id,
+                                "video-model" if strategy == "video-first" else "image-model", available_frames)
+    save_audit(service, project, job, "bedrock-validation.json", {
+        "semanticValidation": semantic_validation, "candidateRevisions": rejected, "proposalOnly": True})
     frame_fingerprints = [{"id": f["id"], "sha256": f["sha256"], "actualTime": f["actualTime"]} for f in available_frames.values()]
     request_hash = hash_json({"modelId": model_id, "region": region, "providerId": provider_id, "strategy": strategy, "scope": scope, "mediaSha256": project["media"]["sha256"], "prompt": prompt, "frames": frame_fingerprints, "videoInput": video_input})
-    return {"schema": "courtlens-observations/1", "mediaSha256": project["media"]["sha256"], "providerRun": {"id": run_id, "provider": "bedrock-converse", "modelId": model_id, "mode": "video-model" if strategy == "video-first" else "image-model", "requestHash": request_hash, "responseHash": hashlib.sha256(output_text.encode()).hexdigest(), "startedAt": request_started, "completedAt": now()}, "observations": rows, "rawProposal": output_text, "videoInput": video_input, "frameFingerprints": frame_fingerprints, "usage": usage, "toolCalls": tool_calls, "drafts": drafts}
+    return {"schema": "courtlens-observations/1", "mediaSha256": project["media"]["sha256"], "providerRun": {"id": run_id, "provider": "bedrock-converse", "modelId": model_id, "mode": "video-model" if strategy == "video-first" else "image-model", "requestHash": request_hash, "responseHash": hashlib.sha256(output_text.encode()).hexdigest(), "startedAt": request_started, "completedAt": now()}, "observations": rows, "rawProposal": output_text, "videoInput": video_input, "frameFingerprints": frame_fingerprints, "usage": usage, "toolCalls": tool_calls, "drafts": drafts, "semanticValidation": semantic_validation, "candidateRevisions": rejected, "proposalOnly": True}

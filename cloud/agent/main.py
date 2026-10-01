@@ -13,7 +13,7 @@ from botocore.config import Config
 from core.broadcast.common import BroadcastError, uid
 from core.broadcast.commentary_style import resolve_style
 from core.broadcast.media import frame_at, probe
-from core.broadcast.providers.bedrock import execute_bedrock
+from core.broadcast.providers.bedrock import execute_bedrock, MAX_SEEN_FRAMES
 
 BUCKET = os.environ["INPUT_BUCKET"]
 MODEL_ID = os.environ["MODEL_ID"]
@@ -57,8 +57,8 @@ class _AgentMediaService:
         return self.source
 
     def frames(self, project_id, revision, times):
-        if project_id != self.project_id or revision != self.revision or self.frame_count + len(times) > 16:
-            raise ApiError("invalid_request", "Agent frame scope or 16-frame budget exceeded")
+        if project_id != self.project_id or revision != self.revision or self.frame_count + len(times) > MAX_SEEN_FRAMES:
+            raise ApiError("invalid_request", "Agent frame scope or source-frame budget exceeded")
         result = []
         for requested in times:
             frame_id = uid()
@@ -113,6 +113,8 @@ def propose(payload):
     strategy = payload.get("strategy")
     if strategy not in ("video-first", "frames-first"):
         raise ApiError("invalid_request", "Agent strategy must be explicit")
+    from core.broadcast.providers.model_access import require_access
+    require_access("agentcore-proposal", strategy)
     revision = payload.get("inputRevision")
     if type(revision) is not int or revision < 0:
         raise ApiError("invalid_request", "Agent input revision invalid")
@@ -153,7 +155,9 @@ def propose(payload):
                 "strategy": strategy, "mode": mode, "requestHash": run["providerRun"]["requestHash"],
                 "responseHash": run["providerRun"]["responseHash"], "rawProposal": run["rawProposal"],
                 "frameFingerprints": run["frameFingerprints"], "videoInput": run["videoInput"],
-                "toolCalls": run["toolCalls"], "usage": run["usage"]}
+                "toolCalls": run["toolCalls"], "usage": run["usage"],
+                "semanticValidation": run["semanticValidation"],
+                "candidateRevisions": run["candidateRevisions"]}
 
 
 def propose_story(payload):

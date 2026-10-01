@@ -25,11 +25,20 @@ test('offline synth contains private origin, AgentCore and bounded CPU workflow'
   }
   assert.ok(byType('AWS::CloudFront::OriginAccessControl').length >= 1);
   assert.equal(byType('AWS::BedrockAgentCore::Runtime').length, 1);
+  const agentEnv = byType('AWS::BedrockAgentCore::Runtime')[0].Properties.EnvironmentVariables;
+  assert.equal(agentEnv.COURTLENS_BEDROCK_MODALITIES,'text,image,video');
+  assert.equal(agentEnv.COURTLENS_BEDROCK_TOOLS,'1');
+  const apiEnv = byType('AWS::Lambda::Function').find(item => item.Properties.PackageType === 'Image').Properties.Environment.Variables;
+  assert.equal(apiEnv.COURTLENS_BEDROCK_MODALITIES,agentEnv.COURTLENS_BEDROCK_MODALITIES);
+  assert.equal(apiEnv.COURTLENS_BEDROCK_TOOLS,agentEnv.COURTLENS_BEDROCK_TOOLS);
   assert.equal(byType('AWS::Cognito::UserPool').length, 1);
   assert.equal(byType('AWS::DynamoDB::Table').length, 1);
   assert.equal(byType('AWS::StepFunctions::StateMachine').length, 1);
   const ecs = byType('AWS::ECS::TaskDefinition')[0];
   assert.equal(ecs.Properties.Cpu, '2048');
+  const workerEnv = Object.fromEntries(ecs.Properties.ContainerDefinitions[0].Environment.map(item => [item.Name,item.Value]));
+  assert.equal(workerEnv.COURTLENS_BEDROCK_MODALITIES,agentEnv.COURTLENS_BEDROCK_MODALITIES);
+  assert.equal(workerEnv.COURTLENS_BEDROCK_TOOLS,agentEnv.COURTLENS_BEDROCK_TOOLS);
   assert.equal(ecs.Properties.RuntimePlatform.CpuArchitecture, 'X86_64');
   assert.equal(ecs.Properties.RequiresCompatibilities[0], 'FARGATE');
   assert.ok(!ecs.Properties.ContainerDefinitions[0].Secrets?.length, 'voice secrets are absent by default');

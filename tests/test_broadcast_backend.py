@@ -378,7 +378,7 @@ class BroadcastBackendTest(unittest.TestCase):
                 pass
         import types
         self_test = self
-        with patch.dict(sys.modules, {"boto3": FakeBoto, "botocore": types.ModuleType("botocore"), "botocore.config": types.SimpleNamespace(Config=FakeConfig)}), patch.dict(os.environ, {"COURTLENS_SEMANTIC_MODEL_ID": "test-model", "COURTLENS_BEDROCK_REGION": "us-east-1"}):
+        with patch.dict(sys.modules, {"boto3": FakeBoto, "botocore": types.ModuleType("botocore"), "botocore.config": types.SimpleNamespace(Config=FakeConfig)}), patch.dict(os.environ, {"COURTLENS_SEMANTIC_MODEL_ID": "test-model", "COURTLENS_BEDROCK_REGION": "us-east-1", "COURTLENS_BEDROCK_MODALITIES": "text,image,video", "COURTLENS_BEDROCK_TOOLS": "1"}):
             run = execute_bedrock(self.service, p, {"id": "jobstub"}, {"providerId": "bedrock-video", "scope": {"start": 0, "end": 5}, "strategy": "video-first"})
         self.assertEqual(run["providerRun"]["mode"], "video-model")
         self.assertEqual(len(run["observations"][0]["frameIds"]), 1)
@@ -405,7 +405,7 @@ class BroadcastBackendTest(unittest.TestCase):
                 pass
         import types
         self_test = self
-        with patch.dict(sys.modules, {"boto3": FakeBoto, "botocore": types.ModuleType("botocore"), "botocore.config": types.SimpleNamespace(Config=FakeConfig)}), patch.dict(os.environ, {"COURTLENS_STORY_MODEL_ID": "story-test", "COURTLENS_BEDROCK_REGION": "us-east-1"}):
+        with patch.dict(sys.modules, {"boto3": FakeBoto, "botocore": types.ModuleType("botocore"), "botocore.config": types.SimpleNamespace(Config=FakeConfig)}), patch.dict(os.environ, {"COURTLENS_STORY_MODEL_ID": "story-test", "COURTLENS_BEDROCK_REGION": "us-east-1", "COURTLENS_BEDROCK_MODALITIES": "text,image,video", "COURTLENS_BEDROCK_TOOLS": "1"}):
             p = self.service.model_story(p["id"], p["revision"], "fan", "bedrock-story")
         self.assertEqual(len(calls), 2)
         self.assertIsNone(p["review"])

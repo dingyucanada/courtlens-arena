@@ -1,0 +1,33 @@
+{
+  "schema": "courtlens-contest-delivery-input/1",
+  "repositoryUrl": "https://github.com/dingyucanada/courtlens-arena",
+  "facts": {
+    "portal-requirements": {
+      "status": "unknown"
+    },
+    "private-repository": {
+      "status": "unknown"
+    },
+    "portal-binding": {
+      "status": "unknown"
+    },
+    "aws-account": {
+      "status": "unknown"
+    },
+    "aws-region": {
+      "status": "unknown"
+    },
+    "cdk-deployment": {
+      "status": "unknown"
+    },
+    "cloudfront": {
+      "status": "unknown"
+    },
+    "agent-service": {
+      "status": "unknown"
+    },
+    "model-authorization": {
+      "status": "unknown"
+    }
+  }
+}

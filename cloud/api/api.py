@@ -14,6 +14,7 @@ from botocore.exceptions import ClientError
 
 from cloud.common.snapshot import Conflict, get_project, hydrate, media_object, persist, project_key
 from core.broadcast.common import BroadcastError
+from core.broadcast.providers.model_access import declared_modalities, supports, require_access
 
 TABLE = os.environ["TABLE_NAME"]
 INPUT = os.environ["INPUT_BUCKET"]
@@ -255,9 +256,14 @@ def handler(event, context):
         if method == "GET" and parts == ["capabilities"]:
             from core.broadcast.commentary_style import capability_styles, capability_options
             def agent_capability(pid, modalities):
-                return {"id": pid, "kind": "semantic", "configured": True, "available": True, "verified": False,
-                        "modalities": modalities, "mode": "agentcore-runtime", "reasonCode": "provider_unverified",
-                        "message": "AgentCore runtime 已配置；当前媒体与模型尚需真实运行验证。", "lastProbeAt": None, "lastProbeResult": "never"}
+                configured = bool(os.environ.get("MODEL_ID"))
+                permitted = supports(pid) if pid.endswith("-story") else any(supports(pid, strategy) for strategy in ("video-first", "frames-first"))
+                available = configured and permitted
+                return {"id": pid, "kind": "semantic", "configured": configured, "available": available, "verified": False,
+                        "modalities": [item for item in modalities if item in declared_modalities()], "mode": "agentcore-runtime",
+                        "reasonCode": "provider_unverified" if available else "unsupported_modality" if configured else "provider_not_configured",
+                        "message": "AgentCore runtime 已配置；当前输入方式尚需真实运行验证。" if available else "当前模型未声明视觉输入与工具能力，可使用文本解说或人工观察。",
+                        "lastProbeAt": None, "lastProbeResult": "never"}
             def voice_capability(pid):
                 configured = pid in VOICE_PROVIDERS
                 return {"id": pid, "kind": "voice", "configured": configured, "available": configured, "verified": False,
@@ -349,6 +355,7 @@ def handler(event, context):
                         idem = next((v for k,v in (event.get("headers") or {}).items() if k.lower() == "idempotency-key"), None)
                         if body.get("audience") not in ("fan", "pro") or body.get("providerId") != "agentcore-story":
                             raise HttpError("invalid_request", "Cloud model story requires AgentCore and a valid audience", 422)
+                        require_access("agentcore-story")
                         return response(202, {"data": start_job(owner, pid, expected, "model-story", {"audience": body["audience"], "providerId": "agentcore-story", "commentaryStyle": body.get("commentaryStyle", "zh-analysis"), "language": body.get("language")}, idem)})
                     return response(200, {"data": with_project(owner, pid, lambda s,c,r: s.template_story(pid, expected, body.get("audience"), body.get("mode"), body.get("providerId"), body.get("commentaryStyle", "zh-analysis"), body.get("language")), True)})
                 if action == "review":
@@ -356,6 +363,10 @@ def handler(event, context):
                 if action in ("render", "analyze", "cv"):
                     if action == "cv":
                         raise HttpError("cv_not_installed", "No cloud CV weights/executor configured", 503)
+                    if action == "analyze":
+                        if body.get("providerId") != "agentcore-proposal":
+                            raise HttpError("invalid_request", "Cloud analysis requires AgentCore", 422)
+                        require_access("agentcore-proposal", body.get("strategy"))
                     if action == "render" and body.get("voiceMode") not in ("silent", *VOICE_PROVIDERS):
                         raise HttpError("voice_unavailable", "Requested cloud voice provider is not configured", 503)
                     idem = next((v for k,v in (event.get("headers") or {}).items() if k.lower() == "idempotency-key"), None)
@@ -377,6 +388,9 @@ def handler(event, context):
         if method == "POST" and len(parts) == 3 and parts[0] == "providers" and parts[2] == "probe":
             body = json_body(event)
             idem = next((v for k,v in (event.get("headers") or {}).items() if k.lower() == "idempotency-key"), None)
+            if parts[1] != "agentcore-proposal":
+                raise HttpError("invalid_request", "Cloud probe requires AgentCore", 422)
+            require_access("agentcore-proposal", "frames-first" if body.get("frameId") else "video-first")
             return response(202, {"data": start_job(owner, body.get("projectId"), body.get("expectedRevision"), "probe-provider", {**body, "providerId": parts[1]}, idem)})
         if len(parts) == 2 and parts[0] == "jobs" and method == "GET":
             return response(200, {"data": get_job(owner, parts[1])})

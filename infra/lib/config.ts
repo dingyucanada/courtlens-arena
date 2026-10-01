@@ -6,6 +6,8 @@ export interface DeploymentConfig {
   allowedRegion: string;
   portalConfirmedAgentService: string;
   portalConfirmedModelId: string;
+  portalConfirmedModelModalities: Array<'text' | 'image' | 'video'>;
+  portalConfirmedToolUse: boolean;
   portalEvidence: string;
   contestConfigConfirmed: boolean;
   modelResourceArn: string;
@@ -28,6 +30,10 @@ export function readConfig(): DeploymentConfig {
 export function validateConfig(config: DeploymentConfig, fixture: boolean): void {
   const missing = ['teamAccountId','allowedRegion','portalConfirmedAgentService','portalConfirmedModelId','portalEvidence','modelResourceArn','operatorEmail','siteAssetDirectory'].filter(k => !String(config[k as keyof DeploymentConfig] ?? '').trim() || String(config[k as keyof DeploymentConfig]).startsWith('REPLACE_'));
   if (missing.length) throw new Error(`Missing confirmed deployment fields: ${missing.join(', ')}`);
+  const modalities = config.portalConfirmedModelModalities;
+  if (!Array.isArray(modalities) || !modalities.length || new Set(modalities).size !== modalities.length || modalities.some(item => !['text','image','video'].includes(item)) || !modalities.includes('text')) throw new Error('portalConfirmedModelModalities must explicitly include text and only supported input modalities');
+  if (typeof config.portalConfirmedToolUse !== 'boolean') throw new Error('portalConfirmedToolUse must explicitly state model tool support');
+  if (modalities.includes('video') && !modalities.includes('image')) throw new Error('Video evidence requires image input for source-frame verification');
   if (!/^\d{12}$/.test(config.teamAccountId)) throw new Error('teamAccountId must be a 12-digit AWS account ID');
   if (!/^[a-z]{2}-[a-z]+-\d$/.test(config.allowedRegion)) throw new Error('allowedRegion must be an AWS region code');
   if (config.portalConfirmedAgentService !== 'bedrock-agentcore') throw new Error('This stack implements only the AgentCore candidate; re-evaluate when Portal names another service.');

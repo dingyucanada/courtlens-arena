@@ -25,7 +25,7 @@ class CloudCapabilityContractTest(unittest.TestCase):
         self.assertIn("COPY tools ./tools", renderer)
 
     def test_agentcore_declares_both_bounded_video_and_actual_frame_modes(self):
-        settings = {"TABLE_NAME": "fixture", "INPUT_BUCKET": "fixture", "RELEASE_BUCKET": "fixture", "AWS_REGION": "us-east-1"}
+        settings = {"TABLE_NAME": "fixture", "INPUT_BUCKET": "fixture", "RELEASE_BUCKET": "fixture", "AWS_REGION": "us-east-1", "MODEL_ID": "fixture-model", "COURTLENS_BEDROCK_MODALITIES": "text,image,video", "COURTLENS_BEDROCK_TOOLS": "1"}
         with patch.dict(os.environ, settings), patch.object(boto3, "client", return_value=object()):
             api = importlib.reload(importlib.import_module("cloud.api.api"))
             result = api.handler({"httpMethod": "GET", "path": "/api/broadcast/v1/capabilities",

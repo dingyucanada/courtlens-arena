@@ -10,6 +10,10 @@ export class BroadcastStack extends Stack {
     super(scope, id, props);
     const cfg = props.config;
     const voiceProviders = cfg.voiceProviders ?? [];
+    const modelEnvironment = {MODEL_ID:cfg.portalConfirmedModelId,
+      COURTLENS_BEDROCK_MODALITIES:cfg.portalConfirmedModelModalities.join(','),
+      COURTLENS_BEDROCK_TOOLS:cfg.portalConfirmedToolUse ? '1' : '0',
+      COURTLENS_BEDROCK_REGION:cfg.allowedRegion};
     const repo = path.resolve(__dirname, '../..');
     const privateBucket = (id: string) => new s3.Bucket(this, id, {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -44,7 +48,7 @@ export class BroadcastStack extends Stack {
       code:lambda.DockerImageCode.fromImageAsset(repo,{file:'cloud/api/Dockerfile',platform:ecrAssets.Platform.LINUX_AMD64,
         exclude:['.git/**','.github/**','.venv/**','.env*','**/.env*','**/__pycache__/**','**/*.pyc','**/node_modules/**','node_modules/**','media/**','workspace/**','site-dist/**','dist/**','infra/**','tests/**','web/**','studio/**','site/**','docs/**','templates/**']}),
       timeout:Duration.seconds(25),memorySize:1024,ephemeralStorageSize:Size.gibibytes(1),
-      environment:{TABLE_NAME:records.tableName,INPUT_BUCKET:input.bucketName,RELEASE_BUCKET:releases.bucketName,MAX_UPLOAD_BYTES:String(256*1024*1024),VOICE_PROVIDER_IDS:[...voiceProviders.map(v=>v.provider),...(cfg.polly ? ['polly'] : [])].join(',')},
+      environment:{...modelEnvironment,TABLE_NAME:records.tableName,INPUT_BUCKET:input.bucketName,RELEASE_BUCKET:releases.bucketName,MAX_UPLOAD_BYTES:String(256*1024*1024),VOICE_PROVIDER_IDS:[...voiceProviders.map(v=>v.provider),...(cfg.polly ? ['polly'] : [])].join(',')},
       logRetention:logs.RetentionDays.TWO_WEEKS,
     });
     records.grantReadWriteData(apiFn);
@@ -117,7 +121,7 @@ export class BroadcastStack extends Stack {
     agentRole.addToPolicy(new iam.PolicyStatement({actions:['logs:DescribeLogGroups'],resources:[`arn:${this.partition}:logs:${this.region}:${this.account}:log-group:*`]}));
     const agent = new CfnResource(this,'BroadcastAgentRuntime',{
       type:'AWS::BedrockAgentCore::Runtime',
-      properties:{AgentRuntimeName:'CourtLensBroadcastAgent',AgentRuntimeArtifact:{ContainerConfiguration:{ContainerUri:agentImage.imageUri}},RoleArn:agentRole.roleArn,ProtocolConfiguration:'HTTP',NetworkConfiguration:{NetworkMode:'PUBLIC'},EnvironmentVariables:{MODEL_ID:cfg.portalConfirmedModelId,INPUT_BUCKET:input.bucketName}},
+      properties:{AgentRuntimeName:'CourtLensBroadcastAgent',AgentRuntimeArtifact:{ContainerConfiguration:{ContainerUri:agentImage.imageUri}},RoleArn:agentRole.roleArn,ProtocolConfiguration:'HTTP',NetworkConfiguration:{NetworkMode:'PUBLIC'},EnvironmentVariables:{...modelEnvironment,INPUT_BUCKET:input.bucketName}},
     });
     const agentArn = agent.getAtt('AgentRuntimeArn').toString();
 
@@ -157,7 +161,7 @@ export class BroadcastStack extends Stack {
     const container = task.addContainer('worker',{
       image:ecs.ContainerImage.fromDockerImageAsset(renderImage),
       logging:ecs.LogDrivers.awsLogs({streamPrefix:'broadcast',logGroup:renderLogs}),
-      environment:{TABLE_NAME:records.tableName,INPUT_BUCKET:input.bucketName,RELEASE_BUCKET:releases.bucketName,AGENT_RUNTIME_ARN:agentArn,MODEL_ID:cfg.portalConfirmedModelId,...voiceEnvironment},
+      environment:{TABLE_NAME:records.tableName,INPUT_BUCKET:input.bucketName,RELEASE_BUCKET:releases.bucketName,AGENT_RUNTIME_ARN:agentArn,...modelEnvironment,...voiceEnvironment},
       secrets:voiceSecrets,
       readonlyRootFilesystem:false,
     });
