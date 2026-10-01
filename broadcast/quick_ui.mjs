@@ -14,6 +14,18 @@ export function hasUnsavedCommentary(project,drafts={}) {
     return draft&&((draft.text??'').trim()!==cue.text||String(draft.sourceStart??'').trim()===''||String(draft.sourceEnd??'').trim()===''||Number(draft.sourceStart)!==cue.sourceStart||Number(draft.sourceEnd)!==cue.sourceEnd);
   });
 }
+export function remainingCommentaryDrafts(project,saved,drafts={},savedCueId) {
+  const remaining={...drafts};
+  for(const cue of commentaryCueRows(project.story)) {
+    const oldKey=cueDraftKey(project,cue.id),draft=remaining[oldKey];
+    if(!draft)continue;
+    if(cue.id===savedCueId)delete remaining[oldKey];
+    else if(saved.id===project.id&&commentaryCueRows(saved.story).some(row=>row.id===cue.id)) {
+      delete remaining[oldKey];remaining[cueDraftKey(saved,cue.id)]=draft;
+    }
+  }
+  return remaining;
+}
 export function updateCommentaryCue(project,cueId,values,expected) {
   if(expected?.projectId!==project?.id||expected?.revision!==project?.revision)throw new Error('解说版本已变化，请重新打开当前句子再保存。');
   const story=project.story,rows=commentaryCueRows(story),cue=rows.find(c=>c.id===cueId);

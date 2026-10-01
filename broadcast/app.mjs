@@ -6,7 +6,7 @@ import {dataReadiness} from './data_readiness.mjs';
 import {commentarySelection, languages, styles, languageLabel, voiceProvidersForLanguage} from './commentary_ui.mjs';
 import {updateWorkspace} from './retained_video.mjs';
 import {renderProductionDesk, renderClockTool, renderMetricIntake} from './production_ui.mjs';
-import {renderQuickScreen, quickPlan, currentQuickEvidence, quickReviewChecks, renderCommentaryCueSection, updateCommentaryCue, cueDraftKey, hasUnsavedCommentary} from './quick_ui.mjs';
+import {renderQuickScreen, quickPlan, currentQuickEvidence, quickReviewChecks, renderCommentaryCueSection, updateCommentaryCue, cueDraftKey, hasUnsavedCommentary, remainingCommentaryDrafts} from './quick_ui.mjs';
 import {loadWatchLanguages,renderWatchLanguages,sourceTimeAfterLanguageSwitch,spokenPlaybackState} from './watch_languages.mjs';
 
 const $ = selector => document.querySelector(selector);
@@ -713,7 +713,7 @@ async function saveCommentaryCue(form) {
   if(state.project?.id!==p.id)throw new Error('项目已切换，请在原项目查看口播修改。');
   clearTimeout(state.jobTimer);state.job=null;
   sessionStorage.removeItem(`courtlens.broadcast.job.${p.id}`);
-  state.cueDrafts={};saveProject(saved);
+  state.cueDrafts=remainingCommentaryDrafts(p,saved,state.cueDrafts,cueId);saveProject(saved);
   notify('口播文字和时间已保存。请重新核对当前版本再生成配音。','success');
 }
 async function saveStory(form) {
@@ -773,11 +773,11 @@ async function onForm(event) {
   event.preventDefault();
   const kind=form.dataset.form;
   await run(async()=>{
+    if(['quick-review','review','render'].includes(kind)&&hasUnsavedCommentary(requiredProject(),state.cueDrafts))throw new Error(kind==='render'?'请先保存口播修改，再导出当前版本。':'请先保存口播修改，再审核当前版本。');
     if(kind==='commentary-cue') {
       await saveCommentaryCue(form);
     } else if(kind==='quick-review') {
       const p=requiredProject(),fd=new FormData(form),actor=cleanText(form,'actor');
-      if(hasUnsavedCommentary(p,state.cueDrafts))throw new Error('请先保存口播修改，再审核当前版本。');
       if(fd.get('confirmed')!=='on'||!actor)throw new Error('请填写核对者，并回看确认当前解说。');
       const report=await quickEvidenceReport(p),evidence=currentQuickEvidence(p,report);
       if(!evidence.ok)throw new Error(evidence.message);
